@@ -153,25 +153,25 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
     } else {
       batchRequestInventoryValidation = true;
     }
-    if (selectedNumberForMortality == null) {
-      batchrequestMortalityValidationMessage =
-          'please select request for mortality';
-      batchrequestMortalityValidation = false;
-    } else {
-      batchrequestMortalityValidation = true;
-    }
+    // if (selectedNumberForMortality == null) {
+    //   batchrequestMortalityValidationMessage =
+    //       'please select request for mortality';
+    //   batchrequestMortalityValidation = false;
+    // } else {
+    //   batchrequestMortalityValidation = true;
+    // }
     if (selectedUnitOfMeasurement == null) {
       unitOfMeasurementValidationMessage = 'please select unit of measurement';
       unitOfMeasurementValidation = false;
     } else {
       unitOfMeasurementValidation = true;
     }
-    if (selectedBatchNumberForGrading == null) {
-      gradeValidationMessage = 'Grading cannot be empty';
-      batchRequestGradingValidation = false;
-    } else {
-      batchRequestGradingValidation = true;
-    }
+    // if (selectedBatchNumberForGrading == null) {
+    //   gradeValidationMessage = 'Grading cannot be empty';
+    //   batchRequestGradingValidation = false;
+    // } else {
+    //   batchRequestGradingValidation = true;
+    // }
     if (selectedProductType == null) {
       productCategoryValidationMessage = 'please select product type';
       productCategoryValidation = false;
@@ -935,124 +935,124 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                         ? const SizedBox()
                         : ModularWidgets.validationDesign(
                             size, batchRequestInventoryValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 440,
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: const Text(
-                                  'Required Batch Number for Mortality'),
-                            ),
-                            Container(
-                              width: 440,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                                border: Border.all(color: Colors.black26),
-                              ),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    value: selectedNumberForMortality,
-                                    items: ['Yes', 'No']
-                                        .map<DropdownMenuItem<String>>((e) {
-                                      return DropdownMenuItem(
-                                        child: Text(e),
-                                        value: e,
-                                        onTap: () {
-                                          itemDetails[
-                                              'Batch_Request_For_Mortality'] = e;
-                                        },
-                                      );
-                                    }).toList(),
-                                    hint: Container(
-                                        width: 404,
-                                        child: const Text('Select')),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedNumberForMortality =
-                                            value as String?;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    batchrequestMortalityValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, batchrequestMortalityValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 440,
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: const Text(
-                                  'Required Batch Number for Grading'),
-                            ),
-                            Container(
-                              width: 440,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                                border: Border.all(color: Colors.black26),
-                              ),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    value: selectedBatchNumberForGrading,
-                                    items: ['Yes', 'No']
-                                        .map<DropdownMenuItem<String>>((e) {
-                                      return DropdownMenuItem(
-                                        child: Text(e),
-                                        value: e,
-                                        onTap: () {
-                                          itemDetails[
-                                              'Batch_Request_For_Grading'] = e;
-                                        },
-                                      );
-                                    }).toList(),
-                                    hint: Container(
-                                        width: 404,
-                                        child: const Text('Select')),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedBatchNumberForGrading =
-                                            value as String?;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    batchRequestGradingValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, batchRequestGradingValidationMessage),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(top: 24.0),
+                    //   child: Align(
+                    //     alignment: Alignment.topLeft,
+                    //     child: Column(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       children: [
+                    //         Container(
+                    //           width: 440,
+                    //           padding: const EdgeInsets.only(bottom: 12),
+                    //           child: const Text(
+                    //               'Required Batch Number for Mortality'),
+                    //         ),
+                    //         Container(
+                    //           width: 440,
+                    //           height: 36,
+                    //           decoration: BoxDecoration(
+                    //             borderRadius: BorderRadius.circular(8),
+                    //             color: Colors.white,
+                    //             border: Border.all(color: Colors.black26),
+                    //           ),
+                    //           child: Padding(
+                    //             padding:
+                    //                 const EdgeInsets.symmetric(horizontal: 5.0),
+                    //             child: DropdownButtonHideUnderline(
+                    //               child: DropdownButton(
+                    //                 value: selectedNumberForMortality,
+                    //                 items: ['Yes', 'No']
+                    //                     .map<DropdownMenuItem<String>>((e) {
+                    //                   return DropdownMenuItem(
+                    //                     child: Text(e),
+                    //                     value: e,
+                    //                     onTap: () {
+                    //                       itemDetails[
+                    //                           'Batch_Request_For_Mortality'] = e;
+                    //                     },
+                    //                   );
+                    //                 }).toList(),
+                    //                 hint: Container(
+                    //                     width: 404,
+                    //                     child: const Text('Select')),
+                    //                 onChanged: (value) {
+                    //                   setState(() {
+                    //                     selectedNumberForMortality =
+                    //                         value as String?;
+                    //                   });
+                    //                 },
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // batchrequestMortalityValidation == true
+                    //     ? const SizedBox()
+                    //     : ModularWidgets.validationDesign(
+                    //         size, batchrequestMortalityValidationMessage),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(top: 24.0),
+                    //   child: Align(
+                    //     alignment: Alignment.topLeft,
+                    //     child: Column(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       children: [
+                    //         Container(
+                    //           width: 440,
+                    //           padding: const EdgeInsets.only(bottom: 12),
+                    //           child: const Text(
+                    //               'Required Batch Number for Grading'),
+                    //         ),
+                    //         Container(
+                    //           width: 440,
+                    //           height: 36,
+                    //           decoration: BoxDecoration(
+                    //             borderRadius: BorderRadius.circular(8),
+                    //             color: Colors.white,
+                    //             border: Border.all(color: Colors.black26),
+                    //           ),
+                    //           child: Padding(
+                    //             padding:
+                    //                 const EdgeInsets.symmetric(horizontal: 5.0),
+                    //             child: DropdownButtonHideUnderline(
+                    //               child: DropdownButton(
+                    //                 value: selectedBatchNumberForGrading,
+                    //                 items: ['Yes', 'No']
+                    //                     .map<DropdownMenuItem<String>>((e) {
+                    //                   return DropdownMenuItem(
+                    //                     child: Text(e),
+                    //                     value: e,
+                    //                     onTap: () {
+                    //                       itemDetails[
+                    //                           'Batch_Request_For_Grading'] = e;
+                    //                     },
+                    //                   );
+                    //                 }).toList(),
+                    //                 hint: Container(
+                    //                     width: 404,
+                    //                     child: const Text('Select')),
+                    //                 onChanged: (value) {
+                    //                   setState(() {
+                    //                     selectedBatchNumberForGrading =
+                    //                         value as String?;
+                    //                   });
+                    //                 },
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // batchRequestGradingValidation == true
+                    //     ? const SizedBox()
+                    //     : ModularWidgets.validationDesign(
+                    //         size, batchRequestGradingValidationMessage),
                     Padding(
                       padding: const EdgeInsets.only(top: 24.0),
                       child: Align(

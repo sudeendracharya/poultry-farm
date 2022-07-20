@@ -70,6 +70,7 @@ class _DashBoardDefaultScreenState extends State<DashBoardDefaultScreen>
       child: Container(
         width: 166,
         height: 44,
+        alignment: Alignment.center,
         child: Text(
           'Administration',
           style: GoogleFonts.roboto(
@@ -100,6 +101,7 @@ class _DashBoardDefaultScreenState extends State<DashBoardDefaultScreen>
       child: Container(
         width: 222,
         height: 44,
+        alignment: Alignment.center,
         child: Text(
           'WareHouse Management',
           style: GoogleFonts.roboto(
@@ -115,6 +117,7 @@ class _DashBoardDefaultScreenState extends State<DashBoardDefaultScreen>
       child: Container(
         width: 145,
         height: 44,
+        alignment: Alignment.center,
         child: Text(
           'Reference Data',
           style: GoogleFonts.roboto(
@@ -621,7 +624,7 @@ class _LogsDropDownState extends State<LogsDropDown> {
             width: 15,
           ),
           Text(
-            'Logs',
+            'Records',
             style: theme,
           ),
           const SizedBox(
@@ -645,7 +648,7 @@ class _LogsDropDownState extends State<LogsDropDown> {
           padding: getpadding(),
           child: ListTile(
             title: Text(
-              'Activity Log',
+              'Activity Records',
               style: expansionDataTheme,
             ),
             onTap: () {
@@ -657,7 +660,7 @@ class _LogsDropDownState extends State<LogsDropDown> {
           padding: getpadding(),
           child: ListTile(
             title: Text(
-              'Vaccination Log',
+              'Vaccination Records',
               style: expansionDataTheme,
             ),
             onTap: () {
@@ -669,7 +672,7 @@ class _LogsDropDownState extends State<LogsDropDown> {
           padding: getpadding(),
           child: ListTile(
             title: Text(
-              'Medication Log',
+              'Medication Records',
               style: expansionDataTheme,
             ),
             onTap: () {

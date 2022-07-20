@@ -588,7 +588,6 @@ class _EditBatchPlanDetailsState extends State<EditBatchPlanDetails>
                                 items: plantDetails
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['Plant_Name']),
                                     value: e['Plant_Name'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
@@ -596,6 +595,7 @@ class _EditBatchPlanDetailsState extends State<EditBatchPlanDetails>
                                           e['Plant_Id'];
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['Plant_Name']),
                                   );
                                 }).toList(),
                                 hint: const Text('Choose plant Name'),

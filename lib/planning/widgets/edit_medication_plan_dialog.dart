@@ -20,7 +20,8 @@ class EditMedicationPlanDialog extends StatefulWidget {
       required this.medicationPlan,
       required this.breedVersionId,
       required this.description,
-      required this.medicationId})
+      required this.medicationId,
+      required this.medicationCode})
       : super(key: key);
 
   final ValueChanged<int> reFresh;
@@ -29,6 +30,7 @@ class EditMedicationPlanDialog extends StatefulWidget {
   final String breedVersionId;
   final String description;
   final String medicationId;
+  final String medicationCode;
 
   @override
   State<EditMedicationPlanDialog> createState() =>
@@ -92,6 +94,24 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
 
   @override
   void initState() {
+    print(widget.medicationPlan);
+    medicationCodeController.text = widget.medicationCode;
+    recommendedByController.text = widget.recommendedBy;
+    breedVersionId = widget.breedVersionId;
+    if (widget.medicationPlan.length == 1) {
+      ageController.text = widget.medicationPlan[0]['Age'].toString();
+      modeController.text = widget.medicationPlan[0]['Mode'];
+      siteController.text = widget.medicationPlan[0]['Site'];
+      dosageController.text = widget.medicationPlan[0]['Dosage'].toString();
+      medicationDescriptionController.text =
+          widget.medicationPlan[0]['Description'];
+      dosageUnitController.text =
+          widget.medicationPlan[0]['Dosage_Unit'].toString();
+      mediactionNameController.text =
+          widget.medicationPlan[0]['Medication_Name'];
+      notificationPriorController.text =
+          widget.medicationPlan[0]['Notification_Prior_Days'].toString();
+    }
     medicationPlanData['Breed_Version_Id'] = breedVersionId;
     medicationPlanData['Description'] = widget.description;
     medicationPlanData['Recommended_By'] = widget.recommendedBy;
@@ -103,6 +123,163 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
     });
 
     super.initState();
+  }
+
+  TextEditingController medicationCodeController = TextEditingController();
+  TextEditingController recommendedByController = TextEditingController();
+  TextEditingController ageController = TextEditingController();
+  TextEditingController mediactionNameController = TextEditingController();
+  TextEditingController modeController = TextEditingController();
+  TextEditingController siteController = TextEditingController();
+  TextEditingController dosageController = TextEditingController();
+  TextEditingController dosageUnitController = TextEditingController();
+  TextEditingController notificationPriorController = TextEditingController();
+  TextEditingController medicationDescriptionController =
+      TextEditingController();
+  bool medicationCodeValidation = true;
+  bool recommendedByValidation = true;
+  bool breedVersionValidation = true;
+  bool ageValidation = true;
+  bool medicationNameValidation = true;
+  bool modeValidation = true;
+  bool siteValidation = true;
+  bool dosageValidation = true;
+  bool dosageUnitValidation = true;
+  bool notificationPriorValidation = true;
+  bool medicationDescriptionValidation = true;
+
+  String medicationCodeValidationMessage = '';
+  String recommendedByValidationMessage = '';
+  String breedVersionValidationMessage = '';
+  String ageValidationMessage = '';
+  String medicationNameValidationMessage = '';
+  String modeValidationMessage = '';
+  String siteValidationMessage = '';
+  String dosageValidationMessage = '';
+  String dosageUnitValidationMessage = '';
+  String notificationPriorValidationMessage = '';
+  String medicationDescriptionValidationMessage = '';
+  bool validate() {
+    if (medicationCodeController.text == '') {
+      medicationCodeValidationMessage = 'Medication code cannot be empty';
+      medicationCodeValidation = false;
+    } else if (medicationCodeController.text.length > 9) {
+      medicationCodeValidationMessage =
+          'Medication code cannot contain more then 9 characters';
+      medicationCodeValidation = false;
+    } else {
+      medicationCodeValidation = true;
+    }
+    if (recommendedByController.text == '') {
+      recommendedByValidationMessage = 'Recommended by cannot be empty';
+      recommendedByValidation = false;
+    } else {
+      recommendedByValidation = true;
+    }
+    if (breedVersionId == null) {
+      breedVersionValidationMessage = 'Breed version cannot be empty';
+      breedVersionValidation = false;
+    } else {
+      breedVersionValidation = true;
+    }
+
+    if (sendData.isEmpty) {
+      if (ageController.text.isNum != true) {
+        ageValidationMessage = 'Enter a valid Age';
+        ageValidation = false;
+      } else if (ageController.text.length > 6) {
+        ageValidationMessage = 'Age Cannot contain more then 6 characters';
+        ageValidation = false;
+      } else if (ageController.text == '') {
+        ageValidationMessage = 'Age cannot be empty';
+        ageValidation = false;
+      } else {
+        ageValidation = true;
+      }
+      if (mediactionNameController.text == '') {
+        medicationNameValidationMessage = 'Medication name cannot be empty';
+        medicationNameValidation = false;
+      } else if (mediactionNameController.text.length > 12) {
+        medicationNameValidationMessage =
+            'Medication name cannot contain more then 12 characters';
+        medicationNameValidation = false;
+      } else {
+        medicationNameValidation = true;
+      }
+      if (modeController.text == '') {
+        modeValidationMessage = 'Mode cannot be empty';
+        modeValidation = false;
+      } else {
+        modeValidation = true;
+      }
+      if (siteController.text == '') {
+        siteValidationMessage = 'Site cannot be empty';
+        siteValidation = false;
+      } else {
+        siteValidation = true;
+      }
+      if (dosageController.text == '') {
+        dosageValidationMessage = 'Dosage cannot be empty';
+        dosageValidation = false;
+      } else {
+        dosageValidation = true;
+      }
+      if (dosageUnitController.text == '') {
+        dosageUnitValidationMessage = 'Dosage unit cannot be empty';
+        dosageUnitValidation = false;
+      } else {
+        dosageUnitValidation = true;
+      }
+
+      if (notificationPriorController.text.isNum != true) {
+        notificationPriorValidationMessage =
+            'Enter a valid Notification prior to days';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text.length > 2) {
+        notificationPriorValidationMessage =
+            'Notification prior to days Cannot contain more then 2 characters';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text == '') {
+        notificationPriorValidationMessage =
+            'Notification prior to days cannot be empty';
+        notificationPriorValidation = false;
+      } else {
+        notificationPriorValidation = true;
+      }
+
+      if (medicationDescriptionController.text == '') {
+        medicationDescriptionValidationMessage = 'Description cannot be empty';
+        medicationDescriptionValidation = false;
+      } else if (medicationDescriptionController.text.length > 30) {
+        medicationDescriptionValidationMessage =
+            'Description cannot contain more then 30 characters';
+        medicationDescriptionValidation = false;
+      } else {
+        medicationDescriptionValidation = true;
+      }
+      if (medicationCodeValidation == true &&
+          recommendedByValidation == true &&
+          breedVersionValidation == true &&
+          ageValidation == true &&
+          medicationNameValidation == true &&
+          modeValidation == true &&
+          siteValidation == true &&
+          dosageValidation == true &&
+          dosageUnitValidation == true &&
+          notificationPriorValidation == true) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (medicationCodeValidation == true &&
+          recommendedByValidation == true &&
+          breedVersionValidation == true) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 
   Future<void> getExcelFile() async {
@@ -202,9 +379,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
   }
 
   void save() {
-    bool validate = _formKey.currentState!.validate();
+    bool validateData = validate();
 
-    if (validate != true) {
+    if (validateData != true) {
+      setState(() {});
       return;
     }
     _formKey.currentState!.save();
@@ -307,7 +485,7 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                                         ? 'Enter Medication Code'
                                         : '',
                                     border: InputBorder.none),
-                                initialValue: '',
+                                controller: medicationCodeController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     // showError('FirmCode');
@@ -325,6 +503,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                       ),
                     ),
                   ),
+                  medicationCodeValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, medicationCodeValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Align(
@@ -357,7 +539,7 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                                         ? 'Enter Recommended By'
                                         : '',
                                     border: InputBorder.none),
-                                initialValue: widget.recommendedBy,
+                                controller: recommendedByController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     // showError('FirmCode');
@@ -374,6 +556,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                       ),
                     ),
                   ),
+                  recommendedByValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, recommendedByValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Align(
@@ -405,13 +591,13 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                                   items: breedVersion
                                       .map<DropdownMenuItem<String>>((e) {
                                     return DropdownMenuItem(
-                                      child:
-                                          Text(e['Breed_Version'].toString()),
                                       value: e['Breed_Version'].toString(),
                                       onTap: () {
                                         medicationPlanData['Breed_Version_Id'] =
                                             e['Breed_Version_Id'];
                                       },
+                                      child:
+                                          Text(e['Breed_Version'].toString()),
                                     );
                                   }).toList(),
                                   hint: const Text(
@@ -429,6 +615,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                       ),
                     ),
                   ),
+                  breedVersionValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, breedVersionValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Align(
@@ -569,7 +759,7 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                                               ? 'Enter primarily age in days'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: '',
+                                      controller: ageController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -586,6 +776,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                             ),
                           ),
                         ),
+                        ageValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, ageValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -619,7 +813,7 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                                               ? 'Enter Medication name'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: '',
+                                      controller: mediactionNameController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -637,6 +831,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                             ),
                           ),
                         ),
+                        medicationNameValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, medicationNameValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -670,7 +868,7 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                                               ? 'Enter mode of administration'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: '',
+                                      controller: modeController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -687,6 +885,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                             ),
                           ),
                         ),
+                        modeValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, modeValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -720,7 +922,7 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                                               ? 'Enter Site of administration'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: '',
+                                      controller: siteController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -737,6 +939,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                             ),
                           ),
                         ),
+                        siteValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, siteValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -770,7 +976,7 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                                               ? 'Enter dosage per bird'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: '',
+                                      controller: dosageController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -787,6 +993,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                             ),
                           ),
                         ),
+                        dosageValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, dosageValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -820,7 +1030,7 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                                               ? 'Enter Dosage unit'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: '',
+                                      controller: dosageUnitController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -838,6 +1048,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                             ),
                           ),
                         ),
+                        dosageUnitValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, dosageUnitValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -871,7 +1085,8 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                                               ? 'Enter description'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: '',
+                                      controller:
+                                          medicationDescriptionController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -889,6 +1104,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                             ),
                           ),
                         ),
+                        medicationDescriptionValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, medicationDescriptionValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -923,7 +1142,7 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                                               ? 'Enter notification prior to vaccine'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: '',
+                                      controller: notificationPriorController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -941,6 +1160,10 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                             ),
                           ),
                         ),
+                        notificationPriorValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, notificationPriorValidationMessage),
                         Consumer<ActivityApis>(
                             builder: (context, value, child) {
                           return ListView.builder(

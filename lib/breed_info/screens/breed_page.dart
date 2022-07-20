@@ -28,6 +28,7 @@ class _BreedPageState extends State<BreedPage> {
   }
 
   void update(int data) {
+    selectedBreeds.clear();
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<BreedInfoApis>(context, listen: false).getBreed(token);
@@ -54,6 +55,7 @@ class _BreedPageState extends State<BreedPage> {
   bool loading = true;
   @override
   void initState() {
+    selectedBreeds.clear();
     getPermission('Breed').then((value) {
       extratedPermissions = value;
       setState(() {

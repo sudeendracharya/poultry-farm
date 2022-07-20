@@ -12,7 +12,6 @@ import 'package:poultry_login_signup/infrastructure/providers/infrastructure_api
 import 'package:poultry_login_signup/widgets/modular_widgets.dart';
 
 import 'package:provider/provider.dart';
-import 'package:universal_html/html.dart';
 
 import '../../admin/widgets/add_permissions_dialog.dart';
 import '../../admin/widgets/add_user_roles.dart';

@@ -284,6 +284,9 @@ class _VaccinationPlanDetailsState extends State<VaccinationPlanDetails> {
                                       context: context,
                                       builder: (ctx) =>
                                           EditVaccinationPlanDialog(
+                                            vaccinationCode:
+                                                _vaccinationDetails[
+                                                    'Vaccination_Code'],
                                             vaccinationId: _vaccinationId,
                                             reFresh: update,
                                             recommendedBy: _vaccinationDetails[

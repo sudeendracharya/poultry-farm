@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 
 import '../../colors.dart';
 import '../../main.dart';
-import '../../planning/providers/activity_plan_apis.dart';
 import '../../providers/apicalls.dart';
 import '../../styles.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart'
@@ -246,6 +245,10 @@ class _AddBreedVersionDetailsDialogState
     if (breedVersionController.text == '') {
       breedVersionValidationSubject = 'Breed Version cannot be empty';
       breedVersionValidation = false;
+    } else if (breedVersionController.text.length > 18) {
+      breedVersionValidationSubject =
+          'Breed Version cannot be greater then 18 characters';
+      breedVersionValidation = false;
     } else {
       breedVersionValidation = true;
     }
@@ -258,32 +261,49 @@ class _AddBreedVersionDetailsDialogState
     }
 
     if (sendData.isEmpty) {
-      if (primarilyDaysController.text == '') {
+      if (primarilyDaysController.text.isNum != true) {
+        primarilyInDaysSubjectValidationSubject =
+            'Enter a valid primarily in days';
+        primarilyInDaysValidation = false;
+      } else if (primarilyDaysController.text == '') {
         primarilyInDaysSubjectValidationSubject =
             'Primarily in days cannot be empty';
         primarilyInDaysValidation = false;
       } else {
         primarilyInDaysValidation = true;
       }
-      if (bodyWeightController.text == '') {
+      if (bodyWeightController.text.isNum != true) {
+        bodyWeightValidationSubject = 'Enter a valid Body weight';
+        bodyWeightValidation = false;
+      } else if (bodyWeightController.text == '') {
         bodyWeightValidationSubject = 'Body weight cannot be empty';
         bodyWeightValidation = false;
       } else {
         bodyWeightValidation = true;
       }
-      if (feedConsumptionController.text == '') {
+      if (feedConsumptionController.text.isNum != true) {
+        feedConsumptionValidationSubject =
+            'Enter a valid feed consumption unit';
+        feedConsumptionValidation = false;
+      } else if (feedConsumptionController.text == '') {
         feedConsumptionValidationSubject = 'Feed Consumption cannot be empty';
         feedConsumptionValidation = false;
       } else {
         feedConsumptionValidation = true;
       }
-      if (eggProductionController.text == '') {
+      if (eggProductionController.text.isNum != true) {
+        eggProductRateValidationSubject = 'Enter a valid Egg production';
+        eggproductionValidation = false;
+      } else if (eggProductionController.text == '') {
         eggProductRateValidationSubject = 'Egg production cannot be empty';
         eggproductionValidation = false;
       } else {
         eggproductionValidation = true;
       }
-      if (mortalityController.text == '') {
+      if (mortalityController.text.isNum != true) {
+        mortalityValidationSubject = 'Enter a valid mortality';
+        mortalityValidation = false;
+      } else if (mortalityController.text == '') {
         mortalityValidationSubject = 'Mortality cannot be empty';
         mortalityValidation = false;
       } else {
@@ -487,12 +507,12 @@ class _AddBreedVersionDetailsDialogState
                                   items:
                                       breed.map<DropdownMenuItem<String>>((e) {
                                     return DropdownMenuItem(
-                                      child: Text(e['Breed_Name'].toString()),
                                       value: e['Breed_Name'].toString(),
                                       onTap: () {
                                         breedInfoData['Breed_Id'] =
                                             e['Breed_Id'];
                                       },
+                                      child: Text(e['Breed_Name'].toString()),
                                     );
                                   }).toList(),
                                   hint:
@@ -728,7 +748,7 @@ class _AddBreedVersionDetailsDialogState
                                 Container(
                                   width: size.width * 0.25,
                                   padding: const EdgeInsets.only(bottom: 12),
-                                  child: const Text('Egg Production Rate'),
+                                  child: const Text('Egg Production Rate %'),
                                 ),
                                 Container(
                                   width: size.width * 0.25,
@@ -777,7 +797,7 @@ class _AddBreedVersionDetailsDialogState
                                 Container(
                                   width: size.width * 0.25,
                                   padding: const EdgeInsets.only(bottom: 12),
-                                  child: const Text('Mortality'),
+                                  child: const Text('Mortality %'),
                                 ),
                                 Container(
                                   width: size.width * 0.25,

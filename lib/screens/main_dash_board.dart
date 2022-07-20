@@ -1121,7 +1121,7 @@ class _MainDashBoardScreenState extends State<MainDashBoardScreen> {
         builder: (BuildContext context, setState) {
           return Container(
             width: 814,
-            height: firmSelected == false ? 510 : 650,
+            height: firmSelected == false ? 510 : 510,
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 65, vertical: 55),
@@ -1205,7 +1205,6 @@ class _MainDashBoardScreenState extends State<MainDashBoardScreen> {
                                 items: firmsList
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['Firm_Name']),
                                     value: e['Firm_Name'],
                                     onTap: () async {
                                       await Provider.of<Apicalls>(context,
@@ -1233,6 +1232,7 @@ class _MainDashBoardScreenState extends State<MainDashBoardScreen> {
                                       // itemDetails['Product_Id'] =
                                       //     e['Product_Category_Id'];
                                     },
+                                    child: Text(e['Firm_Name']),
                                   );
                                 }).toList(),
                                 hint: Container(
@@ -1249,71 +1249,71 @@ class _MainDashBoardScreenState extends State<MainDashBoardScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(
-                    height: 24,
-                  ),
-                  firmSelected == false
-                      ? const SizedBox()
-                      : Align(
-                          alignment: Alignment.topLeft,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 450,
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: Text(
-                                  'Plant Id/Name',
-                                  style: dialogHeadingSecondaryTextStyle(),
-                                ),
-                              ),
-                              Container(
-                                width: 450,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Colors.white,
-                                  border: Border.all(color: Colors.black26),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 5.0),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton(
-                                      value: plantId,
-                                      items: plantList
-                                          .map<DropdownMenuItem<String>>((e) {
-                                        return DropdownMenuItem(
-                                          child: Text(e['Plant_Name']),
-                                          value: e['Plant_Name'],
-                                          onTap: () {
-                                            setState(() {
-                                              plantSelected = true;
-                                              selectedPlantName =
-                                                  e['Plant_Name'];
-                                              selectedPlantId = e['Plant_Id'];
-                                            });
-                                            // itemDetails['Product_Id'] =
-                                            //     e['Product_Category_Id'];
-                                          },
-                                        );
-                                      }).toList(),
-                                      hint: Container(
-                                          width: 404,
-                                          child: const Text('Select')),
-                                      onChanged: (value) {
-                                        setState(() {
-                                          plantId = value as String?;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                  SizedBox(height: firmSelected == false ? 103 : 180),
+                  // const SizedBox(
+                  //   height: 24,
+                  // ),
+                  // firmSelected == false
+                  //     ? const SizedBox()
+                  //     : Align(
+                  //         alignment: Alignment.topLeft,
+                  //         child: Column(
+                  //           mainAxisSize: MainAxisSize.min,
+                  //           children: [
+                  //             Container(
+                  //               width: 450,
+                  //               padding: const EdgeInsets.only(bottom: 12),
+                  //               child: Text(
+                  //                 'Plant Id/Name',
+                  //                 style: dialogHeadingSecondaryTextStyle(),
+                  //               ),
+                  //             ),
+                  //             Container(
+                  //               width: 450,
+                  //               height: 36,
+                  //               decoration: BoxDecoration(
+                  //                 borderRadius: BorderRadius.circular(8),
+                  //                 color: Colors.white,
+                  //                 border: Border.all(color: Colors.black26),
+                  //               ),
+                  //               child: Padding(
+                  //                 padding: const EdgeInsets.symmetric(
+                  //                     horizontal: 5.0),
+                  //                 child: DropdownButtonHideUnderline(
+                  //                   child: DropdownButton(
+                  //                     value: plantId,
+                  //                     items: plantList
+                  //                         .map<DropdownMenuItem<String>>((e) {
+                  //                       return DropdownMenuItem(
+                  //                         child: Text(e['Plant_Name']),
+                  //                         value: e['Plant_Name'],
+                  //                         onTap: () {
+                  //                           setState(() {
+                  //                             plantSelected = true;
+                  //                             selectedPlantName =
+                  //                                 e['Plant_Name'];
+                  //                             selectedPlantId = e['Plant_Id'];
+                  //                           });
+                  //                           // itemDetails['Product_Id'] =
+                  //                           //     e['Product_Category_Id'];
+                  //                         },
+                  //                       );
+                  //                     }).toList(),
+                  //                     hint: Container(
+                  //                         width: 404,
+                  //                         child: const Text('Select')),
+                  //                     onChanged: (value) {
+                  //                       setState(() {
+                  //                         plantId = value as String?;
+                  //                       });
+                  //                     },
+                  //                   ),
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       ),
+                  SizedBox(height: firmSelected == false ? 103 : 103),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -1373,7 +1373,7 @@ class _MainDashBoardScreenState extends State<MainDashBoardScreen> {
                                 });
                           },
                           style: ButtonStyle(
-                            backgroundColor: plantSelected == false
+                            backgroundColor: firmSelected == false
                                 ? MaterialStateProperty.all(
                                     const Color.fromRGBO(130, 130, 130, 1),
                                   )

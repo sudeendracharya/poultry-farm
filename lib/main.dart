@@ -187,6 +187,33 @@ Text emptyLists(String data) {
   );
 }
 
+void deleteAlert(var save) {
+  Get.defaultDialog(
+    titleStyle: const TextStyle(color: Colors.black),
+    title: 'Alert',
+    middleText: 'Are you sure want to delete?',
+    confirm: TextButton(
+      onPressed: () {
+        save();
+        Get.back();
+      },
+      child: Text(
+        'Ok',
+        style: TextStyle(color: ProjectColors.themecolor),
+      ),
+    ),
+    cancel: TextButton(
+      onPressed: () {
+        Get.back();
+      },
+      child: Text(
+        'Cancel',
+        style: TextStyle(color: ProjectColors.themecolor),
+      ),
+    ),
+  );
+}
+
 Future<String> fetchPlant() async {
   var prefs = await SharedPreferences.getInstance();
   if (prefs.containsKey('FirmAndPlantDetails')) {

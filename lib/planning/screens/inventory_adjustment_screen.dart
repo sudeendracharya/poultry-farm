@@ -53,24 +53,24 @@ class _InventoryAdjustmentScreenState extends State<InventoryAdjustmentScreen>
       ),
       // text: 'Administration',
     ),
-    Tab(
-      child: Container(
-        width: 200,
-        height: 44,
-        alignment: Alignment.center,
-        child: Text(
-          'Bird Grading',
-          style: GoogleFonts.roboto(
-            textStyle: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 16,
-              color: Colors.black,
-            ),
-          ),
-        ),
-      ),
-      // text: 'Administration',
-    ),
+    // Tab(
+    //   child: Container(
+    //     width: 200,
+    //     height: 44,
+    //     alignment: Alignment.center,
+    //     child: Text(
+    //       'Bird Grading',
+    //       style: GoogleFonts.roboto(
+    //         textStyle: const TextStyle(
+    //           fontWeight: FontWeight.w500,
+    //           fontSize: 16,
+    //           color: Colors.black,
+    //         ),
+    //       ),
+    //     ),
+    //   ),
+    //   // text: 'Administration',
+    // ),
     Tab(
       child: Container(
         width: 120,
@@ -172,9 +172,9 @@ class _InventoryAdjustmentScreenState extends State<InventoryAdjustmentScreen>
                 SingleChildScrollView(
                   child: InventoryAdjustmentJournal(),
                 ),
-                SingleChildScrollView(
-                  child: BirdGrading(),
-                ),
+                // SingleChildScrollView(
+                //   child: BirdGrading(),
+                // ),
                 SingleChildScrollView(
                   child: Mortalitypage(),
                 ),

@@ -53,6 +53,10 @@ class _AddBreedDialogState extends State<AddBreedDialog> {
     if (nameController.text == '') {
       _nameValidationSubject = 'Breed Name cannot be empty';
       breedNameValid = false;
+    } else if (nameController.text.length > 18) {
+      _nameValidationSubject =
+          'Breed Name cannot be greater then 18 characters';
+      breedNameValid = false;
     } else {
       breedNameValid = true;
     }

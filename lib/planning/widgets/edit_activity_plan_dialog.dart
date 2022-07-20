@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:poultry_login_signup/planning/providers/activity_validation.dart';
 import 'package:provider/provider.dart';
 
 import '../../colors.dart';
@@ -79,10 +80,15 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
 
   @override
   void initState() {
+    breedVersionController.text = widget.breedVersion;
+    activityCodeController.text = widget.activityId.toString();
+    recommendedByController.text = widget.recommendedBy;
+    breedVersionId = widget.breedVersion;
     if (widget.activityList.length == 1) {
-      _age = widget.activityList[0]['Age'];
-      _activityName = widget.activityList[0]['Activity_Name'];
-      _notification = widget.activityList[0]['Notification_Prior_To_Activity'];
+      ageController.text = widget.activityList[0]['Age'];
+      activityNameController.text = widget.activityList[0]['Activity_Name'];
+      notificationPriorController.text =
+          widget.activityList[0]['Notification_Prior_To_Activity'];
     }
     fetchCredientials().then((token) {
       if (token != '') {
@@ -93,6 +99,27 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
 
     super.initState();
   }
+
+  TextEditingController activityCodeController = TextEditingController();
+  TextEditingController recommendedByController = TextEditingController();
+  TextEditingController breedVersionController = TextEditingController();
+  TextEditingController ageController = TextEditingController();
+  TextEditingController activityNameController = TextEditingController();
+  TextEditingController notificationPriorController = TextEditingController();
+
+  bool activityCodeValidation = true;
+  bool recommendedByValidation = true;
+  bool breedVersionValidation = true;
+  bool ageValidation = true;
+  bool activityNameValidation = true;
+  bool notificationPriorValidation = true;
+
+  String activityCodeValidationMessage = '';
+  String recommendedByValidationMessage = '';
+  String breedVersionValidationMessage = '';
+  String ageValidationMessage = '';
+  String activityNameValidationMessage = '';
+  String notificationPriorValidationMessage = '';
 
   Future<void> getExcelFile() async {
     await FilePicker.platform
@@ -166,10 +193,98 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
     });
   }
 
-  void save() {
-    bool validate = _formKey.currentState!.validate();
+  bool validate() {
+    if (activityCodeController.text == '') {
+      activityCodeValidationMessage = 'Activity Code cannot be empty';
+      activityCodeValidation = false;
+    } else if (activityCodeController.text.length > 6) {
+      activityCodeValidationMessage = 'Activity Code cannot be greater then 6';
+      activityCodeValidation = false;
+    } else {
+      activityCodeValidation = true;
+    }
 
-    if (validate != true) {
+    if (recommendedByController.text == '') {
+      recommendedByValidationMessage = 'Recommended by cannot be empty';
+      recommendedByValidation = false;
+    } else {
+      recommendedByValidation = true;
+    }
+
+    if (breedVersionId == null) {
+      breedVersionValidationMessage = 'Breed Version cannot be empty';
+      breedVersionValidation = false;
+    } else {
+      breedVersionValidation = true;
+    }
+
+    if (sendData.isEmpty) {
+      if (ageController.text.isNum != true) {
+        ageValidationMessage = 'Ente a valid Age';
+        ageValidation = false;
+      } else if (ageController.text.length > 6) {
+        ageValidationMessage = 'Age cannot be greater then 6 characters';
+        ageValidation = false;
+      } else if (ageController.text == '') {
+        ageValidationMessage = 'Age cannot be empty';
+        ageValidation = false;
+      } else {
+        ageValidation = true;
+      }
+
+      if (activityNameController.text.length > 16) {
+        activityNameValidationMessage =
+            'Activity name cannot be greater then 16 characters';
+        activityNameValidation = false;
+      } else if (activityNameController.text == '') {
+        activityNameValidationMessage = 'Activity name cannot be empty';
+        activityNameValidation = false;
+      } else {
+        activityNameValidation = true;
+      }
+
+      if (notificationPriorController.text.isNum != true) {
+        notificationPriorValidationMessage =
+            'Enter a valid Notification prior to days';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text.length > 2) {
+        notificationPriorValidationMessage =
+            'Notification prior to days cannot be greater then 2 characters';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text == '') {
+        notificationPriorValidationMessage =
+            'Notification prior to days cannot be empty';
+        notificationPriorValidation = false;
+      } else {
+        notificationPriorValidation = true;
+      }
+
+      if (activityCodeValidation == true &&
+          recommendedByValidation == true &&
+          breedVersionValidation == true &&
+          ageValidation == true &&
+          activityNameValidation == true &&
+          notificationPriorValidation == true) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (activityCodeValidation == true &&
+          recommendedByValidation == true &&
+          breedVersionValidation == true) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  void save() {
+    bool validateData = validate();
+    print('validatiopn $validateData');
+    if (validateData != true) {
+      setState(() {});
       return;
     }
     _formKey.currentState!.save();
@@ -273,7 +388,7 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                                         ? 'Enter Activity Plan Id'
                                         : '',
                                     border: InputBorder.none),
-                                initialValue: widget.activityId.toString(),
+                                controller: activityCodeController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     // showError('FirmCode');
@@ -290,6 +405,10 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                       ),
                     ),
                   ),
+                  activityCodeValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, activityCodeValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Align(
@@ -322,8 +441,7 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                                         ? 'Enter Recommended By'
                                         : '',
                                     border: InputBorder.none),
-                                initialValue:
-                                    widget.recommendedBy.toLowerCase(),
+                                controller: recommendedByController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     // showError('FirmCode');
@@ -340,6 +458,10 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                       ),
                     ),
                   ),
+                  recommendedByValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, recommendedByValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Align(
@@ -395,6 +517,10 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                       ),
                     ),
                   ),
+                  breedVersionValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, breedVersionValidationMessage),
                   const SizedBox(
                     height: 36,
                   ),
@@ -486,8 +612,7 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                                               ? 'Enter primarily age in days'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue:
-                                          _age == null ? '' : _age.toString(),
+                                      controller: ageController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -504,6 +629,10 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                             ),
                           ),
                         ),
+                        ageValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, ageValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -537,9 +666,7 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                                               ? 'Enter activity'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: _activityName == null
-                                          ? ''
-                                          : _activityName.toString(),
+                                      controller: activityNameController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -557,6 +684,10 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                             ),
                           ),
                         ),
+                        activityNameValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, activityNameValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -591,9 +722,7 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                                               ? 'Enter notification days prior to activity'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: _notification == null
-                                          ? ''
-                                          : _notification.toString(),
+                                      controller: notificationPriorController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -612,6 +741,10 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                             ),
                           ),
                         ),
+                        notificationPriorValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, notificationPriorValidationMessage),
                         Consumer<ActivityApis>(
                             builder: (context, value, child) {
                           return ListView.builder(

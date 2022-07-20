@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:poultry_login_signup/sales_journal/screens/companies_page.dart';
 import 'package:poultry_login_signup/sales_journal/screens/customers_page.dart';
+import 'package:poultry_login_signup/sales_journal/screens/vendors_page.dart';
 import 'package:poultry_login_signup/screens/global_app_bar.dart';
 import 'package:poultry_login_signup/screens/main_dash_board.dart';
 import 'package:poultry_login_signup/screens/main_drawer_screen.dart';
@@ -110,6 +111,22 @@ class _SalesDisplayScreenState extends State<SalesDisplayScreen>
       ),
       // text: 'Administration',
     ),
+    Tab(
+      child: Container(
+        width: 180,
+        height: 44,
+        alignment: Alignment.center,
+        child: Text(
+          'Vendors',
+          style: GoogleFonts.roboto(
+              textStyle: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Colors.black)),
+        ),
+      ),
+      // text: 'Administration',
+    ),
   ];
 
   late TabController _tabController;
@@ -201,6 +218,9 @@ class _SalesDisplayScreenState extends State<SalesDisplayScreen>
                   ),
                   SingleChildScrollView(
                     child: CompanyPage(),
+                  ),
+                  SingleChildScrollView(
+                    child: VendorsPage(),
                   )
                   // InventoryAdjustmentScreen(),
                 ]),

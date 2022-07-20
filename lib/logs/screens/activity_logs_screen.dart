@@ -10,6 +10,7 @@ import 'package:poultry_login_signup/screens/global_app_bar.dart';
 import 'package:provider/provider.dart';
 
 import '../../colors.dart';
+import '../../infrastructure/providers/infrastructure_apicalls.dart';
 import '../../providers/apicalls.dart';
 import '../../screens/main_drawer_screen.dart';
 import '../../styles.dart';
@@ -38,6 +39,21 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
 
   String searchQuery = '';
 
+  var selectedFirmName;
+
+  List firmList = [];
+  List plantList = [];
+  List warehouseList = [];
+  List batchCodeList = [];
+
+  var selectedPlantName;
+
+  var selectedWarehouseName;
+
+  var batchPlanCode;
+
+  var selectedBatchCode;
+
   @override
   void initState() {
     route = Get.arguments;
@@ -47,6 +63,11 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
       setState(() {
         loading = false;
       });
+    });
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getFirmDetails(token)
+          .then((value1) {});
     });
     super.initState();
   }
@@ -64,12 +85,12 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
     }
   }
 
-  void searchBook(String query) {
+  void searchBook(String batchPlanCode, var activityNumber) {
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<LogsApi>(context, listen: false).logException.clear();
         Provider.of<LogsApi>(context, listen: false)
-            .getActivityLog(query, token);
+            .getActivityLog(batchPlanCode, 'None', token);
       }
     });
   }
@@ -79,7 +100,7 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
       if (token != '') {
         Provider.of<LogsApi>(context, listen: false).logException.clear();
         Provider.of<LogsApi>(context, listen: false)
-            .getBatchPlanCodes(query, token);
+            .searchActivityNumbers(query, token);
       }
     });
   }
@@ -98,7 +119,7 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
             'From_Date': dateTime,
           }, token).then((value) {
             if (value == 202 || value == 204) {
-              searchBook(searchQuery);
+              searchBook(batchPlanCode, searchQuery);
             } else {
               failureSnackbar('Something went wrong unable to update the data');
             }
@@ -127,7 +148,7 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                     }, token).then((value) {
                       if (value == 202 || value == 204) {
                         print(searchQuery);
-                        searchBook(searchQuery);
+                        searchBook(batchPlanCode, searchQuery);
                         Get.back();
                       } else {
                         failureSnackbar(
@@ -152,6 +173,7 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
     var size = MediaQuery.of(context).size;
     final breadCrumpsStyle = Theme.of(context).textTheme.headline4;
     activityLogDetails = Provider.of<LogsApi>(context).activityLog;
+    firmList = Provider.of<InfrastructureApis>(context).firmDetails;
     return Scaffold(
       drawer: MainDrawer(controller: controller),
       appBar: GlobalAppBar(query: query, appbar: AppBar()),
@@ -210,7 +232,7 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                             child: Row(
                               children: [
                                 Text(
-                                  'Activity Log',
+                                  'Activity Record',
                                   style: ProjectStyles.contentHeaderStyle(),
                                 ),
                               ],
@@ -289,7 +311,8 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                                   child: PaginatedDataTable(
                                     headingRowHeight: 28,
                                     header: Text(
-                                      activityLogDetails['log'] == null
+                                      activityLogDetails['log'] == null ||
+                                              activityLogDetails['log'].isEmpty
                                           ? ''
                                           : activityLogDetails['log'][0]
                                               ['Batch_Plan_Code'],
@@ -299,7 +322,9 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                                     source: MySearchData(
                                         activityLogDetails.isEmpty
                                             ? list
-                                            : activityLogDetails['log'],
+                                            : activityLogDetails['log'].isEmpty
+                                                ? []
+                                                : activityLogDetails['log'],
                                         updateCheckBox,
                                         extratedPermissions['Edit']),
                                     arrowHeadColor: ProjectColors.themecolor,
@@ -362,7 +387,7 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                                   width: 253,
                                   child: AdministrationSearchWidget(
                                       search: (value) {
-                                        searchBook(query);
+                                        // searchBook(query);
                                       },
                                       reFresh: (value) {
                                         setState(() {});
@@ -376,7 +401,7 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                                           query = value;
                                         });
                                       },
-                                      hintText: 'Batch Plan code'),
+                                      hintText: 'Activity Number'),
                                 ),
                                 const SizedBox(
                                   height: 5,
@@ -385,7 +410,8 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                                     ? const SizedBox()
                                     : Consumer<LogsApi>(
                                         builder: (context, value, child) {
-                                          return value.batchPlanCodeList.isEmpty
+                                          return value
+                                                  .activityNumbersList.isEmpty
                                               ? const SizedBox()
                                               : Container(
                                                   decoration: BoxDecoration(
@@ -398,7 +424,7 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                                                   height: 200,
                                                   child: ListView.builder(
                                                     itemCount: value
-                                                        .batchPlanCodeList
+                                                        .activityNumbersList
                                                         .length,
                                                     itemBuilder:
                                                         (BuildContext context,
@@ -406,22 +432,31 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                                                       return ListTile(
                                                         key: UniqueKey(),
                                                         onTap: () {
-                                                          searchBook(value
-                                                                      .batchPlanCodeList[
-                                                                  index][
-                                                              'Batch_Plan_Code']);
+                                                          searchBook(
+                                                              value.activityNumbersList[
+                                                                      index][
+                                                                  'Batch_Plan_Code'],
+                                                              value.activityNumbersList[
+                                                                      index][
+                                                                  'Activity_Number']);
                                                           setState(() {
                                                             searchQuery = value
-                                                                        .batchPlanCodeList[
+                                                                        .activityNumbersList[
                                                                     index][
-                                                                'Batch_Plan_Code'];
+                                                                'Activity_Number'];
+                                                            batchPlanCode =
+                                                                value.activityNumbersList[
+                                                                        index][
+                                                                    'Batch_Plan_Code'];
+                                                            print(
+                                                                '$searchQuery, $batchPlanCode');
                                                             query = '';
                                                           });
                                                         },
                                                         title: Text(value
-                                                                    .batchPlanCodeList[
+                                                                    .activityNumbersList[
                                                                 index][
-                                                            'Batch_Plan_Code']),
+                                                            'Activity_Number']),
                                                       );
                                                     },
                                                   ),
@@ -431,12 +466,105 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                               ],
                             ),
                           ),
+                          Positioned(
+                              top: size.height * 0.11,
+                              left: size.width * 0.2,
+                              child: const Text(
+                                'Or',
+                                style: TextStyle(fontSize: 18),
+                              )),
+                          Positioned(
+                            top: size.height * 0.1,
+                            left: size.width * 0.23,
+                            child: Container(
+                                width: size.width * 0.13,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: ElevatedButton(
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                                ProjectColors.themecolor)),
+                                    onPressed: () {
+                                      filterBasedOnPlant(
+                                          firmList,
+                                          plantList,
+                                          warehouseList,
+                                          batchCodeList,
+                                          selectedFirmName,
+                                          searchPlant,
+                                          selectedPlantName,
+                                          searchWareHouse,
+                                          selectedWarehouseName,
+                                          searchBatchCodes,
+                                          selectedBatchCode,
+                                          searchBook);
+                                    },
+                                    child: const Text('Filter Based on Plant'))
+                                // Padding(
+                                //   padding: const EdgeInsets.symmetric(
+                                //       horizontal: 12, vertical: 6),
+                                //   child: DropdownButtonHideUnderline(
+                                //     child: DropdownButton(
+                                //       isExpanded: true,
+                                //       value: selectedFirmName,
+                                //       items: firmList
+                                //           .map<DropdownMenuItem<String>>((e) {
+                                //         return DropdownMenuItem(
+                                //           value: e['Firm_Name'],
+                                //           onTap: () {
+                                //             searchPlant(e['Firm_Id']);
+                                //           },
+                                //           child:
+                                //               Text(e['Breed_Version'].toString()),
+                                //         );
+                                //       }).toList(),
+                                //       hint: const Text('Choose Firm'),
+                                //       onChanged: (value) {
+                                //         setState(() {
+                                //           selectedFirmName = value as String;
+                                //         });
+                                //       },
+                                //     ),
+                                //   ),
+                                // ),
+                                ),
+                          )
                         ],
                       ),
                     ),
                   ),
                 ),
     );
+  }
+
+  void searchPlant(e) {
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getPlantDetails(token, e)
+          .then((value1) {});
+    });
+  }
+
+  void searchWareHouse(e) {
+    print('id $e');
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getWarehouseDetailsForAll(e, token)
+          .then((value1) {});
+    });
+  }
+
+  void searchBatchCodes(e) {
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getBatchCodeDetails(e, token)
+          .then((value1) {});
+    });
   }
 }
 
@@ -528,4 +656,231 @@ class MySearchData extends DataTableSource {
 
   @override
   int get rowCount => data.length;
+}
+
+void filterBasedOnPlant(
+    List firmList,
+    List plantList,
+    List warehouseList,
+    List batchCodeList,
+    var selectedFirmName,
+    var searchPlant,
+    var selectedPlantName,
+    var searchWareHouse,
+    var selectedWarehouseName,
+    var searchBatchCodes,
+    var selectedBatchCode,
+    var searchBook) {
+  Get.dialog(Dialog(
+    child: Container(
+      width: 400,
+      height: 400,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+      ),
+      child: StatefulBuilder(
+        builder: (BuildContext context, setState) {
+          plantList = Provider.of<InfrastructureApis>(context).plantDetails;
+          warehouseList =
+              Provider.of<InfrastructureApis>(context).warehouseDetails;
+          batchCodeList =
+              Provider.of<InfrastructureApis>(context).batchCodeDetails;
+          return Column(
+            children: [
+              const SizedBox(
+                height: 25,
+              ),
+              const Text(
+                'Filter',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Container(
+                  width: 350,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.black26,
+                    ),
+                  ),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                        isExpanded: true,
+                        value: selectedFirmName,
+                        items: firmList.map<DropdownMenuItem<String>>((e) {
+                          return DropdownMenuItem(
+                            value: e['Firm_Name'],
+                            onTap: () {
+                              searchPlant(e['Firm_Id']);
+                              selectedPlantName = null;
+                            },
+                            child: Text(e['Firm_Name']),
+                          );
+                        }).toList(),
+                        hint: const Text('Choose Firm'),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedFirmName = value as String;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Container(
+                  width: 350,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.black26,
+                    ),
+                  ),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                        isExpanded: true,
+                        value: selectedPlantName,
+                        items: plantList.map<DropdownMenuItem<String>>((e) {
+                          return DropdownMenuItem(
+                            value: e['Plant_Name'],
+                            onTap: () {
+                              searchWareHouse(e['Plant_Id']);
+                              selectedWarehouseName = null;
+                            },
+                            child: Text(e['Plant_Name']),
+                          );
+                        }).toList(),
+                        hint: const Text('Choose Plant'),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedPlantName = value as String;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Container(
+                  width: 350,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.black26,
+                    ),
+                  ),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                        isExpanded: true,
+                        value: selectedWarehouseName,
+                        items: warehouseList.map<DropdownMenuItem<String>>((e) {
+                          return DropdownMenuItem(
+                            value: e['WareHouse_Name'],
+                            onTap: () {
+                              searchBatchCodes(e['WareHouse_Id']);
+                              selectedBatchCode = null;
+                            },
+                            child: Text(e['WareHouse_Name']),
+                          );
+                        }).toList(),
+                        hint: const Text('Choose Warehouse'),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedWarehouseName = value as String;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Container(
+                  width: 350,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.black26,
+                    ),
+                  ),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                        isExpanded: true,
+                        value: selectedBatchCode,
+                        items: batchCodeList.map<DropdownMenuItem<String>>((e) {
+                          return DropdownMenuItem(
+                            value: e['Batch_Plan_Code'],
+                            onTap: () {
+                              // searchBatchCodes(e['WareHouse_Id']);
+                            },
+                            child: Text(e['Batch_Plan_Code']),
+                          );
+                        }).toList(),
+                        hint: const Text('Choose Batch Code'),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedBatchCode = value as String;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              SizedBox(
+                  width: 80,
+                  height: 30,
+                  child: ElevatedButton(
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                              ProjectColors.themecolor)),
+                      onPressed: () {
+                        if (selectedBatchCode == null) {
+                          Get.snackbar('Alert',
+                              'Please Select the batch Code First to search',
+                              duration: const Duration(seconds: 4),
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: ProjectColors.themecolor,
+                              colorText: Colors.white);
+                        } else {
+                          searchBook(selectedBatchCode, 'None');
+                          Get.back();
+                        }
+                      },
+                      child: const Text('Search')))
+            ],
+          );
+        },
+      ),
+    ),
+  ));
 }

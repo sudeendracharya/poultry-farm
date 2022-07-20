@@ -483,7 +483,7 @@ class _AddBatchScreenState extends State<AddBatchScreen>
               "Hatch_Date": batchPlanDetails['Expected_Hatch_Date'],
               // "Batch_Plan_Id": batchPlanDetails['Batch_Plan_Id'],
             };
-
+            print(data);
             Provider.of<BatchApis>(context, listen: false)
                 .addBatchPlanStepTwo(data, token)
                 .then((value) {

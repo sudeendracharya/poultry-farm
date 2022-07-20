@@ -9,6 +9,7 @@ import '../../colors.dart';
 import '../../main.dart';
 import '../../providers/apicalls.dart';
 import '../../styles.dart';
+import '../../widgets/modular_widgets.dart';
 import '../providers/breed_info_apicalls.dart';
 
 class EditBreedVersionDetailsDialog extends StatefulWidget {
@@ -81,11 +82,15 @@ class _EditBreedVersionDetailsDialogState
   @override
   void initState() {
     breedInfoData['Breed_Id'] = widget.breedId;
+    breedVersionController.text = widget.breedVersion;
     if (widget.referenceData.length == 1) {
-      _days = widget.referenceData[0]['Primarily_Days'];
-      _bodyWeight = widget.referenceData[0]['Body_Weight'];
-      _consumption = widget.referenceData[0]['Feed_Consumption'];
-      _productionRate = widget.referenceData[0]['Egg_Production_Rate'];
+      primarilyDaysController.text = widget.referenceData[0]['Primarily_Days'];
+      bodyWeightController.text = widget.referenceData[0]['Body_Weight'];
+      feedConsumptionController.text =
+          widget.referenceData[0]['Feed_Consumption'];
+      eggProductionController.text =
+          widget.referenceData[0]['Egg_Production_Rate'];
+      mortalityController.text = widget.referenceData[0]['Mortality'];
     }
     fetchCredientials().then((token) {
       if (token != '') {
@@ -181,9 +186,10 @@ class _EditBreedVersionDetailsDialogState
   }
 
   void save() {
-    bool validate = _formKey.currentState!.validate();
+    bool validateData = validate();
 
-    if (validate != true) {
+    if (validateData != true) {
+      setState(() {});
       return;
     }
     _formKey.currentState!.save();
@@ -219,6 +225,117 @@ class _EditBreedVersionDetailsDialogState
         });
       }
     });
+  }
+
+  String breedVersionValidationSubject = '';
+  String breedNameValidationSubject = '';
+  String primarilyInDaysSubjectValidationSubject = '';
+  String bodyWeightValidationSubject = '';
+  String feedConsumptionValidationSubject = '';
+  String eggProductRateValidationSubject = '';
+  String mortalityValidationSubject = '';
+  bool breedVersionValidation = true;
+  bool breedNameValidation = true;
+  bool primarilyInDaysValidation = true;
+  bool bodyWeightValidation = true;
+  bool feedConsumptionValidation = true;
+  bool eggproductionValidation = true;
+  bool mortalityValidation = true;
+
+  TextEditingController breedVersionController = TextEditingController();
+  TextEditingController primarilyDaysController = TextEditingController();
+  TextEditingController bodyWeightController = TextEditingController();
+  TextEditingController feedConsumptionController = TextEditingController();
+  TextEditingController eggProductionController = TextEditingController();
+  TextEditingController mortalityController = TextEditingController();
+
+  bool validate() {
+    if (breedVersionController.text == '') {
+      breedVersionValidationSubject = 'Breed Version cannot be empty';
+      breedVersionValidation = false;
+    } else if (breedVersionController.text.length > 18) {
+      breedVersionValidationSubject =
+          'Breed Version cannot be greater then 18 characters';
+      breedVersionValidation = false;
+    } else {
+      breedVersionValidation = true;
+    }
+
+    if (breedId == null) {
+      breedNameValidationSubject = 'Please choose the breed name';
+      breedNameValidation = false;
+    } else {
+      breedNameValidation = true;
+    }
+
+    if (sendData.isEmpty) {
+      if (primarilyDaysController.text.isNum != true) {
+        primarilyInDaysSubjectValidationSubject =
+            'Enter a valid primarily in days';
+        primarilyInDaysValidation = false;
+      } else if (primarilyDaysController.text == '') {
+        primarilyInDaysSubjectValidationSubject =
+            'Primarily in days cannot be empty';
+        primarilyInDaysValidation = false;
+      } else {
+        primarilyInDaysValidation = true;
+      }
+      if (bodyWeightController.text.isNum != true) {
+        bodyWeightValidationSubject = 'Enter a valid Body weight';
+        bodyWeightValidation = false;
+      } else if (bodyWeightController.text == '') {
+        bodyWeightValidationSubject = 'Body weight cannot be empty';
+        bodyWeightValidation = false;
+      } else {
+        bodyWeightValidation = true;
+      }
+      if (feedConsumptionController.text.isNum != true) {
+        feedConsumptionValidationSubject =
+            'Enter a valid feed consumption unit';
+        feedConsumptionValidation = false;
+      } else if (feedConsumptionController.text == '') {
+        feedConsumptionValidationSubject = 'Feed Consumption cannot be empty';
+        feedConsumptionValidation = false;
+      } else {
+        feedConsumptionValidation = true;
+      }
+      if (eggProductionController.text.isNum != true) {
+        eggProductRateValidationSubject = 'Enter a valid Egg production';
+        eggproductionValidation = false;
+      } else if (eggProductionController.text == '') {
+        eggProductRateValidationSubject = 'Egg production cannot be empty';
+        eggproductionValidation = false;
+      } else {
+        eggproductionValidation = true;
+      }
+      if (mortalityController.text.isNum != true) {
+        mortalityValidationSubject = 'Enter a valid mortality';
+        mortalityValidation = false;
+      } else if (mortalityController.text == '') {
+        mortalityValidationSubject = 'Mortality cannot be empty';
+        mortalityValidation = false;
+      } else {
+        mortalityValidation = true;
+      }
+
+      if (breedVersionValidation == true &&
+          breedNameValidation == true &&
+          primarilyInDaysValidation == true &&
+          bodyWeightValidation == true &&
+          feedConsumptionValidation == true &&
+          eggproductionValidation == true &&
+          mortalityValidation == true) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    if (breedVersionValidation == true && breedNameValidation == true) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
@@ -284,12 +401,12 @@ class _EditBreedVersionDetailsDialogState
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 6),
                               child: TextFormField(
+                                controller: breedVersionController,
                                 decoration: InputDecoration(
                                     hintText: activityPlanIdError == false
                                         ? 'Enter Breed Version'
                                         : '',
                                     border: InputBorder.none),
-                                initialValue: widget.breedVersion,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     // showError('FirmCode');
@@ -306,6 +423,10 @@ class _EditBreedVersionDetailsDialogState
                       ),
                     ),
                   ),
+                  breedVersionValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, breedVersionValidationSubject),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Align(
@@ -337,12 +458,12 @@ class _EditBreedVersionDetailsDialogState
                                   items:
                                       breed.map<DropdownMenuItem<String>>((e) {
                                     return DropdownMenuItem(
-                                      child: Text(e['Breed_Name'].toString()),
                                       value: e['Breed_Name'].toString(),
                                       onTap: () {
                                         breedInfoData['Breed_Id'] =
                                             e['Breed_Id'];
                                       },
+                                      child: Text(e['Breed_Name'].toString()),
                                     );
                                   }).toList(),
                                   hint:
@@ -360,6 +481,10 @@ class _EditBreedVersionDetailsDialogState
                       ),
                     ),
                   ),
+                  breedNameValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, breedNameValidationSubject),
                   const SizedBox(
                     height: 36,
                   ),
@@ -446,12 +571,12 @@ class _EditBreedVersionDetailsDialogState
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 6),
                                     child: TextFormField(
+                                      controller: primarilyDaysController,
                                       decoration: InputDecoration(
                                           hintText: activityPlanIdError == false
                                               ? 'Enter primarily days'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: _days ?? '',
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -469,6 +594,10 @@ class _EditBreedVersionDetailsDialogState
                             ),
                           ),
                         ),
+                        primarilyInDaysValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, primarilyInDaysSubjectValidationSubject),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -497,12 +626,12 @@ class _EditBreedVersionDetailsDialogState
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 6),
                                     child: TextFormField(
+                                      controller: bodyWeightController,
                                       decoration: InputDecoration(
                                           hintText: activityPlanIdError == false
                                               ? 'Enter body weight'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: _bodyWeight ?? '',
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -519,6 +648,10 @@ class _EditBreedVersionDetailsDialogState
                             ),
                           ),
                         ),
+                        bodyWeightValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, bodyWeightValidationSubject),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -547,12 +680,12 @@ class _EditBreedVersionDetailsDialogState
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 6),
                                     child: TextFormField(
+                                      controller: feedConsumptionController,
                                       decoration: InputDecoration(
                                           hintText: activityPlanIdError == false
                                               ? 'Enter Feed consumption'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: _consumption ?? '',
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -570,6 +703,10 @@ class _EditBreedVersionDetailsDialogState
                             ),
                           ),
                         ),
+                        feedConsumptionValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, feedConsumptionValidationSubject),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -598,12 +735,12 @@ class _EditBreedVersionDetailsDialogState
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 6),
                                     child: TextFormField(
+                                      controller: eggProductionController,
                                       decoration: InputDecoration(
                                           hintText: activityPlanIdError == false
                                               ? 'Enter Egg Production Rate'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: _productionRate ?? '',
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -621,6 +758,10 @@ class _EditBreedVersionDetailsDialogState
                             ),
                           ),
                         ),
+                        eggproductionValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, eggProductRateValidationSubject),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -649,12 +790,12 @@ class _EditBreedVersionDetailsDialogState
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 6),
                                     child: TextFormField(
+                                      controller: mortalityController,
                                       decoration: InputDecoration(
                                           hintText: activityPlanIdError == false
                                               ? 'Enter mortality'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: _mortality ?? '',
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -671,6 +812,23 @@ class _EditBreedVersionDetailsDialogState
                             ),
                           ),
                         ),
+                        mortalityValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, mortalityValidationSubject),
+                        Consumer<BreedInfoApis>(
+                            builder: (context, value, child) {
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: value.breedException.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return ModularWidgets.exceptionDesign(
+                                  MediaQuery.of(context).size,
+                                  value.breedException[index][0]);
+                            },
+                          );
+                        }),
                       ],
                     ),
                   ),

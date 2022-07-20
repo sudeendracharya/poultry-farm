@@ -16,6 +16,24 @@ class LogsApi with ChangeNotifier {
 
   List _batchPlanCodeList = [];
 
+  List _activityNumbersList = [];
+
+  List _vaccinationNumbersList = [];
+
+  List _medicationNumbersList = [];
+
+  List get medicationNumbersList {
+    return _medicationNumbersList;
+  }
+
+  List get vaccinationNumbersList {
+    return _vaccinationNumbersList;
+  }
+
+  List get activityNumbersList {
+    return _activityNumbersList;
+  }
+
   List get batchPlanCodeList {
     return _batchPlanCodeList;
   }
@@ -36,9 +54,10 @@ class LogsApi with ChangeNotifier {
     return _activityLog;
   }
 
-  Future<void> getActivityLog(var batchCode, var token) async {
-    final url =
-        Uri.parse('${baseUrl}batch-plan/batch-activity/Activity/$batchCode/');
+  Future<void> getActivityLog(
+      var batchCode, var activityNumber, var token) async {
+    final url = Uri.parse(
+        '${baseUrl}batch-plan/batch-activity/Activity/$batchCode/$activityNumber/');
     try {
       var response = await http.get(
         url,
@@ -98,9 +117,104 @@ class LogsApi with ChangeNotifier {
     }
   }
 
-  Future<void> getMedicationLog(var batchCode, var token) async {
-    final url =
-        Uri.parse('${baseUrl}batch-plan/batch-activity/Medicine/$batchCode/');
+  Future<void> searchActivityNumbers(var activityNumbers, var token) async {
+    final url = Uri.parse(
+        '${baseUrl}activities-log/activity-search/?search=$activityNumbers');
+    try {
+      var response = await http.get(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token',
+        },
+        // body: json.encode(batchCode),
+      );
+      print(response.statusCode);
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+
+        _activityNumbersList = responseData;
+        notifyListeners();
+      } else if (response.statusCode == 404) {
+        var responseData = json.decode(response.body) as Map<String, dynamic>;
+        logException = responseData;
+
+        notifyListeners();
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> searchVaccinationNumbers(
+      var vaccinationNumbers, var token) async {
+    final url = Uri.parse(
+        '${baseUrl}activities-log/vaccination-activity-search/?search=$vaccinationNumbers');
+    try {
+      var response = await http.get(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token',
+        },
+        // body: json.encode(batchCode),
+      );
+      print(response.statusCode);
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+
+        _vaccinationNumbersList = responseData;
+        notifyListeners();
+      } else if (response.statusCode == 404) {
+        var responseData = json.decode(response.body) as Map<String, dynamic>;
+        logException = responseData;
+
+        notifyListeners();
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> searchMedicationNumbers(var medicationNumbers, var token) async {
+    final url = Uri.parse(
+        '${baseUrl}activities-log/medication-activity-search/?search=$medicationNumbers');
+    try {
+      var response = await http.get(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token',
+        },
+        // body: json.encode(batchCode),
+      );
+      print(response.statusCode);
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+
+        _medicationNumbersList = responseData;
+        notifyListeners();
+      } else if (response.statusCode == 404) {
+        var responseData = json.decode(response.body) as Map<String, dynamic>;
+        logException = responseData;
+
+        notifyListeners();
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> getMedicationLog(
+      var batchCode, var medicationNumber, var token) async {
+    final url = Uri.parse(
+        '${baseUrl}batch-plan/batch-activity/Medicine/$batchCode/$medicationNumber/');
     try {
       var response = await http.get(
         url,
@@ -128,9 +242,10 @@ class LogsApi with ChangeNotifier {
     }
   }
 
-  Future<void> getVaccinationLog(var batchCode, var token) async {
+  Future<void> getVaccinationLog(
+      var batchCode, var vaccinationNumber, var token) async {
     final url = Uri.parse(
-        '${baseUrl}batch-plan/batch-activity/Vaccination/$batchCode/');
+        '${baseUrl}batch-plan/batch-activity/Vaccination/$batchCode/$vaccinationNumber/');
     try {
       var response = await http.get(
         url,

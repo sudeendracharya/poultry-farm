@@ -281,6 +281,8 @@ class _MedicationPlanDetailsState extends State<MedicationPlanDetails> {
                                       context: context,
                                       builder: (ctx) =>
                                           EditMedicationPlanDialog(
+                                            medicationCode: _MedicationDetails[
+                                                'Medication_Code'],
                                             medicationId: _MedicationDetails[
                                                     'Medication_Id']
                                                 .toString(),

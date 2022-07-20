@@ -31,6 +31,10 @@ class JournalApi with ChangeNotifier {
 
   List inventoryAdjustmentList = [];
 
+  List individualVendorsInfo = [];
+
+  List companyVendors = [];
+
   Map<String, dynamic> get individualCompanyInfoData {
     return individualCompanyInfo;
   }
@@ -47,8 +51,16 @@ class JournalApi with ChangeNotifier {
     return customerSearchResult;
   }
 
+  List get companyVendorsData {
+    return companyVendors;
+  }
+
   List get inventoryAdjustmentListData {
     return inventoryAdjustmentList;
+  }
+
+  List get individualVendorsInfoData {
+    return individualVendorsInfo;
   }
 
   List get companySalesListData {
@@ -197,7 +209,10 @@ class JournalApi with ChangeNotifier {
     var responseData = json.decode(response.body) as Map<String, dynamic>;
     _salesException.clear();
     responseData.forEach((key, value) {
-      _salesException.add(value);
+      _salesException.add({
+        'Key': key,
+        'Value': value,
+      });
     });
     notifyListeners();
   }
@@ -451,12 +466,71 @@ class JournalApi with ChangeNotifier {
     }
   }
 
+  Future<int> addIndividualVendorsInfo(
+    var data,
+    var token,
+  ) async {
+    // log(token);
+    final url = Uri.parse('${baseUrl}vendor/vendor-list/Individual/');
+    try {
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token'
+        },
+        body: json.encode(data),
+      );
+
+      if (response.statusCode == 400) {
+        handleException(response);
+      }
+
+      print(response.statusCode);
+      print(response.body);
+
+      return response.statusCode;
+    } catch (e) {
+      failureSnackbar(e.toString());
+      rethrow;
+    }
+  }
+
   Future<int> addCompanyInfo(
     var data,
     var token,
   ) async {
     // log(token);
     final url = Uri.parse('${baseUrl}customer/company-list/');
+    try {
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token'
+        },
+        body: json.encode(data),
+      );
+      print(response.statusCode);
+      print(response.body);
+
+      if (response.statusCode == 400) {
+        handleException(response);
+      }
+
+      return response.statusCode;
+    } catch (e) {
+      failureSnackbar(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<int> addVendorCompanyInfo(
+    var data,
+    var token,
+  ) async {
+    // log(token);
+    final url = Uri.parse('${baseUrl}vendor/vendor-list/Company/');
     try {
       final response = await http.post(
         url,
@@ -510,6 +584,36 @@ class JournalApi with ChangeNotifier {
     }
   }
 
+  Future<int> updateVendorCompanyInfo(
+    var id,
+    var data,
+    var token,
+  ) async {
+    // log(token);
+    final url = Uri.parse('${baseUrl}vendor/vendor-details/Company/$id/');
+    try {
+      final response = await http.patch(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token'
+        },
+        body: json.encode(data),
+      );
+      print(response.statusCode);
+      print(response.body);
+
+      if (response.statusCode == 400) {
+        handleException(response);
+      }
+
+      return response.statusCode;
+    } catch (e) {
+      failureSnackbar(e.toString());
+      rethrow;
+    }
+  }
+
   Future<int> updateCustomerInfo(
     var id,
     var data,
@@ -517,6 +621,37 @@ class JournalApi with ChangeNotifier {
   ) async {
     // log(token);
     final url = Uri.parse('${baseUrl}customer/customer-details/$id/');
+    try {
+      final response = await http.patch(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token'
+        },
+        body: json.encode(data),
+      );
+
+      if (response.statusCode == 400) {
+        handleException(response);
+      }
+
+      print(response.statusCode);
+      print(response.body);
+
+      return response.statusCode;
+    } catch (e) {
+      failureSnackbar(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<int> updateVendorInfo(
+    var id,
+    var data,
+    var token,
+  ) async {
+    // log(token);
+    final url = Uri.parse('${baseUrl}vendor/vendor-details/Individual/$id/');
     try {
       final response = await http.patch(
         url,
@@ -579,6 +714,57 @@ class JournalApi with ChangeNotifier {
           });
         }
         customersInfo = temp;
+        notifyListeners();
+      }
+
+      if (response.statusCode == 400) {
+        handleException(response);
+      }
+
+      return response.statusCode;
+    } catch (e) {
+      failureSnackbar(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<int> getIndividualVendorsInfo(
+    var token,
+  ) async {
+    // log(token);
+    final url = Uri.parse('${baseUrl}vendor/vendor-list/Individual/');
+    try {
+      final response = await http.get(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token'
+        },
+      );
+
+      print(response.statusCode);
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+        List temp = [];
+        for (var data in responseData) {
+          temp.add({
+            "Vendor": data['Vendor'],
+            "Individual_Vendor_Id": data['Individual_Vendor_Id'],
+            "Vendor__Vendor_Code": data['Vendor__Vendor_Code'],
+            "Vendor__Vendor_Name": data['Vendor__Vendor_Name'],
+            "Vendor__Country": data['Vendor__Country'],
+            "Vendor__State": data['Vendor__State'],
+            "Vendor__Street": data['Vendor__Street'],
+            "Vendor__City": data['Vendor__City'],
+            "Vendor__Zip_Code": data['Vendor__Zip_Code'],
+            "Contact_Number": data['Contact_Number'],
+            "Email_Id": data['Email_Id'],
+            'Is_Selected': false,
+          });
+        }
+        individualVendorsInfo = temp;
         notifyListeners();
       }
 
@@ -704,6 +890,60 @@ class JournalApi with ChangeNotifier {
           });
         }
         companiesInfo = temp;
+        notifyListeners();
+      }
+
+      if (response.statusCode == 400) {
+        handleException(response);
+      }
+
+      return response.statusCode;
+    } catch (e) {
+      failureSnackbar(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<int> getCompanyVendorsInfo(
+    var token,
+  ) async {
+    // log(token);
+    final url = Uri.parse('${baseUrl}vendor/vendor-list/Company/');
+    try {
+      final response = await http.get(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token'
+        },
+      );
+
+      print(response.statusCode);
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+        List temp = [];
+        for (var data in responseData) {
+          temp.add({
+            "Vendor": data['Vendor'],
+            "Company_Vendor_Id": data['Company_Vendor_Id'],
+            "Vendor__Vendor_Code": data['Vendor__Vendor_Code'],
+            "Vendor__Vendor_Name": data['Vendor__Vendor_Name'],
+            "Vendor__Country": data['Vendor__Country'],
+            "Vendor__State": data['Vendor__State'],
+            "Vendor__Street": data['Vendor__Street'],
+            "Vendor__City": data['Vendor__City'],
+            "Vendor__Zip_Code": data['Vendor__Zip_Code'],
+            "Company_Email_Id": data['Company_Email_Id'],
+            "Contact_Person_Name": data['Contact_Person_Name'],
+            "Designation": data['Designation'],
+            "Contact_Number": data['Contact_Number'],
+            "Contact_Email_Id": data['Contact_Email_Id'],
+            'Is_Selected': false,
+          });
+        }
+        companyVendors = temp;
         notifyListeners();
       }
 
@@ -853,6 +1093,36 @@ class JournalApi with ChangeNotifier {
     }
   }
 
+  Future<int> deleteIndividualVendorInfo(
+    var id,
+    var token,
+  ) async {
+    // log(token);
+    final url = Uri.parse('${baseUrl}vendor/vendor-details/Individual/$id/');
+    try {
+      final response = await http.delete(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token'
+        },
+        // body: json.encode(id),
+      );
+
+      if (response.statusCode == 400) {
+        handleException(response);
+      }
+
+      print(response.statusCode);
+      print(response.body);
+
+      return response.statusCode;
+    } catch (e) {
+      failureSnackbar(e.toString());
+      rethrow;
+    }
+  }
+
   Future<int> deleteCompaniesInfo(
     var data,
     var token,
@@ -867,6 +1137,36 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
         body: json.encode(data),
+      );
+
+      if (response.statusCode == 400) {
+        handleException(response);
+      }
+
+      print(response.statusCode);
+      print(response.body);
+
+      return response.statusCode;
+    } catch (e) {
+      failureSnackbar(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<int> deleteCompanyVendorsInfo(
+    var id,
+    var token,
+  ) async {
+    // log(token);
+    final url = Uri.parse('${baseUrl}vendor/vendor-details/Company/$id/');
+    try {
+      final response = await http.delete(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token'
+        },
+        // body: json.encode(id),
       );
 
       if (response.statusCode == 400) {

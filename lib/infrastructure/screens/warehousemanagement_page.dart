@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:poultry_login_signup/infrastructure/screens/warehouse_details_screen.dart';
+import 'package:poultry_login_signup/main.dart';
 import 'package:poultry_login_signup/providers/apicalls.dart';
 import 'package:poultry_login_signup/infrastructure/providers/infrastructure_apicalls.dart';
 
@@ -47,7 +48,8 @@ class _WareHouseManagementPageState extends State<WareHouseManagementPage> {
     super.initState();
 
     getFirmData().then((value) {
-      fechWareHouseList(_storedPlantId);
+      fechplantList(firmId);
+      // fechWareHouseList(_storedPlantId);
     });
   }
 
@@ -62,7 +64,8 @@ class _WareHouseManagementPageState extends State<WareHouseManagementPage> {
         json.decode(prefs.getString('FirmAndPlantDetails')!)
             as Map<String, dynamic>;
     print(extratedUserData);
-    _storedPlantId = extratedUserData['PlantId'];
+    firmId = extratedUserData['FirmId'];
+    // _storedPlantId = extratedUserData['PlantId'];
   }
 
   // Future<void> getFirmData() async {
@@ -86,9 +89,6 @@ class _WareHouseManagementPageState extends State<WareHouseManagementPage> {
             id,
           )
           .then((value1) {});
-      // Provider.of<InfrastructureApis>(context, listen: false)
-      //     .getPlantDetails(token)
-      //     .then((value1) {});
     });
   }
 
@@ -202,105 +202,121 @@ class _WareHouseManagementPageState extends State<WareHouseManagementPage> {
                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 24),
               ),
             ),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 10.0),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 253,
-                      child: AdministrationSearchWidget(
-                          search: (value) {},
-                          reFresh: (value) {},
-                          text: query,
-                          onChanged: searchBook,
-                          hintText: 'Search'),
+            Row(
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 253,
+                          child: AdministrationSearchWidget(
+                              search: (value) {},
+                              reFresh: (value) {},
+                              text: query,
+                              onChanged: searchBook,
+                              hintText: 'Search'),
+                        ),
+                        const SizedBox(width: 10),
+                        // Container(
+                        //   width: 350,
+                        //   child: Row(
+                        //     mainAxisSize: MainAxisSize.min,
+                        //     children: [
+                        //       const Text('Firm Name'),
+                        //       Container(
+                        //         width: 250,
+                        //         child: Padding(
+                        //           padding: const EdgeInsets.symmetric(
+                        //               horizontal: 12, vertical: 6),
+                        //           child: DropdownButtonHideUnderline(
+                        //             child: DropdownButton(
+                        //               value: firmId,
+                        //               items: firmList
+                        //                   .map<DropdownMenuItem<String>>((e) {
+                        //                 return DropdownMenuItem(
+                        //                   child: Text(e['Firm_Name']),
+                        //                   value: e['Firm_Name'],
+                        //                   onTap: () {
+                        //                     fechplantList(e['Firm_Id']);
+                        //                     plantId = null;
+                        //                   },
+                        //                 );
+                        //               }).toList(),
+                        //               hint: const Text('Choose Firm Name'),
+                        //               onChanged: (value) {
+                        //                 setState(() {
+                        //                   firmId = value as String;
+                        //                 });
+                        //               },
+                        //             ),
+                        //           ),
+                        //         ),
+                        //       )
+                        //     ],
+                        //   ),
+                        // ),
+                        const SizedBox(width: 35),
+                        Container(
+                          width: 380,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Plant Name',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Container(
+                                width: 250,
+                                height: 45,
+                                decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: 5, bottom: 2),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton(
+                                      isExpanded: true,
+                                      value: plantId,
+                                      items: plantList
+                                          .map<DropdownMenuItem<String>>((e) {
+                                        return DropdownMenuItem(
+                                          value: e['Plant_Name'],
+                                          onTap: () {
+                                            fechWareHouseList(e['Plant_Id']);
+                                            _plantId = e['Plant_Id'];
+                                          },
+                                          child: Text(e['Plant_Name']),
+                                        );
+                                      }).toList(),
+                                      hint: const Text('Choose plant Name'),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          plantId = value as String;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        )
+                      ],
                     ),
-                    const SizedBox(width: 10),
-                    // Container(
-                    //   width: 350,
-                    //   child: Row(
-                    //     mainAxisSize: MainAxisSize.min,
-                    //     children: [
-                    //       const Text('Firm Name'),
-                    //       Container(
-                    //         width: 250,
-                    //         child: Padding(
-                    //           padding: const EdgeInsets.symmetric(
-                    //               horizontal: 12, vertical: 6),
-                    //           child: DropdownButtonHideUnderline(
-                    //             child: DropdownButton(
-                    //               value: firmId,
-                    //               items: firmList
-                    //                   .map<DropdownMenuItem<String>>((e) {
-                    //                 return DropdownMenuItem(
-                    //                   child: Text(e['Firm_Name']),
-                    //                   value: e['Firm_Name'],
-                    //                   onTap: () {
-                    //                     fechplantList(e['Firm_Id']);
-                    //                     plantId = null;
-                    //                   },
-                    //                 );
-                    //               }).toList(),
-                    //               hint: const Text('Choose Firm Name'),
-                    //               onChanged: (value) {
-                    //                 setState(() {
-                    //                   firmId = value as String;
-                    //                 });
-                    //               },
-                    //             ),
-                    //           ),
-                    //         ),
-                    //       )
-                    //     ],
-                    //   ),
-                    // ),
-                    // const SizedBox(width: 10),
-                    // Container(
-                    //   width: 350,
-                    //   child: Row(
-                    //     mainAxisSize: MainAxisSize.min,
-                    //     children: [
-                    //       const Text('Plant Name'),
-                    //       Container(
-                    //         width: 250,
-                    //         child: Padding(
-                    //           padding: const EdgeInsets.symmetric(
-                    //               horizontal: 12, vertical: 6),
-                    //           child: DropdownButtonHideUnderline(
-                    //             child: DropdownButton(
-                    //               value: plantId,
-                    //               items: plantList
-                    //                   .map<DropdownMenuItem<String>>((e) {
-                    //                 return DropdownMenuItem(
-                    //                   child: Text(e['Plant_Name']),
-                    //                   value: e['Plant_Name'],
-                    //                   onTap: () {
-                    //                     fechWareHouseList(e['Plant_Id']);
-                    //                     _plantId = e['Plant_Id'];
-                    //                   },
-                    //                 );
-                    //               }).toList(),
-                    //               hint: const Text('Choose plant Name'),
-                    //               onChanged: (value) {
-                    //                 setState(() {
-                    //                   plantId = value as String;
-                    //                 });
-                    //               },
-                    //             ),
-                    //           ),
-                    //         ),
-                    //       )
-                    //     ],
-                    //   ),
-                    // )
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
             Container(
-              width: size.width * 0.7,
+              width: size.width * 0.8,
               padding: const EdgeInsets.only(top: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -333,7 +349,7 @@ class _WareHouseManagementPageState extends State<WareHouseManagementPage> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 5.0),
                 child: Container(
-                  width: MediaQuery.of(context).size.width * 0.7,
+                  width: MediaQuery.of(context).size.width * 0.9,
                   height: MediaQuery.of(context).size.height / 2.52,
                   child: InteractiveViewer(
                     alignPanAxis: true,
@@ -344,7 +360,7 @@ class _WareHouseManagementPageState extends State<WareHouseManagementPage> {
                         showCheckboxColumn: true,
                         columnSpacing: width <= 1200
                             ? MediaQuery.of(context).size.width * 0.0520
-                            : MediaQuery.of(context).size.width * 0.09765625,
+                            : MediaQuery.of(context).size.width * 0.0520,
                         headingTextStyle: GoogleFonts.roboto(
                           textStyle: const TextStyle(
                             fontWeight: FontWeight.w700,

@@ -57,6 +57,7 @@ class _BreedVersionState extends State<BreedVersion> {
   bool loading = true;
   @override
   void initState() {
+    selectedBreedVersion.clear();
     getPermission('Breed_Version').then((value) {
       extratedPermissions = value;
       setState(() {

@@ -449,8 +449,8 @@ class ActivityApis with ChangeNotifier {
       if (response.statusCode == 400) {
         handleException(response);
       }
-      // print(response.statusCode);
-      // print(response.body);
+      print(response.statusCode);
+      print(response.body);
 
       return response.statusCode;
     } catch (e) {
@@ -509,8 +509,8 @@ class ActivityApis with ChangeNotifier {
       if (response.statusCode == 400) {
         handleException(response);
       }
-      // print(response.statusCode);
-      // print(response.body);
+      print(response.statusCode);
+      print(response.body);
 
       return response.statusCode;
     } catch (e) {

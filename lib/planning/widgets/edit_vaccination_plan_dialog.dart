@@ -21,7 +21,8 @@ class EditVaccinationPlanDialog extends StatefulWidget {
       required this.vaccinationPlan,
       required this.breedVersionId,
       required this.description,
-      required this.vaccinationId})
+      required this.vaccinationId,
+      required this.vaccinationCode})
       : super(key: key);
 
   final ValueChanged<int> reFresh;
@@ -30,6 +31,7 @@ class EditVaccinationPlanDialog extends StatefulWidget {
   final List vaccinationPlan;
   final String breedVersionId;
   final String description;
+  final String vaccinationCode;
 
   @override
   State<EditVaccinationPlanDialog> createState() =>
@@ -105,6 +107,27 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
 
   @override
   void initState() {
+    breedVersionId = widget.breedVersionId;
+    print(widget.vaccinationPlan);
+    if (widget.vaccinationPlan.length == 1) {
+      ageController.text = widget.vaccinationPlan[0]['Age'].toString();
+      modeController.text = widget.vaccinationPlan[0]['Mode'];
+      siteController.text = widget.vaccinationPlan[0]['Site'];
+      dosageController.text = widget.vaccinationPlan[0]['Dosage'].toString();
+      dosageUnitController.text =
+          widget.vaccinationPlan[0]['Dosage_Unit'].toString();
+      vaccinationDescriptionController.text =
+          widget.vaccinationPlan[0]['Descripption'];
+      vaccinationNameController.text =
+          widget.vaccinationPlan[0]['Vaccination_Name'];
+      notificationPriorController.text =
+          widget.vaccinationPlan[0]['Notification_Prior_Days'];
+      vaccineStoreTemperatureController.text =
+          widget.vaccinationPlan[0]['Vaccine_Store_Temperature'].toString();
+    }
+    recommendedByController.text = widget.recommendedBy;
+
+    vaccinationCodeController.text = widget.vaccinationCode.toString();
     vaccinationPlanData['Vaccination_Id'] = widget.vaccinationId.toString();
     vaccinationPlanData['Breed_Version_Id'] = widget.breedVersionId;
     fetchCredientials().then((token) {
@@ -221,10 +244,190 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
     });
   }
 
-  void save() {
-    bool validate = _formKey.currentState!.validate();
+  TextEditingController vaccinationCodeController = TextEditingController();
+  TextEditingController recommendedByController = TextEditingController();
+  TextEditingController ageController = TextEditingController();
+  TextEditingController vaccinationNameController = TextEditingController();
+  TextEditingController modeController = TextEditingController();
+  TextEditingController siteController = TextEditingController();
+  TextEditingController dosageController = TextEditingController();
+  TextEditingController dosageUnitController = TextEditingController();
+  TextEditingController vaccineStoreTemperatureController =
+      TextEditingController();
+  TextEditingController notificationPriorController = TextEditingController();
+  TextEditingController vaccinationDescriptionController =
+      TextEditingController();
 
-    if (validate != true) {
+  bool vaccinationCodeValidation = true;
+  bool recommendedByValidation = true;
+  bool breedVersionValidation = true;
+  bool ageValidation = true;
+  bool vaccinationNameValidation = true;
+  bool modeValidation = true;
+  bool siteValidation = true;
+  bool dosageValidation = true;
+  bool dosageUnitValidation = true;
+  bool vaccineStoreTemperatureValidation = true;
+  bool notificationPriorValidation = true;
+  bool vaccinationDescriptionValidation = true;
+
+  String vaccinationCodeValidationMessage = '';
+  String recommendedByValidationMessage = '';
+  String breedVersionValidationMessage = '';
+  String ageValidationMessage = '';
+  String vaccinationNameValidationMessage = '';
+  String modeValidationMessage = '';
+  String siteValidationMessage = '';
+  String dosageValidationMessage = '';
+  String dosageUnitValidationMessage = '';
+  String vaccineStoreTemperatureValidationMessage = '';
+  String notificationPriorValidationMessage = '';
+  String vaccinationDescriptionValidationMessage = '';
+
+  bool validate() {
+    if (vaccinationCodeController.text == '') {
+      vaccinationCodeValidationMessage = 'Vaccination code cannot be empty';
+      vaccinationCodeValidation = false;
+    } else if (vaccinationCodeController.text.length > 9) {
+      vaccinationCodeValidationMessage =
+          'Vaccination code cannot be greater then 9 characters';
+      vaccinationCodeValidation = false;
+    } else {
+      vaccinationCodeValidation = true;
+    }
+    if (recommendedByController.text == '') {
+      recommendedByValidationMessage = 'Recommended by cannot be empty';
+      recommendedByValidation = false;
+    } else {
+      recommendedByValidation = true;
+    }
+    if (breedVersionId == null) {
+      breedVersionValidationMessage = 'Breed version cannot be empty';
+      breedVersionValidation = false;
+    } else {
+      breedVersionValidation = true;
+    }
+
+    if (sendData.isEmpty) {
+      if (ageController.text.isNum != true) {
+        ageValidationMessage = 'Enter a valid age';
+        ageValidation = false;
+      } else if (ageController.text == '') {
+        ageValidationMessage = 'Age cannot be empty';
+        ageValidation = false;
+      } else if (ageController.text.length > 6) {
+        ageValidationMessage = 'Age Cannot be greater then 6 characters';
+        ageValidation = false;
+      } else {
+        ageValidation = true;
+      }
+      if (vaccinationNameController.text == '') {
+        vaccinationNameValidationMessage = 'Vaccination name cannot be empty';
+        vaccinationNameValidation = false;
+      } else if (vaccinationNameController.text.length > 12) {
+        vaccinationNameValidationMessage =
+            'Vaccination name cannot be greater then 12 characters';
+        vaccinationNameValidation = false;
+      } else {
+        vaccinationNameValidation = true;
+      }
+      if (modeController.text == '') {
+        modeValidationMessage = 'Mode of administration cannot be empty';
+        modeValidation = false;
+      } else {
+        modeValidation = true;
+      }
+      if (siteController.text == '') {
+        siteValidationMessage = 'Site of administration cannot be empty';
+        siteValidation = false;
+      } else {
+        siteValidation = true;
+      }
+      if (dosageController.text.isNum != true) {
+        dosageValidationMessage = 'Enter a Valid Dosage per bird';
+        dosageValidation = false;
+      } else if (dosageController.text == '') {
+        dosageValidationMessage = 'Dosage per bird cannot be empty';
+        dosageValidation = false;
+      } else {
+        dosageValidation = true;
+      }
+      if (dosageUnitController.text.isNotEmpty != true) {
+        dosageUnitValidationMessage = 'Enter a valid Dosage unit';
+        dosageUnitValidation = false;
+      } else if (dosageUnitController.text == '') {
+        dosageUnitValidationMessage = 'Dosage unit cannot be empty';
+        dosageUnitValidation = false;
+      } else {
+        dosageUnitValidation = true;
+      }
+      if (vaccineStoreTemperatureController.text == '') {
+        vaccineStoreTemperatureValidationMessage =
+            'Vaccination store temperature cannot be empty';
+        vaccineStoreTemperatureValidation = false;
+      } else {
+        vaccineStoreTemperatureValidation = true;
+      }
+
+      if (notificationPriorController.text.isNum != true) {
+        notificationPriorValidationMessage =
+            'Enter a valid Notification Prior to days ';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text.length > 2) {
+        notificationPriorValidationMessage =
+            'Notification Prior to days cannot be greater then 2 characters ';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text == '') {
+        notificationPriorValidationMessage =
+            'Notification Prior to days cannot be empty';
+        notificationPriorValidation = false;
+      } else {
+        notificationPriorValidation = true;
+      }
+
+      if (vaccinationDescriptionController.text == '') {
+        vaccinationDescriptionValidation = false;
+        vaccinationDescriptionValidationMessage = 'Description cannot be empty';
+      } else if (vaccinationDescriptionController.text.length > 30) {
+        vaccinationDescriptionValidation = false;
+        vaccinationDescriptionValidationMessage =
+            'Description cannot contain more then 30 characters';
+      } else {
+        vaccinationDescriptionValidation = true;
+      }
+
+      if (vaccinationCodeValidation == true &&
+          recommendedByValidation == true &&
+          breedVersionValidation == true &&
+          ageValidation == true &&
+          vaccinationNameValidation == true &&
+          modeValidation == true &&
+          siteValidation == true &&
+          dosageValidation == true &&
+          dosageUnitValidation == true &&
+          vaccineStoreTemperatureValidation == true &&
+          notificationPriorValidation == true &&
+          vaccinationDescriptionValidation == true) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (vaccinationCodeValidation == true &&
+          recommendedByValidation == true &&
+          breedVersionValidation == true) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  void save() {
+    bool validateData = validate();
+
+    if (validateData != true) {
+      setState(() {});
       return;
     }
     _formKey.currentState!.save();
@@ -239,7 +442,7 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
     }
     vaccinationPlanData['Vaccination_Plan'] = sendData;
 
-    // print(vaccinationPlanData);
+    print(vaccinationPlanData);
 
     fetchCredientials().then((token) {
       if (token != '') {
@@ -299,55 +502,54 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                       ),
                     ],
                   ),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 24.0),
-                  //   child: Align(
-                  //     alignment: Alignment.topLeft,
-                  //     child: Column(
-                  //       mainAxisSize: MainAxisSize.min,
-                  //       children: [
-                  //         Container(
-                  //           width: size.width * 0.25,
-                  //           padding: const EdgeInsets.only(bottom: 12),
-                  //           child: const Text('Activity Plan Code'),
-                  //         ),
-                  //         Container(
-                  //           width: size.width * 0.25,
-                  //           height: 36,
-                  //           decoration: BoxDecoration(
-                  //             borderRadius: BorderRadius.circular(8),
-                  //             color: Colors.white,
-                  //             border: Border.all(
-                  //                 color: activityPlanIdError == false
-                  //                     ? Colors.black26
-                  //                     : const Color.fromRGBO(243, 60, 60, 1)),
-                  //           ),
-                  //           child: Padding(
-                  //             padding: const EdgeInsets.symmetric(
-                  //                 horizontal: 12, vertical: 6),
-                  //             child: TextFormField(
-                  //               decoration: InputDecoration(
-                  //                   hintText: activityPlanIdError == false
-                  //                       ? 'Enter Activity Plan Code'
-                  //                       : '',
-                  //                   border: InputBorder.none),
-                  //               initialValue: '',
-                  //               validator: (value) {
-                  //                 if (value!.isEmpty) {
-                  //                   // showError('FirmCode');
-                  //                   return '';
-                  //                 }
-                  //               },
-                  //               onSaved: (value) {
-                  //                 vaccinationPlanData['Activity_Id'] = value!;
-                  //               },
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: size.width * 0.25,
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: const Text('Vaccination Code'),
+                          ),
+                          Container(
+                            width: size.width * 0.25,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.white,
+                              border: Border.all(
+                                  color: activityPlanIdError == false
+                                      ? Colors.black26
+                                      : const Color.fromRGBO(243, 60, 60, 1)),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              child: TextFormField(
+                                decoration: InputDecoration(
+                                    hintText: activityPlanIdError == false
+                                        ? 'Enter Vaccination Code'
+                                        : '',
+                                    border: InputBorder.none),
+                                controller: vaccinationCodeController,
+                                onSaved: (value) {
+                                  vaccinationPlanData['Vaccination_Code'] =
+                                      value!;
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  vaccinationCodeValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, vaccinationCodeValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Align(
@@ -380,7 +582,7 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                                         ? 'Enter Recommended By'
                                         : '',
                                     border: InputBorder.none),
-                                initialValue: widget.recommendedBy,
+                                controller: recommendedByController,
                                 validator: (value) {
                                   if (value!.isEmpty) {
                                     // showError('FirmCode');
@@ -398,6 +600,10 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                       ),
                     ),
                   ),
+                  recommendedByValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, recommendedByValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Align(
@@ -429,14 +635,14 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                                   items: breedVersion
                                       .map<DropdownMenuItem<String>>((e) {
                                     return DropdownMenuItem(
-                                      child:
-                                          Text(e['Breed_Version'].toString()),
                                       value: e['Breed_Version'].toString(),
                                       onTap: () {
                                         vaccinationPlanData[
                                                 'Breed_Version_Id'] =
                                             e['Breed_Version_Id'];
                                       },
+                                      child:
+                                          Text(e['Breed_Version'].toString()),
                                     );
                                   }).toList(),
                                   hint: const Text(
@@ -454,6 +660,10 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                       ),
                     ),
                   ),
+                  breedVersionValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, breedVersionValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Align(
@@ -594,11 +804,7 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                                               ? 'Enter primarily age in days'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue:
-                                          _singlevaccinationPlanDetails.isEmpty
-                                              ? ''
-                                              : _singlevaccinationPlanDetails[
-                                                  'Age'],
+                                      controller: ageController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -615,6 +821,12 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                             ),
                           ),
                         ),
+                        ageValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size,
+                                ageValidationMessage,
+                              ),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -648,11 +860,7 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                                               ? 'Enter vaccination name'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue:
-                                          _singlevaccinationPlanDetails.isEmpty
-                                              ? ''
-                                              : _singlevaccinationPlanDetails[
-                                                  'Vaccination_Name'],
+                                      controller: vaccinationNameController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -670,6 +878,10 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                             ),
                           ),
                         ),
+                        vaccinationNameValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, vaccinationNameValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -703,11 +915,7 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                                               ? 'Enter mode of administration'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue:
-                                          _singlevaccinationPlanDetails.isEmpty
-                                              ? ''
-                                              : _singlevaccinationPlanDetails[
-                                                  'Mode'],
+                                      controller: modeController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -724,6 +932,10 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                             ),
                           ),
                         ),
+                        modeValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, modeValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -757,11 +969,7 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                                               ? 'Enter Site of administration'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue:
-                                          _singlevaccinationPlanDetails.isEmpty
-                                              ? ''
-                                              : _singlevaccinationPlanDetails[
-                                                  'Site'],
+                                      controller: siteController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -778,6 +986,10 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                             ),
                           ),
                         ),
+                        siteValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, siteValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -811,11 +1023,7 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                                               ? 'Enter dosage per bird'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue:
-                                          _singlevaccinationPlanDetails.isEmpty
-                                              ? ''
-                                              : _singlevaccinationPlanDetails[
-                                                  'Dosage'],
+                                      controller: dosageController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -833,6 +1041,10 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                             ),
                           ),
                         ),
+                        dosageValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, dosageValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -866,11 +1078,7 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                                               ? 'Enter Dosage unit'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue:
-                                          _singlevaccinationPlanDetails.isEmpty
-                                              ? ''
-                                              : _singlevaccinationPlanDetails[
-                                                  'Dosage_Unit'],
+                                      controller: dosageUnitController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -888,6 +1096,10 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                             ),
                           ),
                         ),
+                        dosageUnitValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, dosageUnitValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -922,11 +1134,8 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                                               ? 'Enter vaccination storage temperature'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue:
-                                          _singlevaccinationPlanDetails.isEmpty
-                                              ? ''
-                                              : _singlevaccinationPlanDetails[
-                                                  'Vaccine_Store_Temperature'],
+                                      controller:
+                                          vaccineStoreTemperatureController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -945,6 +1154,10 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                             ),
                           ),
                         ),
+                        vaccineStoreTemperatureValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, vaccineStoreTemperatureValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -978,11 +1191,8 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                                               ? 'Enter description'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue:
-                                          _singlevaccinationPlanDetails.isEmpty
-                                              ? ''
-                                              : _singlevaccinationPlanDetails[
-                                                  'Descripption'],
+                                      controller:
+                                          vaccinationDescriptionController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -1000,6 +1210,10 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                             ),
                           ),
                         ),
+                        vaccinationDescriptionValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, vaccinationDescriptionValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(
@@ -1034,11 +1248,7 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                                               ? 'Enter notification prior to vaccine'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue:
-                                          _singlevaccinationPlanDetails.isEmpty
-                                              ? ''
-                                              : _singlevaccinationPlanDetails[
-                                                  'Notification_Prior_Days'],
+                                      controller: notificationPriorController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -1056,6 +1266,10 @@ class _EditVaccinationPlanDialogState extends State<EditVaccinationPlanDialog> {
                             ),
                           ),
                         ),
+                        notificationPriorValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, notificationPriorValidationMessage),
                         Consumer<ActivityApis>(
                             builder: (context, value, child) {
                           return ListView.builder(

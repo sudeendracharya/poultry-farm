@@ -75,6 +75,9 @@ class _AddActivityPlanDialogState extends State<AddActivityPlanDialog> {
     if (activityCodeController.text == '') {
       activityCodeValidationMessage = 'Activity Code cannot be empty';
       activityCodeValidation = false;
+    } else if (activityCodeController.text.length > 6) {
+      activityCodeValidationMessage = 'Activity Code cannot be greater then 6';
+      activityCodeValidation = false;
     } else {
       activityCodeValidation = true;
     }
@@ -94,19 +97,39 @@ class _AddActivityPlanDialogState extends State<AddActivityPlanDialog> {
     }
 
     if (sendData.isEmpty) {
-      if (ageController.text == '') {
+      if (ageController.text.isNum != true) {
+        ageValidationMessage = 'Ente a valid Age';
+        ageValidation = false;
+      } else if (ageController.text.length > 6) {
+        ageValidationMessage = 'Age cannot be greater then 6 characters';
+        ageValidation = false;
+      } else if (ageController.text == '') {
         ageValidationMessage = 'Age cannot be empty';
         ageValidation = false;
       } else {
         ageValidation = true;
       }
-      if (activityNameController.text == '') {
+
+      if (activityNameController.text.length > 16) {
+        activityNameValidationMessage =
+            'Activity name cannot be greater then 16 characters';
+        activityNameValidation = false;
+      } else if (activityNameController.text == '') {
         activityNameValidationMessage = 'Activity name cannot be empty';
         activityNameValidation = false;
       } else {
         activityNameValidation = true;
       }
-      if (notificationPriorController.text == '') {
+
+      if (notificationPriorController.text.isNum != true) {
+        notificationPriorValidationMessage =
+            'Enter a valid Notification prior to days';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text.length > 2) {
+        notificationPriorValidationMessage =
+            'Notification prior to days cannot be greater then 2 characters';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text == '') {
         notificationPriorValidationMessage =
             'Notification prior to days cannot be empty';
         notificationPriorValidation = false;
@@ -150,6 +173,7 @@ class _AddActivityPlanDialogState extends State<AddActivityPlanDialog> {
 
   @override
   void initState() {
+    activityCodeController.text = getRandom(3, 'A-');
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<ActivityApis>(context, listen: false)
@@ -663,7 +687,7 @@ class _AddActivityPlanDialogState extends State<AddActivityPlanDialog> {
                                 ),
                                 Container(
                                   width: size.width * 0.25,
-                                  height: 36,
+                                  height: 40,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
                                     color: Colors.white,
@@ -674,8 +698,8 @@ class _AddActivityPlanDialogState extends State<AddActivityPlanDialog> {
                                                 243, 60, 60, 1)),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 6),
+                                    padding: const EdgeInsets.only(
+                                        left: 12, bottom: 6),
                                     child: TextFormField(
                                       decoration: InputDecoration(
                                           hintText: activityPlanIdError == false

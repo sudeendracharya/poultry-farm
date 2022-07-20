@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../colors.dart';
+import '../../infrastructure/providers/infrastructure_apicalls.dart';
 import '../../main.dart';
 import '../../providers/apicalls.dart';
 import '../../screens/global_app_bar.dart';
@@ -12,6 +13,7 @@ import '../../screens/main_drawer_screen.dart';
 import '../../styles.dart';
 import '../../widgets/administration_search_widget.dart';
 import '../providers/logs_api.dart';
+import 'activity_logs_screen.dart';
 
 class VaccinationLogsScreen extends StatefulWidget {
   VaccinationLogsScreen({Key? key}) : super(key: key);
@@ -35,6 +37,24 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
 
   String searchQuery = '';
 
+  var batchPlanCode;
+
+  List firmList = [];
+
+  List plantList = [];
+
+  List warehouseList = [];
+
+  List batchCodeList = [];
+
+  var selectedFirmName;
+
+  var selectedPlantName;
+
+  var selectedWarehouseName;
+
+  var selectedBatchCode;
+
   @override
   void initState() {
     getPermission('Medication_Log').then((value) {
@@ -42,6 +62,11 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
       setState(() {
         loading = false;
       });
+    });
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getFirmDetails(token)
+          .then((value1) {});
     });
     super.initState();
   }
@@ -51,7 +76,7 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
       if (token != '') {
         Provider.of<LogsApi>(context, listen: false).logException.clear();
         Provider.of<LogsApi>(context, listen: false)
-            .getBatchPlanCodes(query, token);
+            .searchVaccinationNumbers(query, token);
       }
     });
   }
@@ -69,12 +94,12 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
     }
   }
 
-  void searchBook(String query) {
+  void searchBook(String batchPlanCode, var vaccinationNumber) {
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<LogsApi>(context, listen: false).logException.clear();
         Provider.of<LogsApi>(context, listen: false)
-            .getVaccinationLog(query, token);
+            .getVaccinationLog(batchPlanCode, vaccinationNumber, token);
       }
     });
   }
@@ -357,7 +382,8 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                             .then((value) {
                                           if (value == 202 || value == 204) {
                                             Get.back();
-                                            searchBook(searchQuery);
+                                            searchBook(
+                                                batchPlanCode, searchQuery);
                                           } else {
                                             failureSnackbar(
                                                 'Something went wrong unable to update the data');
@@ -414,7 +440,7 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                     }, token).then((value) {
                       if (value == 202 || value == 204) {
                         Get.back();
-                        searchBook(searchQuery);
+                        searchBook(batchPlanCode, searchQuery);
                       } else {
                         failureSnackbar(
                             'Something went wrong unable to update the data');
@@ -439,6 +465,7 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
     vaccinationLogDetails = Provider.of<LogsApi>(context).vaccinationLog;
     // print(size.width * 0.95);
     // print(size.height * 0.6);
+    firmList = Provider.of<InfrastructureApis>(context).firmDetails;
     return Scaffold(
       drawer: MainDrawer(controller: controller),
       appBar: GlobalAppBar(query: query, appbar: AppBar()),
@@ -497,7 +524,7 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                             child: Row(
                               children: [
                                 Text(
-                                  'Vaccination Log',
+                                  'Vaccination Record',
                                   style: ProjectStyles.contentHeaderStyle(),
                                 ),
                               ],
@@ -560,7 +587,8 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                               child: PaginatedDataTable(
                                 headingRowHeight: 25,
                                 header: Text(
-                                  vaccinationLogDetails['log'] == null
+                                  vaccinationLogDetails['log'] == null ||
+                                          vaccinationLogDetails['log'].isEmpty
                                       ? ''
                                       : vaccinationLogDetails['log'][0]
                                           ['Batch_Plan_Code'],
@@ -670,6 +698,74 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                             ),
                           ),
                           Positioned(
+                              top: size.height * 0.11,
+                              left: size.width * 0.2,
+                              child: const Text(
+                                'Or',
+                                style: TextStyle(fontSize: 18),
+                              )),
+                          Positioned(
+                            top: size.height * 0.1,
+                            left: size.width * 0.23,
+                            child: Container(
+                                width: size.width * 0.13,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: ElevatedButton(
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                                ProjectColors.themecolor)),
+                                    onPressed: () {
+                                      filterBasedOnPlant(
+                                          firmList,
+                                          plantList,
+                                          warehouseList,
+                                          batchCodeList,
+                                          selectedFirmName,
+                                          searchPlant,
+                                          selectedPlantName,
+                                          searchWareHouse,
+                                          selectedWarehouseName,
+                                          searchBatchCodes,
+                                          selectedBatchCode,
+                                          searchBook);
+                                    },
+                                    child: const Text('Filter Based on Plant'))
+                                // Padding(
+                                //   padding: const EdgeInsets.symmetric(
+                                //       horizontal: 12, vertical: 6),
+                                //   child: DropdownButtonHideUnderline(
+                                //     child: DropdownButton(
+                                //       isExpanded: true,
+                                //       value: selectedFirmName,
+                                //       items: firmList
+                                //           .map<DropdownMenuItem<String>>((e) {
+                                //         return DropdownMenuItem(
+                                //           value: e['Firm_Name'],
+                                //           onTap: () {
+                                //             searchPlant(e['Firm_Id']);
+                                //           },
+                                //           child:
+                                //               Text(e['Breed_Version'].toString()),
+                                //         );
+                                //       }).toList(),
+                                //       hint: const Text('Choose Firm'),
+                                //       onChanged: (value) {
+                                //         setState(() {
+                                //           selectedFirmName = value as String;
+                                //         });
+                                //       },
+                                //     ),
+                                //   ),
+                                // ),
+                                ),
+                          ),
+                          Positioned(
                             top: size.height * 0.1,
                             left: size.width * 0.004,
                             child: Column(
@@ -678,7 +774,8 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                   width: 253,
                                   child: AdministrationSearchWidget(
                                       search: (value) {
-                                        searchBook(query);
+                                        // searchBook(query);
+                                        //  searchBatchPlanCodes(value);
                                       },
                                       reFresh: (value) {
                                         setState(() {});
@@ -690,7 +787,7 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                         }
                                         query = value;
                                       },
-                                      hintText: 'Batch plan code'),
+                                      hintText: 'Vaccination Number'),
                                 ),
                                 const SizedBox(
                                   height: 5,
@@ -699,7 +796,8 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                     ? const SizedBox()
                                     : Consumer<LogsApi>(
                                         builder: (context, value, child) {
-                                          return value.batchPlanCodeList.isEmpty
+                                          return value.vaccinationNumbersList
+                                                  .isEmpty
                                               ? const SizedBox()
                                               : Container(
                                                   decoration: BoxDecoration(
@@ -712,7 +810,7 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                                   height: 200,
                                                   child: ListView.builder(
                                                     itemCount: value
-                                                        .batchPlanCodeList
+                                                        .vaccinationNumbersList
                                                         .length,
                                                     itemBuilder:
                                                         (BuildContext context,
@@ -720,22 +818,29 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                                       return ListTile(
                                                         key: UniqueKey(),
                                                         onTap: () {
-                                                          searchBook(value
-                                                                      .batchPlanCodeList[
-                                                                  index][
-                                                              'Batch_Plan_Code']);
+                                                          searchBook(
+                                                              value.vaccinationNumbersList[
+                                                                      index][
+                                                                  'Batch_Plan_Code'],
+                                                              value.vaccinationNumbersList[
+                                                                      index][
+                                                                  'Vaccination_Activity_Number']);
                                                           setState(() {
                                                             searchQuery = value
-                                                                        .batchPlanCodeList[
+                                                                        .vaccinationNumbersList[
                                                                     index][
-                                                                'Batch_Plan_Code'];
+                                                                'Vaccination_Activity_Number'];
+                                                            batchPlanCode =
+                                                                value.vaccinationNumbersList[
+                                                                        index][
+                                                                    'Batch_Plan_Code'];
                                                             query = '';
                                                           });
                                                         },
                                                         title: Text(value
-                                                                    .batchPlanCodeList[
+                                                                    .vaccinationNumbersList[
                                                                 index][
-                                                            'Batch_Plan_Code']),
+                                                            'Vaccination_Activity_Number']),
                                                       );
                                                     },
                                                   ),
@@ -745,12 +850,105 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                               ],
                             ),
                           ),
+                          Positioned(
+                              top: size.height * 0.11,
+                              left: size.width * 0.2,
+                              child: const Text(
+                                'Or',
+                                style: TextStyle(fontSize: 18),
+                              )),
+                          Positioned(
+                            top: size.height * 0.1,
+                            left: size.width * 0.23,
+                            child: Container(
+                                width: size.width * 0.13,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: ElevatedButton(
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                                ProjectColors.themecolor)),
+                                    onPressed: () {
+                                      filterBasedOnPlant(
+                                          firmList,
+                                          plantList,
+                                          warehouseList,
+                                          batchCodeList,
+                                          selectedFirmName,
+                                          searchPlant,
+                                          selectedPlantName,
+                                          searchWareHouse,
+                                          selectedWarehouseName,
+                                          searchBatchCodes,
+                                          selectedBatchCode,
+                                          searchBook);
+                                    },
+                                    child: const Text('Filter Based on Plant'))
+                                // Padding(
+                                //   padding: const EdgeInsets.symmetric(
+                                //       horizontal: 12, vertical: 6),
+                                //   child: DropdownButtonHideUnderline(
+                                //     child: DropdownButton(
+                                //       isExpanded: true,
+                                //       value: selectedFirmName,
+                                //       items: firmList
+                                //           .map<DropdownMenuItem<String>>((e) {
+                                //         return DropdownMenuItem(
+                                //           value: e['Firm_Name'],
+                                //           onTap: () {
+                                //             searchPlant(e['Firm_Id']);
+                                //           },
+                                //           child:
+                                //               Text(e['Breed_Version'].toString()),
+                                //         );
+                                //       }).toList(),
+                                //       hint: const Text('Choose Firm'),
+                                //       onChanged: (value) {
+                                //         setState(() {
+                                //           selectedFirmName = value as String;
+                                //         });
+                                //       },
+                                //     ),
+                                //   ),
+                                // ),
+                                ),
+                          )
                         ],
                       ),
                     ),
                   ),
                 ),
     );
+  }
+
+  void searchPlant(e) {
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getPlantDetails(token, e)
+          .then((value1) {});
+    });
+  }
+
+  void searchWareHouse(e) {
+    print('id $e');
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getWarehouseDetailsForAll(e, token)
+          .then((value1) {});
+    });
+  }
+
+  void searchBatchCodes(e) {
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getBatchCodeDetails(e, token)
+          .then((value1) {});
+    });
   }
 }
 

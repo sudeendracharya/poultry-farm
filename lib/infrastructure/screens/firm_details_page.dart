@@ -55,7 +55,7 @@ class _FirmDetailsPageState extends State<FirmDetailsPage> {
 
   var count = 0;
 
-  List temp = [];
+  List selectedPlantList = [];
 
   @override
   void initState() {
@@ -388,8 +388,7 @@ class _FirmDetailsPageState extends State<FirmDetailsPage> {
                                 direction: AxisDirection.right);
                           },
                           icon: const Icon(Icons.add)),
-                      count == 1 && selected == true ||
-                              count == 1 && selected == false
+                      selectedPlantList.length == 1
                           ? IconButton(
                               onPressed: () {
                                 showGlobalDrawer(
@@ -397,20 +396,28 @@ class _FirmDetailsPageState extends State<FirmDetailsPage> {
                                     builder: (ctx) => AddPlantDetails(
                                           firmId: _firmId,
                                           reFresh: update,
-                                          pinCode: temp[0]['Plant_Pincode']
+                                          pinCode: selectedPlantList[0]
+                                                  ['Plant_Pincode']
                                               .toString(),
-                                          plantAddressLine1: temp[0]
-                                              ['Plant_Address_Line_1'],
-                                          plantAddressLine2: temp[0]
-                                              ['Plant_Address_Line_2'],
-                                          plantCode:
-                                              temp[0]['Plant_Code'].toString(),
-                                          plantDistrict: temp[0]
+                                          plantAddressLine1:
+                                              selectedPlantList[0]
+                                                  ['Plant_Address_Line_1'],
+                                          plantAddressLine2:
+                                              selectedPlantList[0]
+                                                  ['Plant_Address_Line_2'],
+                                          plantCode: selectedPlantList[0]
+                                                  ['Plant_Code']
+                                              .toString(),
+                                          plantDistrict: selectedPlantList[0]
                                               ['Plant_District'],
-                                          plantId: temp[0]['Plant_Id'],
-                                          plantName: temp[0]['Plant_Name'],
-                                          plantState: temp[0]['Plant_State'],
-                                          plantTaluk: temp[0]['Plant_Taluk'],
+                                          plantId: selectedPlantList[0]
+                                              ['Plant_Id'],
+                                          plantName: selectedPlantList[0]
+                                              ['Plant_Name'],
+                                          plantState: selectedPlantList[0]
+                                              ['Plant_State'],
+                                          plantTaluk: selectedPlantList[0]
+                                              ['Plant_Taluk'],
                                           update: true,
                                         ),
                                     direction: AxisDirection.right);
@@ -418,10 +425,10 @@ class _FirmDetailsPageState extends State<FirmDetailsPage> {
                               icon: const Icon(Icons.edit),
                             )
                           : const SizedBox(),
-                      selected == true || count >= 1
+                      selectedPlantList.isNotEmpty
                           ? IconButton(
                               onPressed: () {
-                                if (temp.isEmpty) {
+                                if (selectedPlantList.isEmpty) {
                                   Get.showSnackbar(GetSnackBar(
                                     duration: const Duration(seconds: 2),
                                     backgroundColor:
@@ -432,7 +439,7 @@ class _FirmDetailsPageState extends State<FirmDetailsPage> {
                                   ));
                                 } else {
                                   List plantIds = [];
-                                  for (var data in temp) {
+                                  for (var data in selectedPlantList) {
                                     plantIds.add(data['Plant_Id']);
                                   }
                                   Provider.of<Apicalls>(context, listen: false)
@@ -507,11 +514,9 @@ class _FirmDetailsPageState extends State<FirmDetailsPage> {
                                       data['Selected'] = value;
                                       selected = value!;
                                       if (value == true) {
-                                        count = count + 1;
-                                        temp.add(data);
+                                        selectedPlantList.add(data);
                                       } else {
-                                        temp.remove(data);
-                                        count = count - 1;
+                                        selectedPlantList.remove(data);
                                       }
                                     });
                                   },

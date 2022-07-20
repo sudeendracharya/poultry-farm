@@ -254,7 +254,7 @@ class _SecondaryDashBoardScreenState extends State<SecondaryDashBoardScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(
-                    'Dashboard: ${firmName},${plantName}',
+                    'Dashboard: ${firmName}',
                     style: GoogleFonts.roboto(
                         textStyle: const TextStyle(
                       fontWeight: FontWeight.w700,

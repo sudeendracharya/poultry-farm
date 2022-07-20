@@ -68,7 +68,8 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
   TextEditingController dosageController = TextEditingController();
   TextEditingController dosageUnitController = TextEditingController();
   TextEditingController notificationPriorController = TextEditingController();
-
+  TextEditingController medicationDescriptionController =
+      TextEditingController();
   bool medicationCodeValidation = true;
   bool recommendedByValidation = true;
   bool breedVersionValidation = true;
@@ -79,6 +80,7 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
   bool dosageValidation = true;
   bool dosageUnitValidation = true;
   bool notificationPriorValidation = true;
+  bool medicationDescriptionValidation = true;
 
   String medicationCodeValidationMessage = '';
   String recommendedByValidationMessage = '';
@@ -90,6 +92,7 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
   String dosageValidationMessage = '';
   String dosageUnitValidationMessage = '';
   String notificationPriorValidationMessage = '';
+  String medicationDescriptionValidationMessage = '';
 
   var breedVersionId;
   bool fileSelected = false;
@@ -102,6 +105,10 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
   bool validate() {
     if (mediactionCodeController.text == '') {
       medicationCodeValidationMessage = 'Medication code cannot be empty';
+      medicationCodeValidation = false;
+    } else if (mediactionCodeController.text.length > 9) {
+      medicationCodeValidationMessage =
+          'Medication code cannot contain more then 9 characters';
       medicationCodeValidation = false;
     } else {
       medicationCodeValidation = true;
@@ -120,7 +127,13 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
     }
 
     if (sendData.isEmpty) {
-      if (ageController.text == '') {
+      if (ageController.text.isNum != true) {
+        ageValidationMessage = 'Enter a valid Age';
+        ageValidation = false;
+      } else if (ageController.text.length > 6) {
+        ageValidationMessage = 'Age Cannot contain more then 6 characters';
+        ageValidation = false;
+      } else if (ageController.text == '') {
         ageValidationMessage = 'Age cannot be empty';
         ageValidation = false;
       } else {
@@ -128,6 +141,10 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
       }
       if (mediactionNameController.text == '') {
         medicationNameValidationMessage = 'Medication name cannot be empty';
+        medicationNameValidation = false;
+      } else if (mediactionNameController.text.length > 12) {
+        medicationNameValidationMessage =
+            'Medication name cannot contain more then 12 characters';
         medicationNameValidation = false;
       } else {
         medicationNameValidation = true;
@@ -156,7 +173,16 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
       } else {
         dosageUnitValidation = true;
       }
-      if (notificationPriorController.text == '') {
+
+      if (notificationPriorController.text.isNum != true) {
+        notificationPriorValidationMessage =
+            'Enter a valid Notification prior to days';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text.length > 2) {
+        notificationPriorValidationMessage =
+            'Notification prior to days Cannot contain more then 2 characters';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text == '') {
         notificationPriorValidationMessage =
             'Notification prior to days cannot be empty';
         notificationPriorValidation = false;
@@ -164,6 +190,16 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
         notificationPriorValidation = true;
       }
 
+      if (medicationDescriptionController.text == '') {
+        medicationDescriptionValidationMessage = 'Description cannot be empty';
+        medicationDescriptionValidation = false;
+      } else if (medicationDescriptionController.text.length > 30) {
+        medicationDescriptionValidationMessage =
+            'Description cannot contain more then 30 characters';
+        medicationDescriptionValidation = false;
+      } else {
+        medicationDescriptionValidation = true;
+      }
       if (medicationCodeValidation == true &&
           recommendedByValidation == true &&
           breedVersionValidation == true &&
@@ -204,6 +240,7 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
 
   @override
   void initState() {
+    mediactionCodeController.text = getRandom(3, 'M-');
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<ActivityApis>(context, listen: false)
@@ -591,13 +628,13 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
                                   items: breedVersion
                                       .map<DropdownMenuItem<String>>((e) {
                                     return DropdownMenuItem(
-                                      child:
-                                          Text(e['Breed_Version'].toString()),
                                       value: e['Breed_Version'].toString(),
                                       onTap: () {
                                         medicationPlanData['Breed_Version_Id'] =
                                             e['Breed_Version_Id'];
                                       },
+                                      child:
+                                          Text(e['Breed_Version'].toString()),
                                     );
                                   }).toList(),
                                   hint: const Text(
@@ -1050,6 +1087,8 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 6),
                                     child: TextFormField(
+                                      controller:
+                                          medicationDescriptionController,
                                       decoration: InputDecoration(
                                           hintText: activityPlanIdError == false
                                               ? 'Enter description'
@@ -1066,6 +1105,10 @@ class _AddMedicationPlanDialogState extends State<AddMedicationPlanDialog> {
                             ),
                           ),
                         ),
+                        medicationDescriptionValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, medicationDescriptionValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(

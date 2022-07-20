@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/instance_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:poultry_login_signup/main.dart';
 import 'package:poultry_login_signup/providers/apicalls.dart';
 import 'package:poultry_login_signup/infrastructure/providers/infrastructure_apicalls.dart';
 
 import 'package:poultry_login_signup/widgets/administration_search_widget.dart';
+import 'package:poultry_login_signup/widgets/modular_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_html/html.dart';
 
 import '../widgets/add_firm_details_dialog.dart';
 import 'firm_details_page.dart';
@@ -26,7 +29,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   List firmDetails = [];
   var selected = false;
 
-  var selectedFirmId;
+  List selectedFirmId = [];
 
   var _firmId;
 
@@ -72,13 +75,15 @@ class _AdministrationPageState extends State<AdministrationPage> {
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
       Provider.of<InfrastructureApis>(context, listen: false)
-          .deleteFirmDetails(selectedFirmId, token)
+          .deleteFirmDetails(selectedFirmId[0], token)
           .then((value1) {
         if (value1 == 204) {
-          Provider.of<InfrastructureApis>(context, listen: false)
-              .getFirmDetails(token)
-              .then((value1) {});
-        } else {}
+          selectedFirmId.clear();
+          successSnackbar('Firm Deleted Successfully');
+          update(100);
+        } else {
+          failureSnackbar('Something went wrong unable to delete the firm');
+        }
       });
     });
   }
@@ -94,7 +99,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
 
   void searchBook(String query) {
     final searchOutput = firmDetails.where((customer) {
-      final firmName = customer['Firm_Name'];
+      final firmName = customer['Firm_Name'].toString().toLowerCase();
 
       final searchName = query.toLowerCase();
 
@@ -206,12 +211,17 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         const SizedBox(
                           width: 10,
                         ),
-                        IconButton(
-                          onPressed: () {
-                            delete();
-                          },
-                          icon: const Icon(Icons.delete),
-                        ),
+                        selectedFirmId.length == 1
+                            ? IconButton(
+                                onPressed: () {
+                                  ModularWidgets.deleteDialog(
+                                      'Are you sure want to delete the selected Firm',
+                                      delete);
+                                  // delete();
+                                },
+                                icon: const Icon(Icons.delete),
+                              )
+                            : const SizedBox(),
                       ],
                     ),
                   ),
@@ -229,7 +239,29 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     // panEnabled: false,
                     scaleEnabled: false,
                     child: DataTable(
-                        onSelectAll: (value) {},
+                        onSelectAll: (value) {
+                          print(value);
+                          if (value == true) {
+                            for (var data in list) {
+                              if (data['Is_Selected'] == false) {
+                                data['Is_Selected'] = true;
+                                selectedFirmId.add(data['Firm_Id']);
+                              }
+                            }
+                            print(selectedFirmId);
+                            setState(() {});
+                          } else {
+                            for (var data in list) {
+                              if (data['Is_Selected'] == true) {
+                                data['Is_Selected'] = false;
+                              }
+
+                              // selectedFirmId.add(data['Firm_Id']);
+                            }
+                            selectedFirmId.clear();
+                            setState(() {});
+                          }
+                        },
                         showCheckboxColumn: true,
                         columnSpacing: width <= 770 ? 45 : width * 0.09765625,
                         headingTextStyle: GoogleFonts.roboto(
@@ -259,7 +291,14 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                     onSelectChanged: (value) {
                                       setState(() {
                                         data['Is_Selected'] = value!;
-                                        selectedFirmId = data['Firm_Id'];
+                                        if (value == true) {
+                                          selectedFirmId.add(data['Firm_Id']);
+                                          print(selectedFirmId);
+                                        } else {
+                                          selectedFirmId
+                                              .remove(data['Firm_Id']);
+                                          print(selectedFirmId);
+                                        }
                                       });
                                     },
                                     cells: <DataCell>[

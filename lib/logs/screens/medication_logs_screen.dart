@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../colors.dart';
+import '../../infrastructure/providers/infrastructure_apicalls.dart';
 import '../../main.dart';
 import '../../providers/apicalls.dart';
 import '../../screens/global_app_bar.dart';
@@ -12,6 +13,7 @@ import '../../screens/main_drawer_screen.dart';
 import '../../styles.dart';
 import '../../widgets/administration_search_widget.dart';
 import '../providers/logs_api.dart';
+import 'activity_logs_screen.dart';
 
 class MedicationLogsScreen extends StatefulWidget {
   MedicationLogsScreen({Key? key}) : super(key: key);
@@ -33,6 +35,23 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
 
   String searchQuery = '';
 
+  var batchPlanCode;
+
+  List firmList = [];
+
+  List plantList = [];
+
+  List warehouseList = [];
+
+  List batchCodeList = [];
+
+  var selectedFirmName;
+
+  var selectedPlantName;
+
+  var selectedWarehouseName;
+
+  var selectedBatchCode;
   @override
   void initState() {
     getPermission('Medication_Log').then((value) {
@@ -40,6 +59,11 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
       setState(() {
         loading = false;
       });
+    });
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getFirmDetails(token)
+          .then((value1) {});
     });
     super.initState();
   }
@@ -49,7 +73,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
       if (token != '') {
         Provider.of<LogsApi>(context, listen: false).logException.clear();
         Provider.of<LogsApi>(context, listen: false)
-            .getBatchPlanCodes(query, token);
+            .searchMedicationNumbers(query, token);
       }
     });
   }
@@ -67,12 +91,12 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
     }
   }
 
-  void searchBook(String query) {
+  void searchBook(String query, var medicationNumber) {
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<LogsApi>(context, listen: false).logException.clear();
         Provider.of<LogsApi>(context, listen: false)
-            .getMedicationLog(query, token);
+            .getMedicationLog(query, medicationNumber, token);
       }
     });
   }
@@ -82,7 +106,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
   GlobalKey<FormState> _formKey = GlobalKey();
 
   void updateCheckBox(Map<String, dynamic> data) {
-    var size = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).size;
+    var size = MediaQueryData.fromWindow(WidgetsBinding.instance.window).size;
     print(size.width);
     print(size.height);
     if (data['Status'] == 'not_started') {
@@ -353,7 +377,8 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                           .then((value) {
                                         if (value == 202 || value == 204) {
                                           Get.back();
-                                          searchBook(searchQuery);
+                                          searchBook(
+                                              batchPlanCode, searchQuery);
                                         } else {
                                           failureSnackbar(
                                               'Something went wrong unable to update the data');
@@ -417,7 +442,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                     }, token).then((value) {
                       if (value == 202 || value == 204) {
                         Get.back();
-                        searchBook(searchQuery);
+                        searchBook(batchPlanCode, searchQuery);
                       } else {
                         Get.back();
                         failureSnackbar(
@@ -442,6 +467,8 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
     var size = MediaQuery.of(context).size;
     final breadCrumpsStyle = Theme.of(context).textTheme.headline4;
     medicationLogDetails = Provider.of<LogsApi>(context).medicationLog;
+    firmList = Provider.of<InfrastructureApis>(context).firmDetails;
+
     return Scaffold(
       drawer: MainDrawer(controller: controller),
       appBar: GlobalAppBar(query: query, appbar: AppBar()),
@@ -495,12 +522,80 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                           //   height: 18,
                           // ),
                           Positioned(
+                              top: size.height * 0.11,
+                              left: size.width * 0.2,
+                              child: const Text(
+                                'Or',
+                                style: TextStyle(fontSize: 18),
+                              )),
+                          Positioned(
+                            top: size.height * 0.1,
+                            left: size.width * 0.23,
+                            child: Container(
+                                width: size.width * 0.13,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: ElevatedButton(
+                                    style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                                ProjectColors.themecolor)),
+                                    onPressed: () {
+                                      filterBasedOnPlant(
+                                          firmList,
+                                          plantList,
+                                          warehouseList,
+                                          batchCodeList,
+                                          selectedFirmName,
+                                          searchPlant,
+                                          selectedPlantName,
+                                          searchWareHouse,
+                                          selectedWarehouseName,
+                                          searchBatchCodes,
+                                          selectedBatchCode,
+                                          searchBook);
+                                    },
+                                    child: const Text('Filter Based on Plant'))
+                                // Padding(
+                                //   padding: const EdgeInsets.symmetric(
+                                //       horizontal: 12, vertical: 6),
+                                //   child: DropdownButtonHideUnderline(
+                                //     child: DropdownButton(
+                                //       isExpanded: true,
+                                //       value: selectedFirmName,
+                                //       items: firmList
+                                //           .map<DropdownMenuItem<String>>((e) {
+                                //         return DropdownMenuItem(
+                                //           value: e['Firm_Name'],
+                                //           onTap: () {
+                                //             searchPlant(e['Firm_Id']);
+                                //           },
+                                //           child:
+                                //               Text(e['Breed_Version'].toString()),
+                                //         );
+                                //       }).toList(),
+                                //       hint: const Text('Choose Firm'),
+                                //       onChanged: (value) {
+                                //         setState(() {
+                                //           selectedFirmName = value as String;
+                                //         });
+                                //       },
+                                //     ),
+                                //   ),
+                                // ),
+                                ),
+                          ),
+                          Positioned(
                             top: size.height * 0.05,
                             left: 10,
                             child: Row(
                               children: [
                                 Text(
-                                  'Medication Log',
+                                  'Medication Record',
                                   style: ProjectStyles.contentHeaderStyle(),
                                 ),
                               ],
@@ -563,7 +658,8 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                 headingRowHeight: 25,
 
                                 header: Text(
-                                  medicationLogDetails['log'] == null
+                                  medicationLogDetails['log'] == null ||
+                                          medicationLogDetails['log'].isEmpty
                                       ? ''
                                       : medicationLogDetails['log'][0]
                                           ['Batch_Plan_Code'],
@@ -661,7 +757,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                   width: 253,
                                   child: AdministrationSearchWidget(
                                       search: (value) {
-                                        searchBook(query);
+                                        searchBook(batchPlanCode, query);
                                       },
                                       reFresh: (value) {
                                         setState(() {});
@@ -673,7 +769,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                         }
                                         query = value;
                                       },
-                                      hintText: 'Batch Plan code'),
+                                      hintText: 'Medication Number'),
                                 ),
                                 const SizedBox(
                                   height: 5,
@@ -682,7 +778,8 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                     ? const SizedBox()
                                     : Consumer<LogsApi>(
                                         builder: (context, value, child) {
-                                          return value.batchPlanCodeList.isEmpty
+                                          return value
+                                                  .medicationNumbersList.isEmpty
                                               ? const SizedBox()
                                               : Container(
                                                   decoration: BoxDecoration(
@@ -695,7 +792,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                                   height: 200,
                                                   child: ListView.builder(
                                                     itemCount: value
-                                                        .batchPlanCodeList
+                                                        .medicationNumbersList
                                                         .length,
                                                     itemBuilder:
                                                         (BuildContext context,
@@ -703,22 +800,29 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                                       return ListTile(
                                                         key: UniqueKey(),
                                                         onTap: () {
-                                                          searchBook(value
-                                                                      .batchPlanCodeList[
-                                                                  index][
-                                                              'Batch_Plan_Code']);
+                                                          searchBook(
+                                                              value.medicationNumbersList[
+                                                                      index][
+                                                                  'Batch_Plan_Code'],
+                                                              value.medicationNumbersList[
+                                                                      index][
+                                                                  'Medication_Activity_Number']);
                                                           setState(() {
                                                             searchQuery = value
-                                                                        .batchPlanCodeList[
+                                                                        .medicationNumbersList[
                                                                     index][
-                                                                'Batch_Plan_Code'];
+                                                                'Medication_Activity_Number'];
+                                                            batchPlanCode =
+                                                                value.medicationNumbersList[
+                                                                        index][
+                                                                    'Batch_Plan_Code'];
                                                             query = '';
                                                           });
                                                         },
                                                         title: Text(value
-                                                                    .batchPlanCodeList[
+                                                                    .medicationNumbersList[
                                                                 index][
-                                                            'Batch_Plan_Code']),
+                                                            'Medication_Activity_Number']),
                                                       );
                                                     },
                                                   ),
@@ -734,6 +838,31 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                   ),
                 ),
     );
+  }
+
+  void searchPlant(e) {
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getPlantDetails(token, e)
+          .then((value1) {});
+    });
+  }
+
+  void searchWareHouse(e) {
+    print('id $e');
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getWarehouseDetailsForAll(e, token)
+          .then((value1) {});
+    });
+  }
+
+  void searchBatchCodes(e) {
+    fetchCredientials().then((token) {
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getBatchCodeDetails(e, token)
+          .then((value1) {});
+    });
   }
 }
 

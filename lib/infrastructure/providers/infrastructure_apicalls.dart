@@ -24,6 +24,8 @@ class InfrastructureApis with ChangeNotifier {
   List _WareHouseSectionLists = [];
 
   List infrastructureException = [];
+
+  var _batchCodeDetails = [];
   InfrastructureApis([this.token]);
   List _firmDetails = [];
   List _plantDetails = [];
@@ -44,6 +46,10 @@ class InfrastructureApis with ChangeNotifier {
 
   List get infrastructureExceptionData {
     return infrastructureException;
+  }
+
+  List get batchCodeDetails {
+    return _batchCodeDetails;
   }
 
   List get singleFirmDetails {
@@ -1141,6 +1147,38 @@ class InfrastructureApis with ChangeNotifier {
       _warehouseDetails = temp;
       // log(_warehouseDetails.toString());
       notifyListeners();
+      return response.statusCode;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<int> getBatchCodeDetails(
+    var wareHouseId,
+    var token,
+  ) async {
+    log(wareHouseId.toString());
+    //log(data.toString());
+    final url = Uri.parse('${baseUrl}batch-plan/get-batch-code/$wareHouseId/');
+    try {
+      final response = await http.get(
+        url,
+        headers: <String, String>{
+          "Content-Type": "application/json; charset=UTF-8",
+          "Authorization": 'Token $token'
+        },
+      );
+      print(response.statusCode);
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+        _batchCodeDetails = responseData;
+        notifyListeners();
+      }
+
+      // log(_warehouseDetails.toString());
+
       return response.statusCode;
     } catch (e) {
       rethrow;

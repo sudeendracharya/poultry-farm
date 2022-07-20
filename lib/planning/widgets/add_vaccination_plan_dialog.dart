@@ -74,6 +74,8 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
   TextEditingController vaccineStoreTemperatureController =
       TextEditingController();
   TextEditingController notificationPriorController = TextEditingController();
+  TextEditingController vaccinationDescriptionController =
+      TextEditingController();
 
   bool vaccinationCodeValidation = true;
   bool recommendedByValidation = true;
@@ -86,6 +88,7 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
   bool dosageUnitValidation = true;
   bool vaccineStoreTemperatureValidation = true;
   bool notificationPriorValidation = true;
+  bool vaccinationDescriptionValidation = true;
 
   String vaccinationCodeValidationMessage = '';
   String recommendedByValidationMessage = '';
@@ -98,10 +101,15 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
   String dosageUnitValidationMessage = '';
   String vaccineStoreTemperatureValidationMessage = '';
   String notificationPriorValidationMessage = '';
+  String vaccinationDescriptionValidationMessage = '';
 
   bool validate() {
     if (vaccinationCodeController.text == '') {
       vaccinationCodeValidationMessage = 'Vaccination code cannot be empty';
+      vaccinationCodeValidation = false;
+    } else if (vaccinationCodeController.text.length > 9) {
+      vaccinationCodeValidationMessage =
+          'Vaccination code cannot be greater then 9 characters';
       vaccinationCodeValidation = false;
     } else {
       vaccinationCodeValidation = true;
@@ -120,14 +128,24 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
     }
 
     if (sendData.isEmpty) {
-      if (ageController.text == '') {
+      if (ageController.text.isNum != true) {
+        ageValidationMessage = 'Enter a valid age';
+        ageValidation = false;
+      } else if (ageController.text == '') {
         ageValidationMessage = 'Age cannot be empty';
+        ageValidation = false;
+      } else if (ageController.text.length > 6) {
+        ageValidationMessage = 'Age Cannot be greater then 6 characters';
         ageValidation = false;
       } else {
         ageValidation = true;
       }
       if (vaccinationNameController.text == '') {
         vaccinationNameValidationMessage = 'Vaccination name cannot be empty';
+        vaccinationNameValidation = false;
+      } else if (vaccinationNameController.text.length > 12) {
+        vaccinationNameValidationMessage =
+            'Vaccination name cannot be greater then 12 characters';
         vaccinationNameValidation = false;
       } else {
         vaccinationNameValidation = true;
@@ -144,13 +162,19 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
       } else {
         siteValidation = true;
       }
-      if (dosageController.text == '') {
+      if (dosageController.text.isNum != true) {
+        dosageValidationMessage = 'Enter a Valid Dosage per bird';
+        dosageValidation = false;
+      } else if (dosageController.text == '') {
         dosageValidationMessage = 'Dosage per bird cannot be empty';
         dosageValidation = false;
       } else {
         dosageValidation = true;
       }
-      if (dosageUnitController.text == '') {
+      if (dosageUnitController.text.isNotEmpty != true) {
+        dosageUnitValidationMessage = 'Enter a valid Dosage unit';
+        dosageUnitValidation = false;
+      } else if (dosageUnitController.text == '') {
         dosageUnitValidationMessage = 'Dosage unit cannot be empty';
         dosageUnitValidation = false;
       } else {
@@ -163,12 +187,32 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
       } else {
         vaccineStoreTemperatureValidation = true;
       }
-      if (notificationPriorController.text == '') {
+
+      if (notificationPriorController.text.isNum != true) {
+        notificationPriorValidationMessage =
+            'Enter a valid Notification Prior to days ';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text.length > 2) {
+        notificationPriorValidationMessage =
+            'Notification Prior to days cannot be greater then 2 characters ';
+        notificationPriorValidation = false;
+      } else if (notificationPriorController.text == '') {
         notificationPriorValidationMessage =
             'Notification Prior to days cannot be empty';
         notificationPriorValidation = false;
       } else {
         notificationPriorValidation = true;
+      }
+
+      if (vaccinationDescriptionController.text == '') {
+        vaccinationDescriptionValidation = false;
+        vaccinationDescriptionValidationMessage = 'Description cannot be empty';
+      } else if (vaccinationDescriptionController.text.length > 30) {
+        vaccinationDescriptionValidation = false;
+        vaccinationDescriptionValidationMessage =
+            'Description cannot contain more then 30 characters';
+      } else {
+        vaccinationDescriptionValidation = true;
       }
 
       if (vaccinationCodeValidation == true &&
@@ -181,7 +225,8 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
           dosageValidation == true &&
           dosageUnitValidation == true &&
           vaccineStoreTemperatureValidation == true &&
-          notificationPriorValidation == true) {
+          notificationPriorValidation == true &&
+          vaccinationDescriptionValidation == true) {
         return true;
       } else {
         return false;
@@ -220,6 +265,7 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
 
   @override
   void initState() {
+    vaccinationCodeController.text = getRandom(3, 'V-');
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<ActivityApis>(context, listen: false)
@@ -615,14 +661,14 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
                                   items: breedVersion
                                       .map<DropdownMenuItem<String>>((e) {
                                     return DropdownMenuItem(
-                                      child:
-                                          Text(e['Breed_Version'].toString()),
                                       value: e['Breed_Version'].toString(),
                                       onTap: () {
                                         vaccinationPlanData[
                                                 'Breed_Version_Id'] =
                                             e['Breed_Version_Id'];
                                       },
+                                      child:
+                                          Text(e['Breed_Version'].toString()),
                                     );
                                   }).toList(),
                                   hint: const Text(
@@ -1129,7 +1175,8 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
                                               ? 'Enter description'
                                               : '',
                                           border: InputBorder.none),
-                                      initialValue: '',
+                                      controller:
+                                          vaccinationDescriptionController,
                                       validator: (value) {
                                         if (value!.isEmpty) {
                                           // showError('FirmCode');
@@ -1147,6 +1194,10 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
                             ),
                           ),
                         ),
+                        vaccinationDescriptionValidation == true
+                            ? const SizedBox()
+                            : ModularWidgets.validationDesign(
+                                size, vaccinationDescriptionValidationMessage),
                         Padding(
                           padding: const EdgeInsets.only(top: 24.0),
                           child: Align(

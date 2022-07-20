@@ -217,7 +217,7 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
 
     getFirmData().then((value) {
       wareHouseDetails['Firm_Id'] = _firmId;
-      wareHouseDetails['Plant_Id'] = _plantId;
+      fechplantList(_firmId);
     });
     if (widget.index != null) {
       index = widget.index;
@@ -297,7 +297,7 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
             as Map<String, dynamic>;
 
     _firmId = extratedUserData['FirmId'];
-    _plantId = extratedUserData['PlantId'];
+    // _plantId = extratedUserData['PlantId'];
   }
 
   void getPlantName() async {
@@ -994,6 +994,62 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
                 )
               ],
             ),
+            Padding(
+              padding: const EdgeInsets.only(top: 24.0),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 440,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Plant Name'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Container(
+                      width: 440,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white,
+                        border: Border.all(color: Colors.black26),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton(
+                            value: plantId,
+                            items: plantList.map<DropdownMenuItem<String>>((e) {
+                              return DropdownMenuItem(
+                                value: e['Plant_Name'],
+                                onTap: () {
+                                  wareHouseDetails['Plant_Id'] = e['Plant_Id'];
+                                },
+                                child: Text(e['Plant_Name']),
+                              );
+                            }).toList(),
+                            hint: const Text('Choose Plant Name'),
+                            onChanged: (value) {
+                              setState(() {
+                                plantId = value as String;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
             Padding(
               padding: const EdgeInsets.only(top: 24.0),
@@ -1053,7 +1109,6 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
                             items: warehouseCategory
                                 .map<DropdownMenuItem<String>>((e) {
                               return DropdownMenuItem(
-                                child: Text(e['WareHouse_Category_Name']),
                                 value: e['WareHouse_Category_Name'],
                                 onTap: () {
                                   wareHouseDetails['WareHouse_Category_Id'] =
@@ -1062,6 +1117,7 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
                                       e['WareHouse_Category_Id']);
                                   warehouseSubCategoryId = null;
                                 },
+                                child: Text(e['WareHouse_Category_Name']),
                               );
                             }).toList(),
                             hint: const Text('Choose WareHouse Category Name'),
@@ -1078,6 +1134,7 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
                 ),
               ),
             ),
+
             categoryError == false
                 ? const SizedBox()
                 : showErrorWidget(
@@ -1138,13 +1195,13 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
                             items: warehouseSubCategory
                                 .map<DropdownMenuItem<String>>((e) {
                               return DropdownMenuItem(
-                                child: Text(e['WareHouse_Sub_Category_Name']),
                                 value: e['WareHouse_Sub_Category_Name'],
                                 onTap: () {
                                   wareHouseDetails[
                                           'WareHouse_Sub_Category_Id'] =
                                       e['WareHouse_Sub_Category_Id'];
                                 },
+                                child: Text(e['WareHouse_Sub_Category_Name']),
                               );
                             }).toList(),
                             hint: const Text(
@@ -1807,7 +1864,6 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
                           items: wareHouseSectionDetailsList
                               .map<DropdownMenuItem<String>>((e) {
                             return DropdownMenuItem(
-                              child: Text(e['WareHouse_Section_Code']),
                               value: e['WareHouse_Section_Code'],
                               onTap: () {
                                 if (lineCount == 0) {
@@ -1858,6 +1914,7 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
                                   });
                                 }
                               },
+                              child: Text(e['WareHouse_Section_Code']),
                             );
                           }).toList(),
                           hint: const Text('Select'),

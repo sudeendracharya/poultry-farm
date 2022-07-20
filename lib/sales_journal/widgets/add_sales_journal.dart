@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:poultry_login_signup/sales_journal/providers/journal_api.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_html/html.dart';
 
 import '../../colors.dart';
 import '../../infrastructure/providers/infrastructure_apicalls.dart';
@@ -52,7 +53,7 @@ class _AddSalesJournalState extends State<AddSalesJournal>
 
   String customerNameValidationMessage = '';
 
-  TextEditingController rateController = TextEditingController();
+  TextEditingController priceController = TextEditingController();
 
   bool rateValidation = true;
 
@@ -215,9 +216,11 @@ class _AddSalesJournalState extends State<AddSalesJournal>
     } else {
       customerNameValidation = true;
     }
-
-    if (rateController.text == '') {
-      rateValidationMessage = 'rate cannot be Empty';
+    if (priceController.text.isNum != true) {
+      rateValidationMessage = 'Enter a valid price';
+      rateValidation = false;
+    } else if (priceController.text == '') {
+      rateValidationMessage = 'Price cannot be Empty';
       rateValidation = false;
     } else {
       rateValidation = true;
@@ -234,13 +237,36 @@ class _AddSalesJournalState extends State<AddSalesJournal>
     } else {
       itemCategoryValidation = true;
     }
+    if (firmId == null) {
+      firmIdValidationMessage = 'Select Firm';
+      firmIdValidation = false;
+    } else {
+      firmIdValidation = true;
+    }
+
+    if (plantId == null) {
+      plantIdValidationMessage = 'Select Plant';
+      plantIdValidation = false;
+    } else {
+      plantIdValidation = true;
+    }
+
+    if (itemSubCategoryId == null) {
+      itemSubCategoryValidationMessage = 'Select item sub category';
+      itemSubCategoryValidation = false;
+    } else {
+      itemSubCategoryValidation = true;
+    }
     if (productId == null) {
       itemValidationMessage = 'item name cannot be Empty';
       itemValidation = false;
     } else {
       itemValidation = true;
     }
-    if (quantityController.text == '') {
+    if (quantityController.text.isNum != true) {
+      quantityValidationMessage = 'Enter a valid Quantity';
+      quantityValidation = false;
+    } else if (quantityController.text == '') {
       quantityValidationMessage = 'Quantity cannot be Empty';
       quantityValidation = false;
     } else {
@@ -296,6 +322,7 @@ class _AddSalesJournalState extends State<AddSalesJournal>
         cwQuantityValidation == true &&
         wareHouseIdValidation == true &&
         cwUnitValidation == true &&
+        itemSubCategoryValidation == true &&
         unitValidation == true &&
         shippingDateValidation == true) {
       return true;
@@ -462,7 +489,7 @@ class _AddSalesJournalState extends State<AddSalesJournal>
       salesJournal['Customer_Name'] = widget.editData['Customer_Name'];
       saleCodeController.text = widget.editData['Sale_Code'];
       salesJournal['Sale_Code'] = widget.editData['Sale_Code'];
-      rateController.text = widget.editData['Rate'].toString();
+      priceController.text = widget.editData['Rate'].toString();
       salesJournal['Rate'] = widget.editData['Rate'];
     }
 
@@ -513,11 +540,78 @@ class _AddSalesJournalState extends State<AddSalesJournal>
   }
 
   var isValid = true;
+  List itemList = [];
 
-  void save() {
+  void edit(int index) {
+    setState(() {
+      itemSubCategoryId = itemList[index]['Item_SubCategory'];
+      itemCategoryId = itemList[index]['Item_Category'];
+      wareHouseId = itemList[index]['WarehouseCode'];
+      productId = itemList[index]['Item'];
+      batchId = itemList[index]['Batch_Code'];
+      priceController.text = itemList[index]['Price'];
+      quantityController.text = itemList[index]['Quantity'];
+      unitId = itemList[index]['Unit'];
+      cwQuantityController.text = itemList[index]['CW_Quantity'];
+      cwUnitId = itemList[index]['CW_Unit'];
+
+      itemList.removeAt(index);
+    });
+  }
+
+  void delete(int index) {
+    setState(() {
+      itemList.removeAt(index);
+    });
+  }
+
+  void addItems() {
     isValid = validate();
     if (!isValid) {
       setState(() {});
+      return;
+    }
+    String total = (double.parse(quantityController.text) *
+            double.parse(priceController.text))
+        .toStringAsFixed(2);
+    itemList.add({
+      'WarehouseCode': wareHouseId,
+      'Item': productId,
+      'Batch_Code': batchId,
+      'Price': priceController.text,
+      'Quantity': quantityController.text,
+      'Unit': unitId,
+      'CW_Quantity': cwQuantityController.text,
+      'CW_Unit': cwUnitId,
+      'Item_Category': itemCategoryId,
+      'Item_SubCategory': itemSubCategoryId,
+      'Total': total,
+    });
+    setState(() {
+      itemSubCategoryId = null;
+      itemCategoryId = null;
+      wareHouseId = null;
+      productId = null;
+      batchId = null;
+      priceController.text = '';
+      quantityController.text = '';
+      unitId = null;
+      cwQuantityController.text = '';
+      cwUnitId = 'Kgs';
+    });
+  }
+
+  void save() {
+    if (itemList.isEmpty) {
+      Get.defaultDialog(
+          titleStyle: const TextStyle(color: Colors.black),
+          title: 'Alert',
+          middleText: 'Please Add Items to the table..',
+          confirm: TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text('Ok')));
       return;
     }
     _formKey.currentState!.save();
@@ -530,63 +624,75 @@ class _AddSalesJournalState extends State<AddSalesJournal>
       salesJournal['Company_Id'] = customerId;
     }
 
+    salesJournal['Item_Details'] = itemList;
+
     print(salesJournal.toString());
 
-    if (widget.editData.isNotEmpty) {
-      Provider.of<Apicalls>(context, listen: false)
-          .tryAutoLogin()
-          .then((value) {
-        var token = Provider.of<Apicalls>(context, listen: false).token;
-        Provider.of<JournalApi>(context, listen: false)
-            .updateCustomerSalesJournalInfo(
-                salesJournal, widget.editData['Sale_Id'], token)
-            .then((value) {
-          if (value == 202 || value == 201) {
-            widget.reFresh(100);
-            Get.back();
-            successSnackbar('Successfully updated sales data');
-          } else {
-            failureSnackbar('Unable to update data something went wrong');
-          }
-        });
-      });
-    } else {
-      if (selectedCustomerType == 'Individual') {
-        Provider.of<Apicalls>(context, listen: false)
-            .tryAutoLogin()
-            .then((value) {
-          var token = Provider.of<Apicalls>(context, listen: false).token;
-          Provider.of<JournalApi>(context, listen: false)
-              .addCustomerSalesJournalInfo(salesJournal, token)
-              .then((value) {
-            if (value == 200 || value == 201) {
-              widget.reFresh(100);
-              Get.back();
-              successSnackbar('Successfully added sales data');
-            } else {
-              failureSnackbar('Unable to add data something went wrong');
-            }
-          });
-        });
-      } else {
-        Provider.of<Apicalls>(context, listen: false)
-            .tryAutoLogin()
-            .then((value) {
-          var token = Provider.of<Apicalls>(context, listen: false).token;
-          Provider.of<JournalApi>(context, listen: false)
-              .addCompanySalesJournalInfo(salesJournal, token)
-              .then((value) {
-            if (value == 200 || value == 201) {
-              widget.reFresh(100);
-              Get.back();
-              successSnackbar('Successfully added sales data');
-            } else {
-              failureSnackbar('Unable to add data something went wrong');
-            }
-          });
-        });
-      }
-    }
+    // if (widget.editData.isNotEmpty) {
+    //   Provider.of<Apicalls>(context, listen: false)
+    //       .tryAutoLogin()
+    //       .then((value) {
+    //     var token = Provider.of<Apicalls>(context, listen: false).token;
+    //     Provider.of<JournalApi>(context, listen: false)
+    //         .updateCustomerSalesJournalInfo(
+    //             salesJournal, widget.editData['Sale_Id'], token)
+    //         .then((value) {
+    //       if (value == 202 || value == 201) {
+    //         widget.reFresh(100);
+    //         Get.back();
+    //         successSnackbar('Successfully updated sales data');
+    //       } else {
+    //         failureSnackbar('Unable to update data something went wrong');
+    //       }
+    //     });
+    //   });
+    // } else {
+    //   if (selectedCustomerType == 'Individual') {
+    //     Provider.of<Apicalls>(context, listen: false)
+    //         .tryAutoLogin()
+    //         .then((value) {
+    //       var token = Provider.of<Apicalls>(context, listen: false).token;
+    //       Provider.of<JournalApi>(context, listen: false)
+    //           .addCustomerSalesJournalInfo(salesJournal, token)
+    //           .then((value) {
+    //         if (value == 200 || value == 201) {
+    //           widget.reFresh(100);
+    //           Get.back();
+    //           successSnackbar('Successfully added sales data');
+    //         } else {
+    //           failureSnackbar('Unable to add data something went wrong');
+    //         }
+    //       });
+    //     });
+    //   } else {
+    //     Provider.of<Apicalls>(context, listen: false)
+    //         .tryAutoLogin()
+    //         .then((value) {
+    //       var token = Provider.of<Apicalls>(context, listen: false).token;
+    //       Provider.of<JournalApi>(context, listen: false)
+    //           .addCompanySalesJournalInfo(salesJournal, token)
+    //           .then((value) {
+    //         if (value == 200 || value == 201) {
+    //           widget.reFresh(100);
+    //           Get.back();
+    //           successSnackbar('Successfully added sales data');
+    //         } else {
+    //           failureSnackbar('Unable to add data something went wrong');
+    //         }
+    //       });
+    //     });
+    //   }
+    // }
+  }
+
+  Container headerContainer(String name) {
+    return Container(
+      width: 100,
+      child: Text(
+        name,
+        style: headerStyle(),
+      ),
+    );
   }
 
   void searchCustomers(String name) {
@@ -623,10 +729,17 @@ class _AddSalesJournalState extends State<AddSalesJournal>
     });
   }
 
+  double columnWidth = 40;
+
+  TextStyle headerStyle() {
+    return GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.w600);
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    double formWidth = size.width * 0.25;
+    double formWidth = size.width * 0.1;
+    double formGap = size.width * 0.03;
 
     wareHouseDetails = Provider.of<InfrastructureApis>(
       context,
@@ -641,7 +754,7 @@ class _AddSalesJournalState extends State<AddSalesJournal>
     unitDetails = Provider.of<Apicalls>(context).standardUnitList;
 
     return Container(
-      width: size.width * 0.3,
+      width: size.width,
       height: MediaQuery.of(context).size.height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
@@ -691,93 +804,90 @@ class _AddSalesJournalState extends State<AddSalesJournal>
                     ),
                     Padding(
                       padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Sale Code'),
-                          ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: TextFormField(
-                                decoration: const InputDecoration(
-                                    hintText: 'Enter Sale code',
-                                    border: InputBorder.none),
-                                controller: saleCodeController,
-                                onSaved: (value) {
-                                  salesJournal['Sale_Code'] = value!;
-                                },
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('Sale Code'),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    saleCodeValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, saleCodeValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Customer Type'),
-                          ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  onTap: () {},
-                                  value: selectedCustomerType,
-                                  items: ['Individual', 'Company']
-                                      .map<DropdownMenuItem<String>>((e) {
-                                    return DropdownMenuItem(
-                                      enabled: false,
-                                      value: e,
-                                      child: Text(e),
-                                    );
-                                  }).toList(),
-                                  hint: const Text('Select'),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedCustomerType = value as String;
-                                    });
-                                  },
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: TextFormField(
+                                    decoration: const InputDecoration(
+                                        hintText: 'Enter Sale code',
+                                        border: InputBorder.none),
+                                    controller: saleCodeController,
+                                    onSaved: (value) {
+                                      salesJournal['Sale_Code'] = value!;
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        children: [
+                          // SizedBox(
+                          //   width: formGap,
+                          // ),
+                          // Column(
+                          //   mainAxisAlignment: MainAxisAlignment.start,
+                          //   children: [
+                          //     Container(
+                          //       width: formWidth,
+                          //       padding: const EdgeInsets.only(bottom: 12),
+                          //       child: const Text('Customer Type'),
+                          //     ),
+                          //     Container(
+                          //       width: formWidth,
+                          //       height: 36,
+                          //       decoration: BoxDecoration(
+                          //         borderRadius: BorderRadius.circular(8),
+                          //         color: Colors.white,
+                          //         border: Border.all(color: Colors.black26),
+                          //       ),
+                          //       child: Padding(
+                          //         padding: const EdgeInsets.symmetric(
+                          //             horizontal: 12, vertical: 6),
+                          //         child: DropdownButtonHideUnderline(
+                          //           child: DropdownButton(
+                          //             onTap: () {},
+                          //             value: selectedCustomerType,
+                          //             items: ['Individual', 'Company']
+                          //                 .map<DropdownMenuItem<String>>((e) {
+                          //               return DropdownMenuItem(
+                          //                 enabled: false,
+                          //                 value: e,
+                          //                 child: Text(e),
+                          //               );
+                          //             }).toList(),
+                          //             hint: const Text('Select'),
+                          //             onChanged: (value) {
+                          //               setState(() {
+                          //                 selectedCustomerType =
+                          //                     value as String;
+                          //               });
+                          //             },
+                          //           ),
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
+                          SizedBox(
+                            width: formGap,
+                          ),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -833,423 +943,926 @@ class _AddSalesJournalState extends State<AddSalesJournal>
                               ),
                             ],
                           ),
-                          customerFieldSelected == true &&
-                                  selectedCustomerType == 'Individual'
-                              ? Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Container(
-                                      width: formWidth,
-                                      height: 300,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Consumer<JournalApi>(
-                                            builder: (context, value, child) {
-                                              return Expanded(
-                                                child: ListView.builder(
-                                                  itemCount: value
-                                                      .customerSearchResult
-                                                      .length,
-                                                  itemBuilder:
-                                                      (BuildContext context,
-                                                          int index) {
-                                                    return ListTile(
-                                                        onTap: () {
-                                                          customerNameController
-                                                              .text = value
-                                                                      .customerSearchResult[
-                                                                  index]
-                                                              ['Customer_Name'];
-                                                          customerId =
-                                                              value.customerSearchResult[
-                                                                      index][
-                                                                  'Customer_Id'];
-                                                          setState(() {
-                                                            customerFieldSelected =
-                                                                false;
-                                                          });
-                                                          // setState(() {});
-                                                        },
-                                                        title: Text(
-                                                          value.customerSearchResult[
-                                                                  index]
-                                                              ['Customer_Name'],
-                                                        ));
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          Consumer<JournalApi>(
-                                            builder: (context, value, child) {
-                                              return Expanded(
-                                                child: ListView.builder(
-                                                  itemCount: value
-                                                      .companySearchResultData
-                                                      .length,
-                                                  itemBuilder:
-                                                      (BuildContext context,
-                                                          int index) {
-                                                    return ListTile(
-                                                        onTap: () {
-                                                          customerNameController
-                                                                  .text =
-                                                              value.companySearchResultData[
-                                                                      index][
-                                                                  'Company_Name'];
-                                                          customerId =
-                                                              value.companySearchResultData[
-                                                                      index][
-                                                                  'Company_Id'];
-                                                          setState(() {
-                                                            customerFieldSelected =
-                                                                false;
-                                                          });
-                                                          // setState(() {});
-                                                        },
-                                                        title: Text(
-                                                          value.companySearchResultData[
-                                                                  index]
-                                                              ['Company_Name'],
-                                                        ));
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                      )),
-                                )
-                              : customerFieldSelected == true &&
-                                      selectedCustomerType == 'Company'
-                                  ? Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Container(
-                                          width: formWidth,
-                                          height: 300,
-                                          child: Consumer<JournalApi>(
-                                            builder: (context, value, child) {
-                                              return Expanded(
-                                                child: ListView.builder(
-                                                  itemCount: value
-                                                      .companySearchResultData
-                                                      .length,
-                                                  itemBuilder:
-                                                      (BuildContext context,
-                                                          int index) {
-                                                    return ListTile(
-                                                        onTap: () {
-                                                          customerNameController
-                                                                  .text =
-                                                              value.companySearchResultData[
-                                                                      index][
-                                                                  'Company_Name'];
-                                                          customerId =
-                                                              value.companySearchResultData[
-                                                                      index][
-                                                                  'Company_Id'];
-                                                          setState(() {
-                                                            customerFieldSelected =
-                                                                false;
-                                                          });
-                                                          // setState(() {});
-                                                        },
-                                                        title: Text(
-                                                          value.companySearchResultData[
-                                                                  index]
-                                                              ['Company_Name'],
-                                                        ));
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                          )),
-                                    )
-                                  : const SizedBox(),
-                        ],
-                      ),
-                    ),
-                    customerNameValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, customerNameValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Rate'),
+                          SizedBox(
+                            width: formGap,
                           ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: TextFormField(
-                                decoration: const InputDecoration(
-                                    hintText: 'Enter rate',
-                                    border: InputBorder.none),
-                                controller: rateController,
-                                onSaved: (value) {
-                                  salesJournal['Rate'] = value!;
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    rateValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, rateValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Firm Name'),
-                          ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  value: firmId,
-                                  items: firmsList
-                                      .map<DropdownMenuItem<String>>((e) {
-                                    return DropdownMenuItem(
-                                      value: e['Firm_Name'],
-                                      onTap: () {
-                                        // firmId = e['Firm_Code'];
-                                        plantId = null;
-                                        getPlantList(e['Firm_Id']);
-                                        //print(warehouseCategory);
-                                      },
-                                      child: Text(e['Firm_Name']),
-                                    );
-                                  }).toList(),
-                                  hint: const Text('Select'),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      firmId = value as String;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    firmIdValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, firmIdValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Plant Name'),
-                          ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  value: plantId,
-                                  items: plantList
-                                      .map<DropdownMenuItem<String>>((e) {
-                                    return DropdownMenuItem(
-                                      value: e['Plant_Name'],
-                                      onTap: () {
-                                        // firmId = e['Firm_Code'];
-                                        wareHouseId = null;
-                                        getWarehouseDetails(e['Plant_Id']);
-                                        //print(warehouseCategory);
-                                      },
-                                      child: Text(e['Plant_Name']),
-                                    );
-                                  }).toList(),
-                                  hint: const Text('Select'),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      plantId = value as String;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    plantIdValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, plantIdValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Ware house Code'),
-                          ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  value: wareHouseId,
-                                  items: wareHouseDetails
-                                      .map<DropdownMenuItem<String>>((e) {
-                                    return DropdownMenuItem(
-                                      child: Text(e['WareHouse_Code']),
-                                      value: e['WareHouse_Code'],
-                                      onTap: () {
-                                        // firmId = e['Firm_Code'];
-                                        salesJournal['WareHouse_Id'] =
-                                            e['WareHouse_Id'];
-                                        //print(warehouseCategory);
-                                      },
-                                    );
-                                  }).toList(),
-                                  hint: const Text('Select'),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      wareHouseId = value as String;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    wareHouseIdValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, wareHouseIdValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Batch Code'),
-                          ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  value: batchId,
-                                  items: batchPlanDetails
-                                      .map<DropdownMenuItem<String>>((e) {
-                                    return DropdownMenuItem(
-                                      child: Text(e['Batch_Plan_Code']),
-                                      value: e['Batch_Plan_Code'],
-                                      onTap: () {
-                                        // firmId = e['Firm_Code'];
-                                        salesJournal['Batch_Plan_Id'] =
-                                            e['Batch_Plan_Id'];
-                                        //print(warehouseCategory);
-                                      },
-                                    );
-                                  }).toList(),
-                                  hint: const Text('Select'),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      batchId = value as String;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    batchPlanValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, batchPlanValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Container(
                                 width: formWidth,
                                 padding: const EdgeInsets.only(bottom: 12),
-                                child: const Text('Shipped Date'),
+                                child: const Text('Firm Name'),
+                              ),
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton(
+                                      value: firmId,
+                                      items: firmsList
+                                          .map<DropdownMenuItem<String>>((e) {
+                                        return DropdownMenuItem(
+                                          value: e['Firm_Name'],
+                                          onTap: () {
+                                            // firmId = e['Firm_Code'];
+                                            plantId = null;
+                                            getPlantList(e['Firm_Id']);
+                                            //print(warehouseCategory);
+                                          },
+                                          child: Text(e['Firm_Name']),
+                                        );
+                                      }).toList(),
+                                      hint: const Text('Select'),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          firmId = value as String;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                          Row(
+                          SizedBox(
+                            width: formGap,
+                          ),
+                          Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Container(
-                                width: size.width * 0.23,
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('Plant Name'),
+                              ),
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton(
+                                      value: plantId,
+                                      items: plantList
+                                          .map<DropdownMenuItem<String>>((e) {
+                                        return DropdownMenuItem(
+                                          value: e['Plant_Name'],
+                                          onTap: () {
+                                            // firmId = e['Firm_Code'];
+                                            wareHouseId = null;
+                                            getWarehouseDetails(e['Plant_Id']);
+                                            //print(warehouseCategory);
+                                          },
+                                          child: Text(e['Plant_Name']),
+                                        );
+                                      }).toList(),
+                                      hint: const Text('Select'),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          plantId = value as String;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            width: formGap,
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: formWidth,
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: const Text('Shipped Date'),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: formWidth,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: Colors.white,
+                                      border: Border.all(color: Colors.black26),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 6),
+                                      child: TextFormField(
+                                        controller: shippingDateController,
+                                        decoration: const InputDecoration(
+                                            hintText: 'Choose Shipped date',
+                                            border: InputBorder.none),
+                                        enabled: false,
+                                        // onSaved: (value) {
+                                        //   batchPlanDetails[
+                                        //       'Required_Date_Of_Delivery'] = value!;
+                                        // },
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                      onPressed: _datePicker,
+                                      icon: Icon(
+                                        Icons.date_range_outlined,
+                                        color: ProjectColors.themecolor,
+                                      ))
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    Row(
+                      children: [
+                        saleCodeValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, saleCodeValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        customerNameValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, customerNameValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        firmIdValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, firmIdValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        plantIdValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, plantIdValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        shippingDateValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, shippingDateValidationMessage),
+                      ],
+                    ),
+
+                    // Padding(
+                    //   padding: const EdgeInsets.only(top: 24.0),
+                    //   child: Column(
+                    //     children: [
+                    //       customerFieldSelected == true &&
+                    //               selectedCustomerType == 'Individual'
+                    //           ? Padding(
+                    //               padding: const EdgeInsets.only(top: 8.0),
+                    //               child: Container(
+                    //                   width: formWidth,
+                    //                   height: 300,
+                    //                   child: Column(
+                    //                     mainAxisAlignment:
+                    //                         MainAxisAlignment.start,
+                    //                     crossAxisAlignment:
+                    //                         CrossAxisAlignment.start,
+                    //                     children: [
+                    //                       Consumer<JournalApi>(
+                    //                         builder: (context, value, child) {
+                    //                           return Expanded(
+                    //                             child: ListView.builder(
+                    //                               itemCount: value
+                    //                                   .customerSearchResult
+                    //                                   .length,
+                    //                               itemBuilder:
+                    //                                   (BuildContext context,
+                    //                                       int index) {
+                    //                                 return ListTile(
+                    //                                     onTap: () {
+                    //                                       customerNameController
+                    //                                           .text = value
+                    //                                                   .customerSearchResult[
+                    //                                               index]
+                    //                                           ['Customer_Name'];
+                    //                                       customerId =
+                    //                                           value.customerSearchResult[
+                    //                                                   index][
+                    //                                               'Customer_Id'];
+                    //                                       setState(() {
+                    //                                         customerFieldSelected =
+                    //                                             false;
+                    //                                       });
+                    //                                       // setState(() {});
+                    //                                     },
+                    //                                     title: Text(
+                    //                                       value.customerSearchResult[
+                    //                                               index]
+                    //                                           ['Customer_Name'],
+                    //                                     ));
+                    //                               },
+                    //                             ),
+                    //                           );
+                    //                         },
+                    //                       ),
+                    //                       Consumer<JournalApi>(
+                    //                         builder: (context, value, child) {
+                    //                           return Expanded(
+                    //                             child: ListView.builder(
+                    //                               itemCount: value
+                    //                                   .companySearchResultData
+                    //                                   .length,
+                    //                               itemBuilder:
+                    //                                   (BuildContext context,
+                    //                                       int index) {
+                    //                                 return ListTile(
+                    //                                     onTap: () {
+                    //                                       customerNameController
+                    //                                               .text =
+                    //                                           value.companySearchResultData[
+                    //                                                   index][
+                    //                                               'Company_Name'];
+                    //                                       customerId =
+                    //                                           value.companySearchResultData[
+                    //                                                   index][
+                    //                                               'Company_Id'];
+                    //                                       setState(() {
+                    //                                         customerFieldSelected =
+                    //                                             false;
+                    //                                       });
+                    //                                       // setState(() {});
+                    //                                     },
+                    //                                     title: Text(
+                    //                                       value.companySearchResultData[
+                    //                                               index]
+                    //                                           ['Company_Name'],
+                    //                                     ));
+                    //                               },
+                    //                             ),
+                    //                           );
+                    //                         },
+                    //                       ),
+                    //                     ],
+                    //                   )),
+                    //             )
+                    //           : customerFieldSelected == true &&
+                    //                   selectedCustomerType == 'Company'
+                    //               ? Padding(
+                    //                   padding: const EdgeInsets.only(top: 8.0),
+                    //                   child: Container(
+                    //                       width: formWidth,
+                    //                       height: 300,
+                    //                       child: Consumer<JournalApi>(
+                    //                         builder: (context, value, child) {
+                    //                           return Expanded(
+                    //                             child: ListView.builder(
+                    //                               itemCount: value
+                    //                                   .companySearchResultData
+                    //                                   .length,
+                    //                               itemBuilder:
+                    //                                   (BuildContext context,
+                    //                                       int index) {
+                    //                                 return ListTile(
+                    //                                     onTap: () {
+                    //                                       customerNameController
+                    //                                               .text =
+                    //                                           value.companySearchResultData[
+                    //                                                   index][
+                    //                                               'Company_Name'];
+                    //                                       customerId =
+                    //                                           value.companySearchResultData[
+                    //                                                   index][
+                    //                                               'Company_Id'];
+                    //                                       setState(() {
+                    //                                         customerFieldSelected =
+                    //                                             false;
+                    //                                       });
+                    //                                       // setState(() {});
+                    //                                     },
+                    //                                     title: Text(
+                    //                                       value.companySearchResultData[
+                    //                                               index]
+                    //                                           ['Company_Name'],
+                    //                                     ));
+                    //                               },
+                    //                             ),
+                    //                           );
+                    //                         },
+                    //                       )),
+                    //                 )
+                    //               : const SizedBox(),
+                    //     ],
+                    //   ),
+                    // ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: Container(
+                        width: size.width * 0.95,
+                        height: size.height * 0.5,
+                        decoration: BoxDecoration(
+                            border: Border.all(),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 150,
+                                    child: Text(
+                                      'WareHouse Code',
+                                      style: headerStyle(),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: columnWidth,
+                                  ),
+                                  headerContainer('Item'),
+                                  SizedBox(
+                                    width: columnWidth,
+                                  ),
+                                  headerContainer('Batch Code'),
+                                  SizedBox(
+                                    width: columnWidth,
+                                  ),
+                                  headerContainer('Quantity'),
+                                  SizedBox(
+                                    width: columnWidth,
+                                  ),
+                                  Container(
+                                    width: 60,
+                                    child: Text(
+                                      'Price',
+                                      style: headerStyle(),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: columnWidth,
+                                  ),
+                                  Container(
+                                    width: 60,
+                                    child: Text(
+                                      'Unit',
+                                      style: headerStyle(),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: columnWidth,
+                                  ),
+                                  headerContainer('CW Quantity'),
+                                  SizedBox(
+                                    width: columnWidth,
+                                  ),
+                                  headerContainer('CW Unit'),
+                                  SizedBox(
+                                    width: columnWidth,
+                                  ),
+                                  headerContainer('Total'),
+                                ],
+                              ),
+                              const Divider(),
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: itemList.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Row(
+                                      key: UniqueKey(),
+                                      children: [
+                                        Container(
+                                          width: 150,
+                                          child: Text(
+                                            itemList[index]['WarehouseCode'],
+                                            style: headerStyle(),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        headerContainer(
+                                            itemList[index]['Item']),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        headerContainer(
+                                          itemList[index]['Batch_Code'],
+                                        ),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        headerContainer(
+                                          itemList[index]['Quantity']
+                                              .toString(),
+                                        ),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        Container(
+                                          width: 60,
+                                          child: Text(
+                                            itemList[index]['Price'].toString(),
+                                            style: headerStyle(),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        Container(
+                                          width: 60,
+                                          child: Text(
+                                            itemList[index]['Unit'],
+                                            style: headerStyle(),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        headerContainer(itemList[index]
+                                                ['CW_Quantity']
+                                            .toString()),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        headerContainer(
+                                            itemList[index]['CW_Unit']),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        headerContainer(
+                                            itemList[index]['Total']),
+                                        const SizedBox(
+                                          width: 20,
+                                        ),
+                                        TextButton.icon(
+                                            style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                        ProjectColors
+                                                            .themecolor)),
+                                            icon: const Icon(Icons.edit,
+                                                color: Colors.white),
+                                            onPressed: () {
+                                              edit(index);
+                                            },
+                                            label: const Text(
+                                              'Edit',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            )),
+                                        const SizedBox(
+                                          width: 20,
+                                        ),
+                                        TextButton.icon(
+                                            style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                        ProjectColors
+                                                            .themecolor)),
+                                            icon: const Icon(Icons.delete,
+                                                color: Colors.white),
+                                            onPressed: () {
+                                              delete(index);
+                                            },
+                                            label: const Text(
+                                              'Delete',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            )),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: Row(
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('Ware house Code'),
+                              ),
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton(
+                                      isExpanded: true,
+                                      value: wareHouseId,
+                                      items: wareHouseDetails
+                                          .map<DropdownMenuItem<String>>((e) {
+                                        return DropdownMenuItem(
+                                          value: e['WareHouse_Code'],
+                                          onTap: () {
+                                            // firmId = e['Firm_Code'];
+                                            salesJournal['WareHouse_Id'] =
+                                                e['WareHouse_Id'];
+                                            //print(warehouseCategory);
+                                          },
+                                          child: Text(e['WareHouse_Code']),
+                                        );
+                                      }).toList(),
+                                      hint: const Text('Select'),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          wareHouseId = value as String;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            width: formGap,
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('Item Category'),
+                              ),
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton(
+                                      isExpanded: true,
+                                      value: itemCategoryId,
+                                      items: itemCategoryDetails
+                                          .map<DropdownMenuItem<String>>((e) {
+                                        return DropdownMenuItem(
+                                          value: e['Product_Category_Name'],
+                                          onTap: () {
+                                            // firmId = e['Firm_Code'];
+                                            salesJournal[
+                                                    'Product_Category_Id'] =
+                                                e['Product_Category_Id'];
+
+                                            getItemSubCategory(
+                                                e['Product_Category_Id']);
+                                            //print(warehouseCategory);
+                                          },
+                                          child:
+                                              Text(e['Product_Category_Name']),
+                                        );
+                                      }).toList(),
+                                      hint: const Text('Select'),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          itemCategoryId = value as String;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            width: formGap,
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('Item Sub Category'),
+                              ),
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton(
+                                      isExpanded: true,
+                                      value: itemSubCategoryId,
+                                      items: itemSubCategory
+                                          .map<DropdownMenuItem<String>>((e) {
+                                        return DropdownMenuItem(
+                                          value: e['Product_Sub_Category_Name'],
+                                          onTap: () {
+                                            // firmId = e['Firm_Code'];
+                                            salesJournal['Item_Sub_Category'] =
+                                                e['Product_Sub_Category_Id'];
+
+                                            getProducts(
+                                                e['Product_Sub_Category_Id']);
+                                            //print(warehouseCategory);
+                                          },
+                                          child: Text(
+                                              e['Product_Sub_Category_Name']),
+                                        );
+                                      }).toList(),
+                                      hint: const Text('Select'),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          itemSubCategoryId = value as String;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            width: formGap,
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('Product'),
+                              ),
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton(
+                                      isExpanded: true,
+                                      value: productId,
+                                      items: productList
+                                          .map<DropdownMenuItem<String>>((e) {
+                                        return DropdownMenuItem(
+                                          value: e['Product_Name'],
+                                          onTap: () {
+                                            // firmId = e['Firm_Code'];
+                                            salesJournal['Product_Id'] =
+                                                e['Product_Id'];
+                                            unitId =
+                                                e['Unit_Of_Measure__Unit_Name'];
+                                            salesJournal['Quantity_Unit'] =
+                                                e['Unit_Of_Measure__Unit_Id'];
+                                            //print(warehouseCategory);
+                                          },
+                                          child: Text(e['Product_Name']),
+                                        );
+                                      }).toList(),
+                                      hint: const Text('Select'),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          productId = value as String;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            width: formGap,
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('Batch Code'),
+                              ),
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton(
+                                      isExpanded: true,
+                                      value: batchId,
+                                      items: batchPlanDetails
+                                          .map<DropdownMenuItem<String>>((e) {
+                                        return DropdownMenuItem(
+                                          value: e['Batch_Plan_Code'],
+                                          onTap: () {
+                                            // firmId = e['Firm_Code'];
+                                            salesJournal['Batch_Plan_Id'] =
+                                                e['Batch_Plan_Id'];
+                                            //print(warehouseCategory);
+                                          },
+                                          child: Text(e['Batch_Plan_Code']),
+                                        );
+                                      }).toList(),
+                                      hint: const Text('Select'),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          batchId = value as String;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            width: formGap,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        wareHouseIdValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, wareHouseIdValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        itemCategoryValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, itemCategoryValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        itemSubCategoryValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, itemSubCategoryValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        itemValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, itemValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        batchPlanValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, batchPlanValidationMessage),
+                      ],
+                    ),
+
+                    // Column(
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   children: [
+                    //     Container(
+                    //       width: formWidth,
+                    //       padding: const EdgeInsets.only(bottom: 12),
+                    //       child: const Text('Product'),
+                    //     ),
+                    //     Container(
+                    //       width: formWidth,
+                    //       height: 36,
+                    //       decoration: BoxDecoration(
+                    //         borderRadius: BorderRadius.circular(8),
+                    //         color: Colors.white,
+                    //         border: Border.all(color: Colors.black26),
+                    //       ),
+                    //       child: Padding(
+                    //         padding: const EdgeInsets.symmetric(
+                    //             horizontal: 12, vertical: 6),
+                    //         child: DropdownButtonHideUnderline(
+                    //           child: DropdownButton(
+                    //             value: productId,
+                    //             items: productList
+                    //                 .map<DropdownMenuItem<String>>((e) {
+                    //               return DropdownMenuItem(
+                    //                 child: Text(e['Product_Name']),
+                    //                 value: e['Product_Name'],
+                    //                 onTap: () {
+                    //                   // firmId = e['Firm_Code'];
+                    //                   salesJournal['Product_Id'] =
+                    //                       e['Product_Id'];
+                    //                   unitId = e['Unit_Of_Measure__Unit_Name'];
+                    //                   salesJournal['Quantity_Unit'] =
+                    //                       e['Unit_Of_Measure__Unit_Id'];
+                    //                   //print(warehouseCategory);
+                    //                 },
+                    //               );
+                    //             }).toList(),
+                    //             hint: const Text('Select'),
+                    //             onChanged: (value) {
+                    //               setState(() {
+                    //                 productId = value as String;
+                    //               });
+                    //             },
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: Row(
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('Price'),
+                              ),
+                              Container(
+                                width: formWidth,
                                 height: 36,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
@@ -1260,398 +1873,269 @@ class _AddSalesJournalState extends State<AddSalesJournal>
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 12, vertical: 6),
                                   child: TextFormField(
-                                    controller: shippingDateController,
                                     decoration: const InputDecoration(
-                                        hintText: 'Choose Shipped date',
+                                        hintText: 'Enter Price',
                                         border: InputBorder.none),
-                                    enabled: false,
-                                    // onSaved: (value) {
-                                    //   batchPlanDetails[
-                                    //       'Required_Date_Of_Delivery'] = value!;
-                                    // },
+                                    controller: priceController,
+                                    onSaved: (value) {
+                                      salesJournal['Rate'] = value!;
+                                    },
                                   ),
                                 ),
                               ),
-                              IconButton(
-                                  onPressed: _datePicker,
-                                  icon: Icon(
-                                    Icons.date_range_outlined,
-                                    color: ProjectColors.themecolor,
-                                  ))
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                    shippingDateValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, shippingDateValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Item Category'),
+                          SizedBox(
+                            width: formGap,
                           ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  value: itemCategoryId,
-                                  items: itemCategoryDetails
-                                      .map<DropdownMenuItem<String>>((e) {
-                                    return DropdownMenuItem(
-                                      child: Text(e['Product_Category_Name']),
-                                      value: e['Product_Category_Name'],
-                                      onTap: () {
-                                        // firmId = e['Firm_Code'];
-                                        salesJournal['Product_Category_Id'] =
-                                            e['Product_Category_Id'];
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('Quantity'),
+                              ),
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly
+                                    ],
+                                    decoration: const InputDecoration(
+                                        hintText: 'Enter Quantity',
+                                        border: InputBorder.none),
+                                    controller: quantityController,
+                                    onSaved: (value) {
+                                      salesJournal['Quantity'] = value!;
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            width: formGap,
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('Unit'),
+                              ),
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton(
+                                      isExpanded: true,
+                                      value: unitId,
+                                      items: unitDetails
+                                          .map<DropdownMenuItem<String>>((e) {
+                                        return DropdownMenuItem(
+                                          value: e['Unit_Name'],
+                                          onTap: () {
+                                            // firmId = e['Firm_Code'];
+                                            salesJournal['Quantity_Unit'] =
+                                                e['Unit_Id'];
 
-                                        getItemSubCategory(
-                                            e['Product_Category_Id']);
-                                        //print(warehouseCategory);
+                                            //print(warehouseCategory);
+                                          },
+                                          child: Text(e['Unit_Name']),
+                                        );
+                                      }).toList(),
+                                      hint: const Text('Select'),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          unitId = value as String;
+                                        });
                                       },
-                                    );
-                                  }).toList(),
-                                  hint: const Text('Select'),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      itemCategoryId = value as String;
-                                    });
-                                  },
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    itemCategoryValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, itemCategoryValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Item Sub Category'),
+                          SizedBox(
+                            width: formGap,
                           ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  value: itemSubCategoryId,
-                                  items: itemSubCategory
-                                      .map<DropdownMenuItem<String>>((e) {
-                                    return DropdownMenuItem(
-                                      child:
-                                          Text(e['Product_Sub_Category_Name']),
-                                      value: e['Product_Sub_Category_Name'],
-                                      onTap: () {
-                                        // firmId = e['Firm_Code'];
-                                        salesJournal['Item_Sub_Category'] =
-                                            e['Product_Sub_Category_Id'];
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('CW Quantity'),
+                              ),
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                        hintText: 'Enter cw quantity',
+                                        border: InputBorder.none),
+                                    controller: cwQuantityController,
+                                    onSaved: (value) {
+                                      salesJournal['CW_Quantity'] = value!;
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            width: formGap,
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: formWidth,
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: const Text('CW Unit'),
+                              ),
+                              Container(
+                                width: formWidth,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.black26),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton(
+                                      isExpanded: true,
+                                      value: cwUnitId,
+                                      items: unitDetails
+                                          .map<DropdownMenuItem<String>>((e) {
+                                        return DropdownMenuItem(
+                                          value: e['Unit_Name'],
+                                          onTap: () {
+                                            // firmId = e['Firm_Code'];
+                                            salesJournal['CW_Unit'] =
+                                                e['Unit_Id'];
 
-                                        getProducts(
-                                            e['Product_Sub_Category_Id']);
-                                        //print(warehouseCategory);
+                                            //print(warehouseCategory);
+                                          },
+                                          child: Text(e['Unit_Name']),
+                                        );
+                                      }).toList(),
+                                      hint: const Text('Please Choose Unit'),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          cwUnitId = value as String;
+                                        });
                                       },
-                                    );
-                                  }).toList(),
-                                  hint: const Text('Select'),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      itemSubCategoryId = value as String;
-                                    });
-                                  },
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    itemSubCategoryValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, itemSubCategoryValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Product'),
+                          SizedBox(
+                            width: formGap,
                           ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  value: productId,
-                                  items: productList
-                                      .map<DropdownMenuItem<String>>((e) {
-                                    return DropdownMenuItem(
-                                      child: Text(e['Product_Name']),
-                                      value: e['Product_Name'],
-                                      onTap: () {
-                                        // firmId = e['Firm_Code'];
-                                        salesJournal['Product_Id'] =
-                                            e['Product_Id'];
-                                        unitId =
-                                            e['Unit_Of_Measure__Unit_Name'];
-                                        salesJournal['Quantity_Unit'] =
-                                            e['Unit_Of_Measure__Unit_Id'];
-                                        //print(warehouseCategory);
-                                      },
-                                    );
-                                  }).toList(),
-                                  hint: const Text('Select'),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      productId = value as String;
-                                    });
-                                  },
-                                ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: const SizedBox()),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 12.0),
+                                child: ElevatedButton(
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all(
+                                              ProjectColors.themecolor),
+                                    ),
+                                    onPressed: addItems,
+                                    child: const Text('Add')),
                               ),
-                            ),
-                          ),
+                            ],
+                          )
                         ],
                       ),
                     ),
-                    itemValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, itemValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Quantity'),
-                          ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: TextFormField(
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly
-                                ],
-                                decoration: const InputDecoration(
-                                    hintText: 'Enter Quantity',
-                                    border: InputBorder.none),
-                                controller: quantityController,
-                                onSaved: (value) {
-                                  salesJournal['Quantity'] = value!;
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    Row(
+                      children: [
+                        rateValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, rateValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        quantityValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, quantityValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        unitValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, unitValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        cwQuantityValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, cwQuantityValidationMessage),
+                        SizedBox(
+                          width: formGap,
+                        ),
+                        cwUnitValidation == true
+                            ? SizedBox(
+                                width: size.width * 0.1,
+                              )
+                            : ModularWidgets.salesValidationDesign(
+                                size, cwUnitValidationMessage),
+                      ],
                     ),
-                    quantityValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, quantityValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Unit'),
-                          ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  value: unitId,
-                                  items: unitDetails
-                                      .map<DropdownMenuItem<String>>((e) {
-                                    return DropdownMenuItem(
-                                      child: Text(e['Unit_Name']),
-                                      value: e['Unit_Name'],
-                                      onTap: () {
-                                        // firmId = e['Firm_Code'];
-                                        salesJournal['Quantity_Unit'] =
-                                            e['Unit_Id'];
 
-                                        //print(warehouseCategory);
-                                      },
-                                    );
-                                  }).toList(),
-                                  hint: const Text('Select'),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      unitId = value as String;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    unitValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, unitValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('CW Quantity'),
-                          ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: TextFormField(
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                    hintText: 'Enter cw quantity',
-                                    border: InputBorder.none),
-                                controller: cwQuantityController,
-                                onSaved: (value) {
-                                  salesJournal['CW_Quantity'] = value!;
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    cwQuantityValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, cwQuantityValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: formWidth,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('CW Unit'),
-                          ),
-                          Container(
-                            width: formWidth,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black26),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  value: cwUnitId,
-                                  items: unitDetails
-                                      .map<DropdownMenuItem<String>>((e) {
-                                    return DropdownMenuItem(
-                                      child: Text(e['Unit_Name']),
-                                      value: e['Unit_Name'],
-                                      onTap: () {
-                                        // firmId = e['Firm_Code'];
-                                        salesJournal['CW_Unit'] = e['Unit_Id'];
-
-                                        //print(warehouseCategory);
-                                      },
-                                    );
-                                  }).toList(),
-                                  hint: const Text('Please Choose Unit'),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      cwUnitId = value as String;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    cwUnitValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, cwUnitValidationMessage),
                     Consumer<JournalApi>(builder: (context, value, child) {
                       return ListView.builder(
                         shrinkWrap: true,
