@@ -123,9 +123,10 @@ class _IndividualVendorsState extends State<IndividualVendors> {
 
   void searchBook(String query) {
     final searchOutput = individualVendorsInfo.where((details) {
-      final customerName = details['Customer_Name'];
+      final customerName =
+          details['Vendor__Vendor_Name'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
       return customerName.contains(searchName);
     }).toList();
@@ -174,7 +175,7 @@ class _IndividualVendorsState extends State<IndividualVendors> {
                   reFresh: (value) {},
                   text: query,
                   onChanged: searchBook,
-                  hintText: 'Search'),
+                  hintText: 'Vendor Name'),
             ),
           ),
           Container(

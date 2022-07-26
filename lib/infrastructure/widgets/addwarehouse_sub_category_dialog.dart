@@ -174,11 +174,15 @@ class _AddWareHouseSubCategoryDialogState
     warehouseCategory = Provider.of<InfrastructureApis>(
       context,
     ).warehouseCategory;
-    return Dialog(
-      child: Container(
-        width: MediaQuery.of(context).size.width / 3,
-        height: MediaQuery.of(context).size.height / 2,
-        decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+    return Container(
+      width: MediaQuery.of(context).size.width / 3,
+      height: MediaQuery.of(context).size.height / 2,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+        border: Border.all(color: Colors.black26),
+      ),
+      child: Drawer(
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(

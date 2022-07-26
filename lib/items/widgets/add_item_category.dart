@@ -31,7 +31,6 @@ class _AddItemCategoryState extends State<AddItemCategory> {
       return;
     }
     _formKey.currentState!.save();
-    print(ItemCategory);
 
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;

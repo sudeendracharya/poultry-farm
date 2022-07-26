@@ -28,10 +28,13 @@ class _BreedPageState extends State<BreedPage> {
   }
 
   void update(int data) {
-    selectedBreeds.clear();
     fetchCredientials().then((token) {
       if (token != '') {
-        Provider.of<BreedInfoApis>(context, listen: false).getBreed(token);
+        Provider.of<BreedInfoApis>(context, listen: false)
+            .getBreed(token)
+            .then((value) {
+          selectedBreeds.clear();
+        });
       }
     });
   }
@@ -88,7 +91,10 @@ class _BreedPageState extends State<BreedPage> {
             if (value == 204) {
               successSnackbar('Successfully deleted the data');
               update(100);
+              selectedBreeds.clear();
             } else {
+              update(100);
+              selectedBreeds.clear();
               failureSnackbar('Unable to delete the data Something went wrong');
             }
           });
@@ -99,11 +105,10 @@ class _BreedPageState extends State<BreedPage> {
 
   void searchBook(String query) {
     final searchOutput = breedDetails.where((details) {
-      final breedName = details['Breed_Name'];
-      final breedVendor = details['Vendor'].toString().toLowerCase();
+      final breedVendor = details['Breed_Name'].toString().toLowerCase();
       final searchName = query.toLowerCase();
 
-      return breedName.contains(searchName) || breedVendor.contains(searchName);
+      return breedVendor.contains(searchName);
     }).toList();
 
     setState(() {
@@ -151,7 +156,7 @@ class _BreedPageState extends State<BreedPage> {
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'Breed Name'),
                       ),
                     ),
                     Container(

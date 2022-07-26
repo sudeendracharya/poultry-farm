@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:poultry_login_signup/main.dart';
 import 'package:poultry_login_signup/providers/apicalls.dart';
 import 'package:poultry_login_signup/widgets/modular_widgets.dart';
 import 'package:provider/provider.dart';
@@ -141,6 +142,12 @@ class _SignUpState extends State<SignUp> {
     } else {
       return false;
     }
+  }
+
+  @override
+  void initState() {
+    clearSignupException(context);
+    super.initState();
   }
 
   bool _validate = true;
@@ -606,7 +613,7 @@ class _SignUpState extends State<SignUp> {
                                 itemBuilder: (BuildContext context, int index) {
                                   return ModularWidgets.exceptionDesign(
                                       MediaQuery.of(context).size,
-                                      value.signupException[index][0]);
+                                      value.signupException[index]);
                                 },
                               );
                             }),

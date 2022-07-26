@@ -316,24 +316,8 @@ class MySearchData extends DataTableSource {
         selected: data[index]['Is_Selected'],
         cells: [
           DataCell(
-            TextButton(
-              onPressed: () async {
-                final prefs = await SharedPreferences.getInstance();
-                if (prefs.containsKey('Grading_Record_Id')) {
-                  prefs.remove('Grading_Record_Id');
-                }
-                final userData = json.encode(
-                  {
-                    'Grading_Record_Id': data[index]['Grading_Record_Id'],
-                  },
-                );
-                prefs.setString('Grading_Record_Id', userData);
-
-                // Get.toNamed(BatchPlanDetailsPage.routeName);
-              },
-              child: Text(
-                data[index]['Batch_Id'].toString(),
-              ),
+            Text(
+              data[index]['Batch_Id'].toString(),
             ),
           ),
           DataCell(

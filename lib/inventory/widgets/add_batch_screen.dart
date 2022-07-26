@@ -66,6 +66,12 @@ class _AddBatchScreenState extends State<AddBatchScreen>
 
   var activityId;
 
+  var plantId;
+
+  List plantList = [];
+
+  var firmId;
+
   EdgeInsetsGeometry getPadding() {
     return const EdgeInsets.only(left: 8.0);
   }
@@ -215,7 +221,7 @@ class _AddBatchScreenState extends State<AddBatchScreen>
     }
 
     if (requiredQuantityValidation == true &&
-        birdAgeIdValidation == true &&
+        // birdAgeIdValidation == true &&
         wareHouseIdValidation == true &&
         breedIdValidation == true &&
         breedVersionIdValidation == true &&
@@ -300,30 +306,30 @@ class _AddBatchScreenState extends State<AddBatchScreen>
     });
   }
 
-  Future<void> getPlantDetails() async {
-    var prefs = await SharedPreferences.getInstance();
+  // Future<void> getPlantDetails() async {
+  //   var prefs = await SharedPreferences.getInstance();
 
-    if (prefs.containsKey('FirmAndPlantDetails')) {
-      var extratedData = json.decode(prefs.getString('FirmAndPlantDetails')!)
-          as Map<String, dynamic>;
+  //   if (prefs.containsKey('FirmAndPlantDetails')) {
+  //     var extratedData = json.decode(prefs.getString('FirmAndPlantDetails')!)
+  //         as Map<String, dynamic>;
 
-      // print(extratedData);
-      await Provider.of<Apicalls>(context, listen: false)
-          .tryAutoLogin()
-          .then((value) async {
-        var token = Provider.of<Apicalls>(context, listen: false).token;
-        await Provider.of<InfrastructureApis>(context, listen: false)
-            .getPlantDetails(token, extratedData['PlantId'])
-            .then((value1) {
-          // setState(() {
-          //   firmSelected = true;
-          //   selectedFirmName = e['Firm_Name'];
-          //   selectedFirmId = e['Firm_Id'];
-          // });
-        });
-      });
-    }
-  }
+  //     // print(extratedData);
+  //     await Provider.of<Apicalls>(context, listen: false)
+  //         .tryAutoLogin()
+  //         .then((value) async {
+  //       var token = Provider.of<Apicalls>(context, listen: false).token;
+  //       // await Provider.of<InfrastructureApis>(context, listen: false)
+  //       //     .getPlantDetails(token, extratedData['PlantId'])
+  //       //     .then((value1) {
+  //       //   // setState(() {
+  //       //   //   firmSelected = true;
+  //       //   //   selectedFirmName = e['Firm_Name'];
+  //       //   //   selectedFirmId = e['Firm_Id'];
+  //       //   // });
+  //       // });
+  //     });
+  //   }
+  // }
 
   Future<String> fetchCredientials() async {
     bool data =
@@ -340,6 +346,7 @@ class _AddBatchScreenState extends State<AddBatchScreen>
 
   @override
   void initState() {
+    clearInventoryBatchException(context);
     super.initState();
     controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 450));
@@ -355,7 +362,7 @@ class _AddBatchScreenState extends State<AddBatchScreen>
     selectedSectionList.clear();
     selectedSectionLineList.clear();
 
-    getPlantDetails();
+    // getPlantDetails();
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<BreedInfoApis>(context, listen: false)
@@ -383,13 +390,14 @@ class _AddBatchScreenState extends State<AddBatchScreen>
         .tryAutoLogin()
         .then((value) async {
       var token = Provider.of<Apicalls>(context, listen: false).token;
-      var plantId = await fetchPlant();
-      Provider.of<InfrastructureApis>(context, listen: false)
-          .getWarehouseDetails(plantId, token)
-          .then((value1) {});
-      // Provider.of<InfrastructureApis>(context, listen: false)
-      //     .getPlantDetails(token)
-      //     .then((value1) {});
+      await getFirmData().then((value) {
+        if (value != '') {
+          Provider.of<InfrastructureApis>(context, listen: false)
+              .getPlantDetails(token, value)
+              .then((value1) {});
+        }
+      });
+
       Provider.of<BreedInfoApis>(context, listen: false)
           .getBreed(token)
           .then((value1) {});
@@ -440,66 +448,65 @@ class _AddBatchScreenState extends State<AddBatchScreen>
     if (!isValid) {
       setState(() {});
       return;
-    }
-    _formKey.currentState!.save();
-    batchPlanDetails['WareHouse_Section_Id'] = selectedSectionList;
-    batchPlanDetails['WareHouse_Section_Line_Id'] = selectedSectionLineList;
-
-    print(batchPlanDetails);
-
-    if (widget.editData.isNotEmpty) {
-      Provider.of<Apicalls>(context, listen: false)
-          .tryAutoLogin()
-          .then((value) {
-        var token = Provider.of<Apicalls>(context, listen: false).token;
-        Provider.of<InventoryApi>(context, listen: false)
-            .updateBatch(
-                batchPlanDetails, widget.editData['Batch_Plan_Id'], token)
-            .then((value) {
-          if (value == 202 || value == 201) {
-            widget.reFresh(100);
-            Get.back();
-            successSnackbar('Successfully updated batch');
-          } else {
-            failureSnackbar('Unable to update data something went wrong');
-          }
-        });
-      });
     } else {
-      Provider.of<Apicalls>(context, listen: false)
-          .tryAutoLogin()
-          .then((value) {
-        var token = Provider.of<Apicalls>(context, listen: false).token;
-        Provider.of<InventoryApi>(context, listen: false)
-            .addBatch(batchPlanDetails, token)
+      _formKey.currentState!.save();
+      batchPlanDetails['WareHouse_Section_Id'] = selectedSectionList;
+      batchPlanDetails['WareHouse_Section_Line_Id'] = selectedSectionLineList;
+
+      if (widget.editData.isNotEmpty) {
+        Provider.of<Apicalls>(context, listen: false)
+            .tryAutoLogin()
             .then((value) {
-          if (value == 200 || value == 201) {
-            var data = {
-              'Activity_Plan_Id': batchPlanDetails['Activity_Plan_Id'],
-              'Medication_Plan_Id': batchPlanDetails['Medication_Plan_Id'],
-              'Vaccination_Plan_Id': batchPlanDetails['Vaccination_Plan_Id'],
-              "Breed_Version_Id": batchPlanDetails['Breed_Version_Id'],
-              "Batch_Plan_Code": batchPlanDetails['Batch_Plan_Code'],
-              "Hatch_Date": batchPlanDetails['Expected_Hatch_Date'],
-              // "Batch_Plan_Id": batchPlanDetails['Batch_Plan_Id'],
-            };
-            print(data);
-            Provider.of<BatchApis>(context, listen: false)
-                .addBatchPlanStepTwo(data, token)
-                .then((value) {
-              if (value == 200 || value == 201) {
-                widget.reFresh(100);
-                Get.back();
-                successSnackbar('Successfully added batch');
-              } else {
-                failureSnackbar('Unable to add data something went wrong');
-              }
-            });
-          } else {
-            failureSnackbar('Unable to add data something went wrong');
-          }
+          var token = Provider.of<Apicalls>(context, listen: false).token;
+          Provider.of<InventoryApi>(context, listen: false)
+              .updateBatch(
+                  batchPlanDetails, widget.editData['Batch_Plan_Id'], token)
+              .then((value) {
+            if (value == 202 || value == 201) {
+              widget.reFresh(100);
+              Get.back();
+              successSnackbar('Successfully updated batch');
+            } else {
+              failureSnackbar('Unable to update data something went wrong');
+            }
+          });
         });
-      });
+      } else {
+        Provider.of<Apicalls>(context, listen: false)
+            .tryAutoLogin()
+            .then((value) {
+          var token = Provider.of<Apicalls>(context, listen: false).token;
+          Provider.of<InventoryApi>(context, listen: false)
+              .addBatch(batchPlanDetails, token)
+              .then((value) {
+            if (value == 200 || value == 201) {
+              var data = {
+                'Activity_Plan_Id': batchPlanDetails['Activity_Plan_Id'],
+                'Medication_Plan_Id': batchPlanDetails['Medication_Plan_Id'],
+                'Vaccination_Plan_Id': batchPlanDetails['Vaccination_Plan_Id'],
+                "Breed_Version_Id": batchPlanDetails['Breed_Version_Id'],
+                "Batch_Plan_Code": batchPlanDetails['Batch_Plan_Code'],
+                "Hatch_Date": batchPlanDetails['Expected_Hatch_Date'],
+                // "Batch_Plan_Id": batchPlanDetails['Batch_Plan_Id'],
+              };
+
+              Provider.of<BatchApis>(context, listen: false)
+                  .addBatchPlanStepTwo(data, token)
+                  .then((value) {
+                if (value == 200 || value == 201) {
+                  widget.reFresh(100);
+                  Get.back();
+                  successSnackbar('Successfully added batch');
+                } else {
+                  failureSnackbar('Unable to add data something went wrong');
+                }
+              });
+            } else {
+              failureSnackbar('Unable to add data something went wrong');
+            }
+          });
+        });
+      }
     }
   }
 
@@ -519,13 +526,26 @@ class _AddBatchScreenState extends State<AddBatchScreen>
     });
   }
 
+  void fechWareHouseList(int id) {
+    Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
+      var token = Provider.of<Apicalls>(context, listen: false).token;
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getWarehouseDetailsForAll(
+            id,
+            token,
+          )
+          .then((value1) {});
+      // Provider.of<InfrastructureApis>(context, listen: false)
+      //     .getPlantDetails(token)
+      //     .then((value1) {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     double formWidth = size.width * 0.25;
-    plantDetails = Provider.of<InfrastructureApis>(
-      context,
-    ).plantDetails;
+
     wareHouseDetails = Provider.of<InfrastructureApis>(
       context,
     ).warehouseDetails;
@@ -540,7 +560,9 @@ class _AddBatchScreenState extends State<AddBatchScreen>
     batchPlanData = Provider.of<BatchApis>(context).batchPlan;
     birdGradeList = Provider.of<Apicalls>(context).standardBirdGradeList;
     standardUnitlist = Provider.of<Apicalls>(context).standardUnitList;
-
+    plantList = Provider.of<InfrastructureApis>(
+      context,
+    ).plantDetails;
     warehouseSectionDetails = Provider.of<InfrastructureApis>(
       context,
     ).warehouseSection;
@@ -765,7 +787,53 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                       //     ? const SizedBox()
                       //     : ModularWidgets.validationDesign(
                       //         size, batchCodeValidationMessage),
-
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: formWidth,
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: const Text('Plant Name'),
+                            ),
+                            Container(
+                              width: formWidth,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black26),
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 5, bottom: 2, right: 5),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton(
+                                    isExpanded: true,
+                                    value: plantId,
+                                    items: plantList
+                                        .map<DropdownMenuItem<String>>((e) {
+                                      return DropdownMenuItem(
+                                        value: e['Plant_Name'],
+                                        onTap: () {
+                                          fechWareHouseList(e['Plant_Id']);
+                                          wareHouseId = null;
+                                        },
+                                        child: Text(e['Plant_Name']),
+                                      );
+                                    }).toList(),
+                                    hint: const Text('Choose plant Name'),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        plantId = value as String;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(top: 24.0),
                         child: Column(
@@ -793,7 +861,6 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                                     items: wareHouseDetails
                                         .map<DropdownMenuItem<String>>((e) {
                                       return DropdownMenuItem(
-                                        child: Text(e['WareHouse_Code']),
                                         value: e['WareHouse_Code'],
                                         onTap: () {
                                           // firmId = e['Firm_Code'];
@@ -807,6 +874,7 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                                           getSectionCode(e['WareHouse_Id']);
                                           //print(warehouseCategory);
                                         },
+                                        child: Text(e['WareHouse_Code']),
                                       );
                                     }).toList(),
                                     hint: const Text(
@@ -955,61 +1023,61 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                       //     ? const SizedBox()
                       //     : ModularWidgets.validationDesign(
                       //         size, plantIdValidationMessage),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 24.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: formWidth,
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: const Text('Bird Age Group'),
-                            ),
-                            Container(
-                              width: formWidth,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                                border: Border.all(color: Colors.black26),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    value: birdName,
-                                    items: birdAgeGroup
-                                        .map<DropdownMenuItem<String>>((e) {
-                                      return DropdownMenuItem(
-                                        child: Text(e['Name']),
-                                        value: e['Name'],
-                                        onTap: () {
-                                          // firmId = e['Firm_Code'];
-                                          batchPlanDetails['Bird_Age_Id'] =
-                                              e['Bird_Age_Id'];
-                                          //print(warehouseCategory);
-                                        },
-                                      );
-                                    }).toList(),
-                                    hint:
-                                        const Text('Please Choose Bird Age ID'),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        birdName = value as String;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      birdAgeIdValidation == true
-                          ? const SizedBox()
-                          : ModularWidgets.validationDesign(
-                              size, birdAgeIdValidationMessage),
+                      // Padding(
+                      //   padding: const EdgeInsets.only(top: 24.0),
+                      //   child: Column(
+                      //     mainAxisAlignment: MainAxisAlignment.start,
+                      //     children: [
+                      //       Container(
+                      //         width: formWidth,
+                      //         padding: const EdgeInsets.only(bottom: 12),
+                      //         child: const Text('Bird Age Group'),
+                      //       ),
+                      //       Container(
+                      //         width: formWidth,
+                      //         height: 36,
+                      //         decoration: BoxDecoration(
+                      //           borderRadius: BorderRadius.circular(8),
+                      //           color: Colors.white,
+                      //           border: Border.all(color: Colors.black26),
+                      //         ),
+                      //         child: Padding(
+                      //           padding: const EdgeInsets.symmetric(
+                      //               horizontal: 12, vertical: 6),
+                      //           child: DropdownButtonHideUnderline(
+                      //             child: DropdownButton(
+                      //               value: birdName,
+                      //               items: birdAgeGroup
+                      //                   .map<DropdownMenuItem<String>>((e) {
+                      //                 return DropdownMenuItem(
+                      //                   value: e['Name'],
+                      //                   onTap: () {
+                      //                     // firmId = e['Firm_Code'];
+                      //                     batchPlanDetails['Bird_Age_Id'] =
+                      //                         e['Bird_Age_Id'];
+                      //                     //print(warehouseCategory);
+                      //                   },
+                      //                   child: Text(e['Name']),
+                      //                 );
+                      //               }).toList(),
+                      //               hint:
+                      //                   const Text('Please Choose Bird Age ID'),
+                      //               onChanged: (value) {
+                      //                 setState(() {
+                      //                   birdName = value as String;
+                      //                 });
+                      //               },
+                      //             ),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                      // birdAgeIdValidation == true
+                      //     ? const SizedBox()
+                      //     : ModularWidgets.validationDesign(
+                      //         size, birdAgeIdValidationMessage),
 
                       Padding(
                         padding: const EdgeInsets.only(top: 24.0),
@@ -1038,13 +1106,13 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                                     items: breedInfo
                                         .map<DropdownMenuItem<String>>((e) {
                                       return DropdownMenuItem(
-                                        child: Text(e['Breed_Name']),
                                         value: e['Breed_Name'],
                                         onTap: () {
                                           // firmId = e['Firm_Code'];
                                           batchPlanDetails['Breed_Id'] =
                                               e['Breed_Id'].toString();
                                         },
+                                        child: Text(e['Breed_Name']),
                                       );
                                     }).toList(),
                                     hint: const Text('Please Choose Breed Id'),
@@ -1091,13 +1159,13 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                                     items: breedVersion
                                         .map<DropdownMenuItem<String>>((e) {
                                       return DropdownMenuItem(
-                                        child: Text(e['Breed_Version']),
                                         value: e['Breed_Version'],
                                         onTap: () {
                                           // firmId = e['Firm_Code'];
                                           batchPlanDetails['Breed_Version_Id'] =
                                               e['Breed_Version_Id'].toString();
                                         },
+                                        child: Text(e['Breed_Version']),
                                       );
                                     }).toList(),
                                     hint: const Text(
@@ -1145,13 +1213,13 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                                     items: activityHeaderData
                                         .map<DropdownMenuItem<String>>((e) {
                                       return DropdownMenuItem(
-                                        child: Text(e['Activity_Code']),
                                         value: e['Activity_Code'],
                                         onTap: () {
                                           // firmId = e['Firm_Code'];
                                           batchPlanDetails['Activity_Plan_Id'] =
                                               e['Activity_Id'].toString();
                                         },
+                                        child: Text(e['Activity_Code']),
                                       );
                                     }).toList(),
                                     hint: const Text('Choose Activity name'),
@@ -1198,7 +1266,6 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                                     items: medicationHeaderData
                                         .map<DropdownMenuItem<String>>((e) {
                                       return DropdownMenuItem(
-                                        child: Text(e['Medication_Code']),
                                         value: e['Medication_Code'],
                                         onTap: () {
                                           // firmId = e['Firm_Code'];
@@ -1206,6 +1273,7 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                                                   'Medication_Plan_Id'] =
                                               e['Medication_Id'].toString();
                                         },
+                                        child: Text(e['Medication_Code']),
                                       );
                                     }).toList(),
                                     hint: const Text('Choose Medication name'),
@@ -1252,7 +1320,6 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                                     items: vaccinationHeaderData
                                         .map<DropdownMenuItem<String>>((e) {
                                       return DropdownMenuItem(
-                                        child: Text(e['Vaccination_Code']),
                                         value: e['Vaccination_Code'],
                                         onTap: () {
                                           // firmId = e['Firm_Code'];
@@ -1260,6 +1327,7 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                                                   'Vaccination_Plan_Id'] =
                                               e['Vaccination_Id'].toString();
                                         },
+                                        child: Text(e['Vaccination_Code']),
                                       );
                                     }).toList(),
                                     hint: const Text('Choose Vaccination Name'),
@@ -1459,7 +1527,6 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                                     items: standardUnitlist
                                         .map<DropdownMenuItem<String>>((e) {
                                       return DropdownMenuItem(
-                                        child: Text(e['Unit_Name']),
                                         value: e['Unit_Name'],
                                         onTap: () {
                                           // firmId = e['Firm_Code'];
@@ -1467,6 +1534,7 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                                               e['Unit_Id'];
                                           //print(warehouseCategory);
                                         },
+                                        child: Text(e['Unit_Name']),
                                       );
                                     }).toList(),
                                     hint: const Text('Please Choose Unit'),
@@ -1482,56 +1550,56 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                           ],
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 24.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: formWidth,
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: const Text('Grade'),
-                            ),
-                            Container(
-                              width: formWidth,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                                border: Border.all(color: Colors.black26),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    value: birdGradeId,
-                                    items: birdGradeList
-                                        .map<DropdownMenuItem<String>>((e) {
-                                      return DropdownMenuItem(
-                                        child: Text(e['Bird_Grade']),
-                                        value: e['Bird_Grade'],
-                                        onTap: () {
-                                          // firmId = e['Firm_Code'];
-                                          batchPlanDetails['Bird_Grade_Id'] =
-                                              e['Bird_Grade_Id'];
-                                          //print(warehouseCategory);
-                                        },
-                                      );
-                                    }).toList(),
-                                    hint: const Text('Please Choose Grade'),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        birdGradeId = value as String;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.only(top: 24.0),
+                      //   child: Column(
+                      //     mainAxisAlignment: MainAxisAlignment.start,
+                      //     children: [
+                      //       Container(
+                      //         width: formWidth,
+                      //         padding: const EdgeInsets.only(bottom: 12),
+                      //         child: const Text('Grade'),
+                      //       ),
+                      //       Container(
+                      //         width: formWidth,
+                      //         height: 36,
+                      //         decoration: BoxDecoration(
+                      //           borderRadius: BorderRadius.circular(8),
+                      //           color: Colors.white,
+                      //           border: Border.all(color: Colors.black26),
+                      //         ),
+                      //         child: Padding(
+                      //           padding: const EdgeInsets.symmetric(
+                      //               horizontal: 12, vertical: 6),
+                      //           child: DropdownButtonHideUnderline(
+                      //             child: DropdownButton(
+                      //               value: birdGradeId,
+                      //               items: birdGradeList
+                      //                   .map<DropdownMenuItem<String>>((e) {
+                      //                 return DropdownMenuItem(
+                      //                   value: e['Bird_Grade'],
+                      //                   onTap: () {
+                      //                     // firmId = e['Firm_Code'];
+                      //                     batchPlanDetails['Bird_Grade_Id'] =
+                      //                         e['Bird_Grade_Id'];
+                      //                     //print(warehouseCategory);
+                      //                   },
+                      //                   child: Text(e['Bird_Grade']),
+                      //                 );
+                      //               }).toList(),
+                      //               hint: const Text('Please Choose Grade'),
+                      //               onChanged: (value) {
+                      //                 setState(() {
+                      //                   birdGradeId = value as String;
+                      //                 });
+                      //               },
+                      //             ),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
 
                       Consumer<InventoryApi>(builder: (context, value, child) {
                         return ListView.builder(
@@ -1541,7 +1609,7 @@ class _AddBatchScreenState extends State<AddBatchScreen>
                           itemBuilder: (BuildContext context, int index) {
                             return ModularWidgets.exceptionDesign(
                                 MediaQuery.of(context).size,
-                                value.inventoryBatchExceptions[index][0]);
+                                value.inventoryBatchExceptions[index]);
                           },
                         );
                       }),

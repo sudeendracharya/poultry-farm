@@ -10,9 +10,11 @@ import 'package:poultry_login_signup/sales_journal/widgets/add_sales_journal.dar
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../colors.dart';
 import '../../providers/apicalls.dart';
 import '../../screens/global_app_bar.dart';
 import '../../screens/main_dash_board.dart';
+import '../../styles.dart';
 
 class SalesDetailsPage extends StatefulWidget {
   SalesDetailsPage({Key? key, required this.id}) : super(key: key);
@@ -56,6 +58,8 @@ class _SalesDetailsPageState extends State<SalesDetailsPage> {
   List temp = [];
 
   var _productId;
+
+  void updateCheckBox(int data) {}
 
   void update(int data) {
     getProductData().then((value) {
@@ -151,11 +155,15 @@ class _SalesDetailsPageState extends State<SalesDetailsPage> {
     );
   }
 
+  int defaultRowsPerPage = 5;
+  List selectedSaleCodes = [];
+
   @override
   Widget build(BuildContext context) {
     salesDetails = Provider.of<JournalApi>(context).individualSalesData;
     final breadCrumpsStyle = Theme.of(context).textTheme.headline4;
     final width = MediaQuery.of(context).size.width;
+    final size = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: () async {
         // Get.offNamed(ProductManagementPage.routeName, arguments: 0);
@@ -163,7 +171,7 @@ class _SalesDetailsPageState extends State<SalesDetailsPage> {
         return true;
       },
       child: Scaffold(
-        appBar: GlobalAppBar(query: query, appbar: AppBar()),
+        appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
         body: Padding(
           padding: const EdgeInsets.only(top: 18.0, left: 43),
           child: SingleChildScrollView(
@@ -196,7 +204,7 @@ class _SalesDetailsPageState extends State<SalesDetailsPage> {
                       onPressed: () {},
                       child: salesDetails.isEmpty
                           ? const SizedBox()
-                          : Text(salesDetails['Sale_Code'],
+                          : Text(salesDetails['sale']['Sale_Code'],
                               style: breadCrumpsStyle),
                     ),
                   ],
@@ -209,7 +217,7 @@ class _SalesDetailsPageState extends State<SalesDetailsPage> {
                       salesDetails.isEmpty
                           ? const SizedBox()
                           : Text(
-                              salesDetails['Sale_Code'],
+                              salesDetails['sale']['Sale_Code'],
                               style:
                                   // style: TextStyle(fontWeight: FontWeight.w700, fontSize: 36),
                                   GoogleFonts.roboto(
@@ -233,16 +241,16 @@ class _SalesDetailsPageState extends State<SalesDetailsPage> {
                           },
                           child: Row(
                             children: [
-                              Text(
-                                'Edit Detail',
-                                style: GoogleFonts.roboto(
-                                  textStyle: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 18,
-                                      decoration: TextDecoration.underline,
-                                      color: Colors.black),
-                                ),
-                              ),
+                              // Text(
+                              //   'Edit Detail',
+                              //   style: GoogleFonts.roboto(
+                              //     textStyle: const TextStyle(
+                              //         fontWeight: FontWeight.w700,
+                              //         fontSize: 18,
+                              //         decoration: TextDecoration.underline,
+                              //         color: Colors.black),
+                              //   ),
+                              // ),
                               // const Icon(
                               //   Icons.arrow_drop_down_outlined,
                               //   size: 25,
@@ -279,60 +287,27 @@ class _SalesDetailsPageState extends State<SalesDetailsPage> {
                             ),
                             salesDetails.isEmpty
                                 ? const SizedBox()
-                                : getDataContainer(
-                                    salesDetails['Sale_Code'].toString()),
+                                : getDataContainer(salesDetails['sale']
+                                        ['Sale_Code']
+                                    .toString()),
                           ],
                         ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          children: [
-                            getHeadingContainer('Customer Name'),
-                            const SizedBox(
-                              width: 55,
-                            ),
-                            salesDetails.isEmpty
-                                ? const SizedBox()
-                                : getDataContainer(
-                                    salesDetails['Customer_Id__Customer_Name']),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          children: [
-                            getHeadingContainer('Rate '),
-                            const SizedBox(
-                              width: 55,
-                            ),
-                            salesDetails.isEmpty
-                                ? const SizedBox()
-                                : getDataContainer(
-                                    salesDetails['Rate'].toString()),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          children: [
-                            getHeadingContainer('Warehouse Name'),
-                            const SizedBox(
-                              width: 55,
-                            ),
-                            salesDetails.isEmpty
-                                ? const SizedBox()
-                                : getDataContainer(
-                                    salesDetails['WareHouse_Id__WareHouse_Name']
-                                        .toString(),
-                                  ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
+                        // const SizedBox(
+                        //   height: 15,
+                        // ),
+                        // Row(
+                        //   children: [
+                        //     getHeadingContainer('Customer Name'),
+                        //     const SizedBox(
+                        //       width: 55,
+                        //     ),
+                        //     salesDetails.isEmpty
+                        //         ? const SizedBox()
+                        //         : getDataContainer(
+                        //             salesDetails['Customer_Id__Customer_Name']),
+                        //   ],
+                        // ),
+
                         Row(
                           children: [
                             getHeadingContainer('Shipped Date'),
@@ -343,118 +318,152 @@ class _SalesDetailsPageState extends State<SalesDetailsPage> {
                                 ? const SizedBox()
                                 : getDataContainer(
                                     DateFormat('dd-MM-yyyy').format(
-                                        DateTime.parse(
-                                            salesDetails['Shipped_Date'])),
+                                        DateTime.parse(salesDetails['sale']
+                                            ['Despatch_Date'])),
                                   ),
                           ],
                         ),
                         const SizedBox(
                           height: 15,
                         ),
-                        Row(
-                          children: [
-                            getHeadingContainer('Batch Code'),
-                            const SizedBox(
-                              width: 55,
-                            ),
-                            salesDetails.isEmpty
-                                ? const SizedBox()
-                                : getDataContainer(salesDetails[
-                                        'Batch_Plan_Id__Batch_Plan_Code']
-                                    .toString()),
-                          ],
+                        SizedBox(
+                          width: width,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(
+                                height: 50,
+                              ),
+                              Text(
+                                'Product List',
+                                style: ProjectStyles.contentHeaderStyle()
+                                    .copyWith(fontSize: 26),
+                              ),
+                              // Padding(
+                              //   padding: const EdgeInsets.only(top: 20.0),
+                              //   child: Container(
+                              //     width: 253,
+                              //     child: AdministrationSearchWidget(
+                              //         search: (value) {},
+                              //         reFresh: (value) {},
+                              //         text: query,
+                              //         onChanged: searchBook,
+                              //         hintText: 'Search'),
+                              //   ),
+                              // ),
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.5,
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    // extratedSalesPermissions['Create'] == true
+                                    //     ?
+                                    // IconButton(
+                                    //   onPressed: () {
+                                    //     // showGlobalDrawer(
+                                    //     //     context: context,
+                                    //     //     builder: (ctx) => AddSalesJournal(
+                                    //     //           name: individualCustomerInfo[
+                                    //     //               'Individual_Customer_Name'],
+                                    //     //           id: individualCustomerInfo[
+                                    //     //                   'Customer']
+                                    //     //               .toString(),
+                                    //     //           customerType: 'Individual',
+                                    //     //           editData: {},
+                                    //     //           reFresh: update,
+                                    //     //         ),
+                                    //     //     direction: AxisDirection.right);
+                                    //   },
+                                    //   icon: const Icon(Icons.add),
+                                    // ),
+                                    // : const SizedBox(),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    // extratedSalesPermissions['Delete'] == true
+                                    //     ?
+                                    // IconButton(
+                                    //   onPressed: delete,
+                                    //   icon: const Icon(Icons.delete),
+                                    // )
+                                    // : const SizedBox(),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 5.0),
+                                child: Container(
+                                  width: size.width * 0.5,
+                                  child: PaginatedDataTable(
+                                    source: MySearchData(
+                                        salesDetails['sale_items'] ?? [],
+                                        updateCheckBox),
+                                    arrowHeadColor: ProjectColors.themecolor,
+
+                                    columns: [
+                                      DataColumn(
+                                          label: Text('Warehouse',
+                                              style: ProjectStyles
+                                                  .paginatedHeaderStyle())),
+                                      DataColumn(
+                                          label: Text('Batch ',
+                                              style: ProjectStyles
+                                                  .paginatedHeaderStyle())),
+                                      DataColumn(
+                                          label: Text('Product',
+                                              style: ProjectStyles
+                                                  .paginatedHeaderStyle())),
+                                      DataColumn(
+                                          label: Text('Quantity',
+                                              style: ProjectStyles
+                                                  .paginatedHeaderStyle())),
+                                      DataColumn(
+                                          label: Text('Price',
+                                              style: ProjectStyles
+                                                  .paginatedHeaderStyle())),
+                                      DataColumn(
+                                          label: Text('CW Quantity',
+                                              style: ProjectStyles
+                                                  .paginatedHeaderStyle())),
+                                      DataColumn(
+                                          label: Text('Unit',
+                                              style: ProjectStyles
+                                                  .paginatedHeaderStyle())),
+                                      DataColumn(
+                                          label: Text('CW Unit',
+                                              style: ProjectStyles
+                                                  .paginatedHeaderStyle())),
+                                    ],
+                                    onRowsPerPageChanged: (index) {
+                                      setState(() {
+                                        defaultRowsPerPage = index!;
+                                      });
+                                    },
+                                    availableRowsPerPage: const <int>[
+                                      3,
+                                      5,
+                                      10,
+                                      20,
+                                      40,
+                                      60,
+                                      80,
+                                    ],
+                                    columnSpacing: 20,
+                                    //  horizontalMargin: 10,
+                                    rowsPerPage: defaultRowsPerPage,
+                                    showCheckboxColumn: true,
+                                    // addEmptyRows: false,
+                                    checkboxHorizontalMargin: 30,
+                                    // onSelectAll: (value) {},
+                                    showFirstLastButtons: true,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          children: [
-                            getHeadingContainer('Item'),
-                            const SizedBox(
-                              width: 55,
-                            ),
-                            salesDetails.isEmpty
-                                ? const SizedBox()
-                                : getDataContainer(
-                                    salesDetails['Product_Id__Product_Name']),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          children: [
-                            getHeadingContainer('Item Category'),
-                            const SizedBox(
-                              width: 55,
-                            ),
-                            salesDetails.isEmpty
-                                ? const SizedBox()
-                                : getDataContainer(salesDetails[
-                                        'Product_Category_Id__Product_Category_Name']
-                                    .toString()),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          children: [
-                            getHeadingContainer('Quantity'),
-                            const SizedBox(
-                              width: 55,
-                            ),
-                            salesDetails.isEmpty
-                                ? const SizedBox()
-                                : getDataContainer(
-                                    salesDetails['Quantity'].toString()),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          children: [
-                            getHeadingContainer('Quantity Unit'),
-                            const SizedBox(
-                              width: 55,
-                            ),
-                            salesDetails.isEmpty
-                                ? const SizedBox()
-                                : getDataContainer(
-                                    salesDetails['Quantity_Unit'].toString()),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          children: [
-                            getHeadingContainer('CW Quantity'),
-                            const SizedBox(
-                              width: 55,
-                            ),
-                            salesDetails.isEmpty
-                                ? const SizedBox()
-                                : getDataContainer(
-                                    salesDetails['CW_Quantity'].toString()),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          children: [
-                            getHeadingContainer('CW Unit'),
-                            const SizedBox(
-                              width: 55,
-                            ),
-                            salesDetails.isEmpty
-                                ? const SizedBox()
-                                : getDataContainer(
-                                    salesDetails['CW_Unit'].toString()),
-                          ],
-                        )
                       ],
                     ),
                   ),
@@ -466,4 +475,53 @@ class _SalesDetailsPageState extends State<SalesDetailsPage> {
       ),
     );
   }
+}
+
+List selectedSaleCodes = [];
+
+class MySearchData extends DataTableSource {
+  final List<dynamic> data;
+  final ValueChanged<int> reFresh;
+  MySearchData(this.data, this.reFresh);
+
+  @override
+  int get selectedRowCount => 0;
+
+  DataRow displayRows(int index) {
+    return DataRow(
+        // onSelectChanged: (value) {
+        //   data[index]['Is_Selected'] = value;
+        //   reFresh(100);
+        //   if (selectedSaleCodes.isEmpty) {
+        //     selectedSaleCodes.add(data[index]['Sale_Id']);
+        //   } else {
+        //     if (value == true) {
+        //       selectedSaleCodes.add(data[index]['Sale_Id']);
+        //     } else {
+        //       selectedSaleCodes.remove(data[index]['Sale_Id']);
+        //     }
+        //   }
+        //   // print(selectedSaleCodes);
+        // },
+        // selected: data[index]['Is_Selected'],
+        cells: [
+          DataCell(Text(data[index]['WareHouse_Id'].toString())),
+          DataCell(Text(data[index]['Batch_Plan_Id'].toString())),
+          DataCell(Text(data[index]['Product_Id'].toString())),
+          DataCell(Text(data[index]['Quantity'].toString())),
+          DataCell(Text(data[index]['Price'].toString())),
+          DataCell(Text(data[index]['CW_Quantity'].toString())),
+          DataCell(Text(data[index]['Unit'].toString())),
+          DataCell(Text(data[index]['CW_Unit'].toString())),
+        ]);
+  }
+
+  @override
+  DataRow getRow(int index) => displayRows(index);
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => data.length;
 }

@@ -6,6 +6,7 @@ import 'package:poultry_login_signup/providers/apicalls.dart';
 import 'package:poultry_login_signup/infrastructure/providers/infrastructure_apicalls.dart';
 import 'package:provider/provider.dart';
 
+import '../../main.dart';
 import '../../widgets/modular_widgets.dart';
 
 class EditFirmDetailsDialog extends StatefulWidget {
@@ -227,6 +228,7 @@ class _EditFirmDetailsDialogState extends State<EditFirmDetailsDialog> {
 
   @override
   void initState() {
+    clearFirmException(context);
     firmCodeController.text = widget.firmCode.toString();
     firmNameController.text = widget.firmName;
     emailIdController.text = widget.email;
@@ -768,7 +770,7 @@ class _EditFirmDetailsDialogState extends State<EditFirmDetailsDialog> {
                           itemBuilder: (BuildContext context, int index) {
                             return ModularWidgets.exceptionDesign(
                                 MediaQuery.of(context).size,
-                                value.firmException[index][0]);
+                                value.firmException[index]);
                           },
                         );
                       }),

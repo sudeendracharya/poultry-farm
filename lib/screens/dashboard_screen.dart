@@ -461,12 +461,12 @@ class _InfraManagementState extends State<InfraManagement> {
                     // Get.to(() => WareHouseDetailsScreen());
                   },
                 ),
-                ListTile(
-                  title: const Text('Ware House Section'),
-                  onTap: () {
-                    Get.toNamed(WareHouseSectionScreen.routeName);
-                  },
-                ),
+                // ListTile(
+                //   title: const Text('Ware House Section'),
+                //   onTap: () {
+                //     Get.toNamed(WareHouseSectionScreen.routeName);
+                //   },
+                // ),
                 ListTile(
                   title: const Text('Ware House Section Line'),
                   onTap: () {

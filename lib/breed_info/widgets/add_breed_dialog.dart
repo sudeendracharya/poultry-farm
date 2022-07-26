@@ -49,6 +49,12 @@ class _AddBreedDialogState extends State<AddBreedDialog> {
     }
   }
 
+  @override
+  void initState() {
+    clearBreedException(context);
+    super.initState();
+  }
+
   bool validation() {
     if (nameController.text == '') {
       _nameValidationSubject = 'Breed Name cannot be empty';

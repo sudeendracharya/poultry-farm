@@ -9,17 +9,14 @@ import 'package:poultry_login_signup/colors.dart';
 import 'package:poultry_login_signup/inventory/providers/inventory_api.dart';
 import 'package:poultry_login_signup/inventory/screens/inventory_screen.dart';
 import 'package:poultry_login_signup/inventory/widgets/add_batch_screen.dart';
-import 'package:poultry_login_signup/items/screens/inventory.dart';
 import 'package:poultry_login_signup/main.dart';
 import 'package:poultry_login_signup/providers/apicalls.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../batch_plan/widgets/add_batch_plan_details_dialog.dart';
 import '../../screens/global_app_bar.dart';
 import '../../screens/main_drawer_screen.dart';
 import '../../screens/secondary_dashboard_screen.dart';
-import '../../search_widget.dart';
 
 class InventoryBatchDetailScreen extends StatefulWidget {
   InventoryBatchDetailScreen({Key? key}) : super(key: key);
@@ -215,7 +212,7 @@ class _InventoryBatchDetailScreenState
     }
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: loading == true
           ? const Center(
               child: Text('Loading'),
@@ -667,15 +664,15 @@ class _InventoryBatchDetailScreenState
                           batchDetailsData['Batch_Code'] == null
                               ? IconButton(
                                   onPressed: () {
-                                    showGlobalDrawer(
-                                        context: context,
-                                        builder: (ctx) =>
-                                            AddBatchPlanDetailsDialog(
-                                              editData: {},
-                                              id: _batchPlanId.toString(),
-                                              reFresh: update,
-                                            ),
-                                        direction: AxisDirection.right);
+                                    // showGlobalDrawer(
+                                    //     context: context,
+                                    //     builder: (ctx) =>
+                                    //         AddBatchPlanDetailsDialog(
+                                    //           editData: {},
+                                    //           id: _batchPlanId.toString(),
+                                    //           reFresh: update,
+                                    //         ),
+                                    //     direction: AxisDirection.right);
                                   },
                                   icon: Icon(
                                     Icons.add_circle_outline,
@@ -686,15 +683,15 @@ class _InventoryBatchDetailScreenState
                                   padding: const EdgeInsets.only(right: 143.0),
                                   child: TextButton(
                                     onPressed: () {
-                                      showGlobalDrawer(
-                                          context: context,
-                                          builder: (ctx) =>
-                                              AddBatchPlanDetailsDialog(
-                                                editData: batchDetailsData,
-                                                id: _batchPlanId.toString(),
-                                                reFresh: update,
-                                              ),
-                                          direction: AxisDirection.right);
+                                      // showGlobalDrawer(
+                                      //     context: context,
+                                      //     builder: (ctx) =>
+                                      //         AddBatchPlanDetailsDialog(
+                                      //           editData: batchDetailsData,
+                                      //           id: _batchPlanId.toString(),
+                                      //           reFresh: update,
+                                      //         ),
+                                      //     direction: AxisDirection.right);
                                     },
                                     child: Text(
                                       'Edit Detail',

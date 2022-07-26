@@ -4,6 +4,8 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
+import '../../main.dart';
+
 class GradingApis with ChangeNotifier {
   List _eggGradingList = [];
   List _birdGradingList = [];
@@ -20,8 +22,7 @@ class GradingApis with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/grade-types/add-egg-grade/');
+    final url = Uri.parse('${baseUrl}api/v1/grade-types/add-egg-grade/');
     try {
       final response = await http.get(
         url,
@@ -48,8 +49,7 @@ class GradingApis with ChangeNotifier {
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/grade-types/add-egg-grade/');
+    final url = Uri.parse('${baseUrl}api/v1/grade-types/add-egg-grade/');
     try {
       final response = await http.post(
         url,
@@ -74,8 +74,7 @@ class GradingApis with ChangeNotifier {
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/grade-types/edit-egg-grade/$id');
+    final url = Uri.parse('${baseUrl}api/v1/grade-types/edit-egg-grade/$id');
     try {
       final response = await http.put(
         url,
@@ -99,8 +98,7 @@ class GradingApis with ChangeNotifier {
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/grade-types/edit-egg-grade/$id');
+    final url = Uri.parse('${baseUrl}api/v1/grade-types/edit-egg-grade/$id');
     try {
       final response = await http.delete(
         url,
@@ -123,10 +121,8 @@ class GradingApis with ChangeNotifier {
   Future<int> getBirdGrading(
     var token,
   ) async {
-    log(token.toString());
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/grade-types/add-bird-grade/');
+    final url = Uri.parse('${baseUrl}api/v1/grade-types/add-bird-grade/');
     try {
       final response = await http.get(
         url,
@@ -152,8 +148,7 @@ class GradingApis with ChangeNotifier {
     var data,
     var token,
   ) async {
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/grade-types/add-bird-grade/');
+    final url = Uri.parse('${baseUrl}api/v1/grade-types/add-bird-grade/');
     try {
       final response = await http.post(
         url,
@@ -177,8 +172,7 @@ class GradingApis with ChangeNotifier {
     var id,
     var token,
   ) async {
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/grade-types/edit-bird-grade/$id');
+    final url = Uri.parse('${baseUrl}api/v1/grade-types/edit-bird-grade/$id');
     try {
       final response = await http.put(
         url,
@@ -201,8 +195,7 @@ class GradingApis with ChangeNotifier {
     var id,
     var token,
   ) async {
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/grade-types/edit-bird-grade/$id');
+    final url = Uri.parse('${baseUrl}api/v1/grade-types/edit-bird-grade/$id');
     try {
       final response = await http.delete(
         url,

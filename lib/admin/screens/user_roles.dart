@@ -91,12 +91,11 @@ class _UserRolesState extends State<UserRoles> {
 
   void searchBook(String query) {
     final searchOutput = userRoles.where((details) {
-      final batchCode = details['Batch_Code'];
-      final breedName = details['Breed_Id'];
+      final roleName = details['Role_Name'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
-      return batchCode.contains(searchName) || breedName.contains(searchName);
+      return roleName.contains(searchName);
     }).toList();
 
     setState(() {
@@ -140,7 +139,7 @@ class _UserRolesState extends State<UserRoles> {
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'Role Name'),
                       ),
                     ),
                     Container(

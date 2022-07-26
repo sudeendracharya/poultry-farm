@@ -1,11 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
 
-class InventoryAdjustemntApis extends ChangeNotifier {
-  var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
+import '../../main.dart';
 
+class InventoryAdjustemntApis extends ChangeNotifier {
   List _eggCollectionDetails = [];
 
   List _eggGradingList = [];
@@ -50,16 +51,18 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleExceptions(response);
       }
 
-      // print(response.statusCode);
-      // print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -76,7 +79,7 @@ class InventoryAdjustemntApis extends ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
 
@@ -112,11 +115,13 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         notifyListeners();
       }
 
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -137,7 +142,7 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleExceptions(response);
       }
@@ -147,6 +152,8 @@ class InventoryAdjustemntApis extends ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -165,12 +172,14 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -189,16 +198,17 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleExceptions(response);
       }
 
-      print(response.statusCode);
-      print(response.body);
-
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -215,23 +225,22 @@ class InventoryAdjustemntApis extends ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      print(response.statusCode);
-      print(response.body);
-
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         List temp = [];
         for (var data in responseData) {
           temp.add({
             "Grading_Record_Id": data['Grading_Record_Id'],
-            "Batch_Id": data['Batch_Id__Batch_Code'],
+            "Batch_Id": data['Batch_Plan_Id__Batch_Code'],
             "Grading_Date": data['Grading_Date'],
             "WareHouse_Id": data['WareHouse_Id__WareHouse_Name'],
             "Location": data['Location'],
             "From": data['From'],
             "To": data['To'],
-            "Unit": data['Unit'],
+            "Unit": data['Unit_Id__Unit_Name'],
             "Is_Selected": false,
           });
         }
@@ -241,6 +250,8 @@ class InventoryAdjustemntApis extends ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -260,6 +271,7 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
+      forbidden(response);
       if (response.statusCode == 400) {
         handleExceptions(response);
       }
@@ -269,6 +281,8 @@ class InventoryAdjustemntApis extends ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -287,12 +301,14 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -301,7 +317,7 @@ class InventoryAdjustemntApis extends ChangeNotifier {
     var responseData = json.decode(response.body) as Map<String, dynamic>;
     _inventoryAdjustemntExceptions.clear();
     responseData.forEach((key, value) {
-      _inventoryAdjustemntExceptions.add(value);
+      _inventoryAdjustemntExceptions.add({'Key': key, 'Value': value});
     });
     notifyListeners();
   }
@@ -321,16 +337,18 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleExceptions(response);
       }
 
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -348,7 +366,7 @@ class InventoryAdjustemntApis extends ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         List temp = [];
@@ -374,6 +392,8 @@ class InventoryAdjustemntApis extends ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -394,6 +414,7 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
+      forbidden(response);
       if (response.statusCode == 400) {
         handleExceptions(response);
       }
@@ -403,6 +424,8 @@ class InventoryAdjustemntApis extends ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -422,12 +445,14 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -446,7 +471,7 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleExceptions(response);
       }
@@ -456,6 +481,8 @@ class InventoryAdjustemntApis extends ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -472,9 +499,9 @@ class InventoryAdjustemntApis extends ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      // print(response.statusCode);
-      // print('mortality ${response.body}');
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -487,7 +514,7 @@ class InventoryAdjustemntApis extends ChangeNotifier {
             "Item": data['Product_Id__Product_Name'],
             "Item_Category": data['Product_Category_Id__Product_Category_Name'],
             "Date": data['Date'],
-            "Batch_Id": data['Batch_Id__Batch_Code'],
+            "Batch_Id": data['Batch_Plan_Id__Batch_Code'],
             "Quantity": data['Quantity'],
             "Description": data['Description'],
             "Is_Selected": false,
@@ -499,6 +526,8 @@ class InventoryAdjustemntApis extends ChangeNotifier {
       }
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -519,7 +548,7 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleExceptions(response);
       }
@@ -529,6 +558,8 @@ class InventoryAdjustemntApis extends ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -548,12 +579,14 @@ class InventoryAdjustemntApis extends ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }

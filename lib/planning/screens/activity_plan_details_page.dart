@@ -78,7 +78,7 @@ class _ActivityPlanDetailsPageState extends State<ActivityPlanDetailsPage> {
     if (prefs.containsKey('Activity_Id')) {
       var extratedData =
           json.decode(prefs.getString('Activity_Id')!) as Map<String, dynamic>;
-      print(extratedData);
+
       _activityId = extratedData['Activity_Id'].toString();
     }
   }
@@ -181,7 +181,7 @@ class _ActivityPlanDetailsPageState extends State<ActivityPlanDetailsPage> {
     _activityDetails = Provider.of<ActivityApis>(context).singleActivityPlan;
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: loading == true
           ? const Center(
               child: Text('Loading'),

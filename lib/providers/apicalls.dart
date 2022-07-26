@@ -3,11 +3,15 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../main.dart';
+
 class Apicalls with ChangeNotifier {
-  var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
   var _token;
   var _userName;
   var _expiryDate;
@@ -96,9 +100,9 @@ class Apicalls with ChangeNotifier {
         ),
       );
 
-      print(response.statusCode);
-      print(response.body);
-
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
+      forbidden(response);
       final responseData = json.decode(response.body);
 
       if (response.statusCode == 400) {
@@ -106,7 +110,7 @@ class Apicalls with ChangeNotifier {
         var responseData = json.decode(response.body) as Map<String, dynamic>;
         _signupException.clear();
         responseData.forEach((key, value) {
-          _signupException.add(value);
+          _signupException.add({'Key': key, 'Value': value});
         });
         notifyListeners();
         return response.statusCode;
@@ -131,6 +135,8 @@ class Apicalls with ChangeNotifier {
 
       return response.statusCode;
     } catch (error) {
+      EasyLoading.dismiss();
+      exceptionDialog(error.toString());
       rethrow;
     }
   }
@@ -145,9 +151,9 @@ class Apicalls with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -477,7 +483,7 @@ class Apicalls with ChangeNotifier {
         var responseData = json.decode(response.body) as Map<String, dynamic>;
         _signupException.clear();
         responseData.forEach((key, value) {
-          _signupException.add(value);
+          _signupException.add({'Key': key, 'Value': value});
         });
         notifyListeners();
         return response.statusCode;
@@ -510,10 +516,11 @@ class Apicalls with ChangeNotifier {
           },
         ),
       );
-      log(response.body);
 
       return response.statusCode;
     } catch (error) {
+      EasyLoading.dismiss();
+      exceptionDialog(error.toString());
       rethrow;
     }
   }
@@ -543,7 +550,7 @@ class Apicalls with ChangeNotifier {
           'password2': data['password2'],
         }),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
@@ -552,27 +559,56 @@ class Apicalls with ChangeNotifier {
         if (responseData['error'] != null) {
           throw HttpException(responseData['error']['message']);
         }
-        _token = responseData['key'];
-        // _userId = responseData['agent']['uId'];
-        _expiryDate = DateTime.now().add(
-          const Duration(days: 60),
-        );
-        notifyListeners();
-        final prefs = await SharedPreferences.getInstance();
-        final userData = json.encode(
-          {
-            'token': _token,
-            // 'userId': _userId,
-            'expiryDate': _expiryDate.toIso8601String(),
-          },
-        );
-        prefs.setString('userData', userData);
+        // _token = responseData['key'];
+        // // _userId = responseData['agent']['uId'];
+        // _expiryDate = DateTime.now().add(
+        //   const Duration(days: 60),
+        // );
+        // notifyListeners();
+        // final prefs = await SharedPreferences.getInstance();
+        // final userData = json.encode(
+        //   {
+        //     'token': _token,
+        //     // 'userId': _userId,
+        //     'expiryDate': _expiryDate.toIso8601String(),
+        //   },
+        // );
+        // prefs.setString('userData', userData);
       } else if (response.statusCode == 400) {
         var responseData = json.decode(response.body) as Map<String, dynamic>;
         _signupException.clear();
         responseData.forEach((key, value) {
-          _signupException.add(value);
+          _signupException.add({'Key': key, 'Value': value});
         });
+        Get.dialog(Dialog(
+          child: StatefulBuilder(
+            builder: (BuildContext context, setState) {
+              return Container(
+                width: 300,
+                height: 100,
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: ListView.builder(
+                    itemCount: _signupException.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Column(
+                        children: [
+                          Text(_signupException[index]['Key']),
+                          Text(_signupException[index]['Value'][0]),
+                          const SizedBox(
+                            height: 10,
+                          )
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ));
         notifyListeners();
       }
 
@@ -580,6 +616,9 @@ class Apicalls with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
+
       rethrow;
     }
   }
@@ -599,7 +638,7 @@ class Apicalls with ChangeNotifier {
         //   //"Authorization": token,
         // },
       );
-
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
 
@@ -635,6 +674,8 @@ class Apicalls with ChangeNotifier {
         'StatusCode': response.statusCode,
       };
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -659,7 +700,6 @@ class Apicalls with ChangeNotifier {
           'password2': data['password2'],
         }),
       );
-      log(response.body);
       // final responseData = json.decode(response.body);
 
       // if (responseData['error'] != null) {
@@ -684,6 +724,8 @@ class Apicalls with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -699,11 +741,13 @@ class Apicalls with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -719,9 +763,11 @@ class Apicalls with ChangeNotifier {
         },
         body: json.encode({'email': data}),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -742,9 +788,11 @@ class Apicalls with ChangeNotifier {
           'token': data['Token']
         }),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -759,9 +807,11 @@ class Apicalls with ChangeNotifier {
           "Content-Type": "application/json; charset=UTF-8",
         },
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -817,7 +867,7 @@ class Apicalls with ChangeNotifier {
           "Authorization": 'Token $token',
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       _plantDetails = responseData;
 
@@ -825,6 +875,8 @@ class Apicalls with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -840,7 +892,7 @@ class Apicalls with ChangeNotifier {
           "Authorization": 'Token $token',
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       _batchList = responseData;
 
@@ -848,6 +900,8 @@ class Apicalls with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -863,7 +917,7 @@ class Apicalls with ChangeNotifier {
           "Authorization": 'Token $token',
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       _batchDetailsData = responseData;
 
@@ -871,6 +925,8 @@ class Apicalls with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -886,7 +942,7 @@ class Apicalls with ChangeNotifier {
           "Authorization": 'Token $token',
         },
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
@@ -897,6 +953,8 @@ class Apicalls with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -913,8 +971,8 @@ class Apicalls with ChangeNotifier {
         },
       );
       // print(response.statusCode);
-      // print(response.body);
-
+      // print(      forbidden(response);response.body);
+      forbidden(response);
       var responseData = json.decode(response.body);
       _standardBirdGradeList = responseData;
 
@@ -922,6 +980,8 @@ class Apicalls with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -937,216 +997,19 @@ class Apicalls with ChangeNotifier {
           "Authorization": 'Token $token',
         },
       );
-      // print(response.statusCode);
-      // print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       var responseData = json.decode(response.body);
       _standardEggGradeList = responseData;
-
+      forbidden(response);
       notifyListeners();
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
 }
-
-var data = {
-  "Role_Id": 1,
-  "Role_Name": "Admin",
-  "Role_Permission": [
-    {
-      "Firms": [
-        {
-          "Id": 1,
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true,
-        }
-      ],
-      "Roles": {
-        "Id": "Roles",
-        "Edit": true,
-        "View": true,
-        "Create": true,
-        "Delete": true
-      },
-      "Sales": {
-        "Id": "Add Batch",
-        "Edit": true,
-        "View": true,
-        "Create": true,
-        "Delete": true
-      },
-      "Users": {
-        "Id": "Users",
-        "Edit": true,
-        "View": true,
-        "Create": true,
-        "Delete": true,
-        "Approve": true
-      },
-      "Plants": [
-        {"Id": 1, "Edit": true, "View": true, "Create": true, "Delete": true},
-        {"Id": 2, "Edit": true, "View": true, "Create": true, "Delete": true}
-      ],
-      "Sections": [
-        {"Id": 1, "Edit": true, "View": true, "Create": true, "Delete": true},
-        {"Id": 2, "Edit": true, "View": true, "Create": true, "Delete": true},
-        {"Id": 3, "Edit": true, "View": true, "Create": true, "Delete": true}
-      ],
-      "Add_Batch": {
-        "Id": "Add Batch",
-        "Edit": true,
-        "View": true,
-        "Create": true,
-        "Delete": true
-      },
-      "Transfers": {
-        "Transfer_In": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        },
-        "Transfer_Out": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        }
-      },
-      "WareHouses": [
-        {"Id": 1, "Edit": true, "View": true, "Create": true, "Delete": true}
-      ],
-      "Activity_Log": {
-        "Id": "Add Batch",
-        "Edit": true,
-        "View": true,
-        "Create": true,
-        "Delete": true
-      },
-      "Batch_Planning": {
-        "Id": "Add Batch",
-        "Edit": true,
-        "View": true,
-        "Create": true,
-        "Delete": true
-      },
-      "Medication_Log": {
-        "Id": "Add Batch",
-        "Edit": true,
-        "View": true,
-        "Create": true,
-        "Delete": true
-      },
-      "Reference_Data": {
-        "Breed": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        },
-        "Activity_Plan": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        },
-        "Breed_Version": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        },
-        "Medication_Plan": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        },
-        "Vaccination_Plan": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        },
-        "Bird_Age_Grouping": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        }
-      },
-      "Vaccination_Log": {
-        "Id": "Add Batch",
-        "Edit": true,
-        "View": true,
-        "Create": true,
-        "Delete": true
-      },
-      "Log_Daily_Batches": {
-        "Id": "Add Batch",
-        "Edit": true,
-        "View": true,
-        "Create": true,
-        "Delete": true
-      },
-      "Product_Management": {
-        "Id": "Add Batch",
-        "Edit": true,
-        "View": true,
-        "Create": true,
-        "Delete": true
-      },
-      "Inventory_Adjustment": {
-        "Mortality": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        },
-        "Egg_Grading": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        },
-        "Bird_Grading": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        },
-        "Egg_Collection": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        },
-        "Inventory_Adjustment_Journal": {
-          "Id": "Add Batch",
-          "Edit": true,
-          "View": true,
-          "Create": true,
-          "Delete": true
-        }
-      }
-    }
-  ],
-  "Description": "No Description"
-};

@@ -13,7 +13,6 @@ import '../../main.dart';
 import '../../providers/apicalls.dart';
 import '../../screens/global_app_bar.dart';
 import '../../styles.dart';
-import '../../widgets/administration_search_widget.dart';
 import '../providers/journal_api.dart';
 import '../widgets/add_sales_journal.dart';
 import 'sales_details_page.dart';
@@ -38,6 +37,8 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
   int defaultRowsPerPage = 5;
   List journalDetails = [];
 
+  var customer;
+
   Future<String> fetchCredientials() async {
     bool data =
         await Provider.of<Apicalls>(context, listen: false).tryAutoLogin();
@@ -60,7 +61,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
           Provider.of<JournalApi>(context, listen: false)
               .getIndividualCustomersInfo(customerId, token);
           Provider.of<JournalApi>(context, listen: false)
-              .getCustomerSalesJournalInfo(customerId, token);
+              .getCustomerSalesJournalInfo(customer, token);
         }
       });
     });
@@ -74,7 +75,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<JournalApi>(context, listen: false)
-            .getCustomerSalesJournalInfo(customerId, token);
+            .getCustomerSalesJournalInfo(customer, token);
       }
     });
   }
@@ -89,6 +90,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
       var extratedData = json.decode(pref.getString('Customer_Id')!);
 
       customerId = extratedData['Customer_Id'];
+      customer = extratedData['Customer'];
     }
   }
 
@@ -166,7 +168,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
     journalDetails = Provider.of<JournalApi>(context).journalInfo;
 
     return Scaffold(
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: Padding(
         padding: const EdgeInsets.only(top: 18.0, left: 43),
         child: SingleChildScrollView(
@@ -212,7 +214,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            individualCustomerInfo['Customer_Name'],
+                            individualCustomerInfo['Individual_Customer_Name'],
                             style:
                                 // style: TextStyle(fontWeight: FontWeight.w700, fontSize: 36),
                                 GoogleFonts.roboto(
@@ -247,7 +249,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                                 ),
                                 getDataContainer(
                                   individualCustomerInfo[
-                                      'Customer_Permanent_Account_Number'],
+                                      'Customer__Permanent_Account_Number'],
                                 ),
                               ],
                             ),
@@ -261,7 +263,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCustomerInfo['Country'],
+                                  individualCustomerInfo['Customer__Country'],
                                 ),
                               ],
                             ),
@@ -275,7 +277,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCustomerInfo['State'],
+                                  individualCustomerInfo['Customer__State'],
                                 ),
                               ],
                             ),
@@ -289,7 +291,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCustomerInfo['City'],
+                                  individualCustomerInfo['Customer__City'],
                                 ),
                               ],
                             ),
@@ -303,7 +305,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCustomerInfo['Street'],
+                                  individualCustomerInfo['Customer__Street'],
                                 ),
                               ],
                             ),
@@ -317,7 +319,8 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCustomerInfo['Pincode'].toString(),
+                                  individualCustomerInfo['Customer__Pincode']
+                                      .toString(),
                                 ),
                               ],
                             ),
@@ -331,7 +334,8 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCustomerInfo['Contact_Number']
+                                  individualCustomerInfo[
+                                          'Customer__Contact_Number']
                                       .toString(),
                                 ),
                               ],
@@ -381,7 +385,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                           //   ),
                           // ),
                           Container(
-                            width: MediaQuery.of(context).size.width * 0.6,
+                            width: MediaQuery.of(context).size.width * 0.3,
                             padding: const EdgeInsets.only(top: 10),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -394,8 +398,10 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                                         context: context,
                                         builder: (ctx) => AddSalesJournal(
                                               name: individualCustomerInfo[
-                                                  'Customer_Name'],
-                                              id: customerId.toString(),
+                                                  'Individual_Customer_Name'],
+                                              id: individualCustomerInfo[
+                                                      'Customer']
+                                                  .toString(),
                                               customerType: 'Individual',
                                               editData: {},
                                               reFresh: update,
@@ -421,7 +427,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                           Padding(
                             padding: const EdgeInsets.only(top: 5.0),
                             child: Container(
-                              width: size.width * 0.6,
+                              width: size.width * 0.3,
                               child: PaginatedDataTable(
                                 source: MySearchData(
                                     query == '' ? journalDetails : list,
@@ -434,23 +440,7 @@ class _CustomerDetailsPageState extends State<CustomerDetailsPage> {
                                           style: ProjectStyles
                                               .paginatedHeaderStyle())),
                                   DataColumn(
-                                      label: Text('Customer Name',
-                                          style: ProjectStyles
-                                              .paginatedHeaderStyle())),
-                                  DataColumn(
                                       label: Text('Date',
-                                          style: ProjectStyles
-                                              .paginatedHeaderStyle())),
-                                  DataColumn(
-                                      label: Text('Warehouse Name',
-                                          style: ProjectStyles
-                                              .paginatedHeaderStyle())),
-                                  DataColumn(
-                                      label: Text('Sold/Sale Item',
-                                          style: ProjectStyles
-                                              .paginatedHeaderStyle())),
-                                  DataColumn(
-                                      label: Text('Quantity',
                                           style: ProjectStyles
                                               .paginatedHeaderStyle())),
                                 ],
@@ -537,16 +527,12 @@ class MySearchData extends DataTableSource {
                 Get.toNamed(SalesDetailsPage.routeName);
               },
               child: Text(data[index]['Sale_Code']))),
-          DataCell(Text(data[index]['Customer_Name'])),
           DataCell(
             Text(
               DateFormat('dd-MM-yyyy')
-                  .format(DateTime.parse(data[index]['Shipped_Date'])),
+                  .format(DateTime.parse(data[index]['Despatch_Date'])),
             ),
           ),
-          DataCell(Text(data[index]['WareHouse_Code'].toString())),
-          DataCell(Text(data[index]['Item'].toString())),
-          DataCell(Text(data[index]['Quantity'].toString())),
         ]);
   }
 

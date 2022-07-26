@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/cupertino.dart';
+
+import '../../main.dart';
 
 class BreedInfoApis with ChangeNotifier {
   var _token;
@@ -38,7 +39,7 @@ class BreedInfoApis with ChangeNotifier {
     return _birdReferenceDetail;
   }
 
-  var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
+  // var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
 
   Future<int> getBreed(
     var token,
@@ -54,6 +55,8 @@ class BreedInfoApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         var responseData = json.decode(response.body);
@@ -93,7 +96,8 @@ class BreedInfoApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       if (response.statusCode == 200 || response.statusCode == 201) {
         var responseData = json.decode(response.body);
         List temp = [];
@@ -416,8 +420,7 @@ class BreedInfoApis with ChangeNotifier {
   ) async {
     // log(token);
     // log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/breed-info/breed-reference-detail/');
+    final url = Uri.parse('${baseUrl}breed-info/breed-reference-detail/');
     try {
       final response = await http.get(
         url,
@@ -432,7 +435,6 @@ class BreedInfoApis with ChangeNotifier {
       //   _firmDetails.add(data['Firm_Name']);
       // }
       _birdReferenceDetail = responseData;
-      log(responseData.toString());
       notifyListeners();
       return response.statusCode;
     } catch (e) {
@@ -446,8 +448,7 @@ class BreedInfoApis with ChangeNotifier {
   ) async {
     // log(token);
     // log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/breed-info/breed-reference-detail/');
+    final url = Uri.parse('${baseUrl}breed-info/breed-reference-detail/');
     try {
       final response = await http.post(
         url,

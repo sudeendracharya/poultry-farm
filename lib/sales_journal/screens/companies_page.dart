@@ -28,10 +28,13 @@ class _CompanyPageState extends State<CompanyPage> {
   List list = [];
 
   void update(int data) {
-    selectedCompanies.clear();
     fetchCredientials().then((token) {
       if (token != '') {
-        Provider.of<JournalApi>(context, listen: false).getCompaniesInfo(token);
+        Provider.of<JournalApi>(context, listen: false)
+            .getCompaniesInfo(token)
+            .then((value) {
+          selectedCompanies.clear();
+        });
       }
     });
   }
@@ -79,20 +82,18 @@ class _CompanyPageState extends State<CompanyPage> {
     if (selectedCompanies.isEmpty) {
       alertSnackBar('Select the checkbox first');
     } else {
-      List temp = [];
-      for (var data in selectedCompanies) {
-        temp.add(data['Company_Id']);
-      }
-      print(temp);
       fetchCredientials().then((token) {
         if (token != '') {
           Provider.of<JournalApi>(context, listen: false)
-              .deleteCompaniesInfo(temp, token)
+              .deleteCompaniesInfo(selectedCompanies[0]['Company_Id'], token)
               .then((value) {
             if (value == 204) {
+              selectedCompanies.clear();
               update(100);
               successSnackbar('Successfully deleted the data');
             } else {
+              selectedCompanies.clear();
+              update(100);
               failureSnackbar(
                   'Unable to delete the data something went wrong ');
             }
@@ -127,9 +128,9 @@ class _CompanyPageState extends State<CompanyPage> {
 
   void searchBook(String query) {
     final searchOutput = customersInfo.where((details) {
-      final customerName = details['Customer_Name'];
+      final customerName = details['Company_Name'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
       return customerName.contains(searchName);
     }).toList();
@@ -177,11 +178,11 @@ class _CompanyPageState extends State<CompanyPage> {
                   reFresh: (value) {},
                   text: query,
                   onChanged: searchBook,
-                  hintText: 'Search'),
+                  hintText: 'Company Name'),
             ),
           ),
           Container(
-            width: MediaQuery.of(context).size.width * 0.9,
+            width: MediaQuery.of(context).size.width * 0.95,
             padding: const EdgeInsets.only(top: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -225,10 +226,12 @@ class _CompanyPageState extends State<CompanyPage> {
                 ),
                 // extratedSalesPermissions['Delete'] == true
                 //     ?
-                IconButton(
-                  onPressed: delete,
-                  icon: const Icon(Icons.delete),
-                )
+                selectedCompanies.length == 1
+                    ? IconButton(
+                        onPressed: delete,
+                        icon: const Icon(Icons.delete),
+                      )
+                    : const SizedBox(),
                 // : const SizedBox(),
               ],
             ),
@@ -236,7 +239,7 @@ class _CompanyPageState extends State<CompanyPage> {
           Padding(
             padding: const EdgeInsets.only(top: 5.0),
             child: Container(
-              width: size.width * 0.9,
+              width: size.width * 0.95,
               child: PaginatedDataTable(
                 source: MySearchData(
                     query == '' ? customersInfo : list, updateCheckBox),
@@ -340,12 +343,14 @@ class MySearchData extends DataTableSource {
                 if (pref.containsKey('Company_Id')) {
                   pref.remove('Company_Id');
                 }
-                var userData =
-                    json.encode({'Company_Id': data[index]['Company_Id']});
+                var userData = json.encode({
+                  'Company_Id': data[index]['Individual_Company_Id'],
+                  'Customer': data[index]['Company_Id'],
+                });
 
                 pref.setString('Company_Id', userData);
                 Get.toNamed(CompanyDetailsPage.routeName,
-                    arguments: data[index]['Company_Id']);
+                    arguments: data[index]['Individual_Company_Id']);
               },
               child: Text(data[index]['Company_Name']))),
           DataCell(Text(data[index]['Company_Permanent_Account_Number'])),

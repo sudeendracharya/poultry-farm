@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:poultry_login_signup/widgets/modular_widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../../colors.dart';
@@ -55,6 +56,10 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
 
   var selectedBatchCode;
 
+  var selectedUnitOfMeasurement;
+
+  List unitDetails = [];
+
   @override
   void initState() {
     getPermission('Medication_Log').then((value) {
@@ -94,12 +99,13 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
     }
   }
 
-  void searchBook(String batchPlanCode, var vaccinationNumber) {
+  void searchBook(String batchPlanCodeData, var vaccinationNumber) {
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<LogsApi>(context, listen: false).logException.clear();
         Provider.of<LogsApi>(context, listen: false)
-            .getVaccinationLog(batchPlanCode, vaccinationNumber, token);
+            .getVaccinationLog(batchPlanCodeData, vaccinationNumber, token);
+        batchPlanCode = batchPlanCodeData;
       }
     });
   }
@@ -108,8 +114,91 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
 
   Map<String, dynamic> vaccinationLog = {};
   ScrollController tableController = ScrollController();
+  TextEditingController modeOfAdministrationController =
+      TextEditingController();
+  TextEditingController siteOfAdministrationController =
+      TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  TextEditingController vaccinatorController = TextEditingController();
+  TextEditingController dosagePerBirdController = TextEditingController();
+
+  bool modeOfAdministrationValidate = true;
+  bool siteOfAdministrationValidate = true;
+  bool descriptionValidate = true;
+  bool vaccinatorValidate = true;
+  bool dosagePerBirdValidate = true;
+  bool unitValidate = true;
+
+  String modeOfAdministrationValidateMessage = '';
+  String siteOfAdministrationValidateMessage = '';
+  String descriptionValidateMessage = '';
+  String vaccinatorValidateMessage = '';
+  String dosagePerBirdValidateMessage = '';
+  String unitValidateMessage = '';
+
+  bool validateVaccination() {
+    if (modeOfAdministrationController.text == '') {
+      modeOfAdministrationValidate = false;
+      modeOfAdministrationValidateMessage =
+          'Mode Of Administration cannot be null';
+    } else {
+      modeOfAdministrationValidate = true;
+    }
+
+    if (siteOfAdministrationController.text == '') {
+      siteOfAdministrationValidate = false;
+      siteOfAdministrationValidateMessage =
+          'Site Of Administration cannot be null';
+    } else {
+      siteOfAdministrationValidate = true;
+    }
+
+    if (descriptionController.text == '') {
+      descriptionValidate = false;
+      descriptionValidateMessage = 'Description cannot be null';
+    } else {
+      descriptionValidate = true;
+    }
+
+    if (vaccinatorController.text == '') {
+      vaccinatorValidate = false;
+      vaccinatorValidateMessage = 'Vaccinator cannot be null';
+    } else {
+      vaccinatorValidate = true;
+    }
+
+    if (dosagePerBirdController.text.isNum != true) {
+      dosagePerBirdValidate = false;
+      dosagePerBirdValidateMessage = 'Enter a valid Dosage Per Bird';
+    } else {
+      dosagePerBirdValidate = true;
+    }
+    if (selectedUnitOfMeasurement == null) {
+      unitValidate = false;
+      unitValidateMessage = 'Select Unit';
+    } else {
+      unitValidate = true;
+    }
+
+    if (modeOfAdministrationValidate == true &&
+        siteOfAdministrationValidate == true &&
+        descriptionValidate == true &&
+        // vaccinatorValidate == true &&
+        dosagePerBirdValidate == true &&
+        unitValidate == true) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   void updateCheckBox(Map<String, dynamic> data) {
+    Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
+      var token = Provider.of<Apicalls>(context, listen: false).token;
+
+      Provider.of<Apicalls>(context, listen: false)
+          .getStandardUnitValues(token);
+    });
     var size = MediaQueryData.fromWindow(WidgetsBinding.instance!.window).size;
     // print(size.width);
     // print(size.height);
@@ -126,6 +215,8 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
             ),
             child: StatefulBuilder(
               builder: (BuildContext context, setState) {
+                unitDetails = Provider.of<Apicalls>(context).standardUnitList;
+
                 return Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: size.width * 0.015,
@@ -163,7 +254,8 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                           hintText:
                                               'Enter Mode of Administration',
                                           border: InputBorder.none),
-                                      // controller: saleCodeController,
+                                      controller:
+                                          modeOfAdministrationController,
                                       onSaved: (value) {
                                         vaccinationLog[
                                             'Mode_Of_Administration'] = value!;
@@ -174,6 +266,10 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                               ],
                             ),
                           ),
+                          modeOfAdministrationValidate == true
+                              ? const SizedBox()
+                              : ModularWidgets.validationDesign(
+                                  size, modeOfAdministrationValidateMessage),
                           Padding(
                             padding: const EdgeInsets.only(top: 24.0),
                             child: Column(
@@ -200,7 +296,8 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                           hintText:
                                               'Enter Site of Administration',
                                           border: InputBorder.none),
-                                      // controller: saleCodeController,
+                                      controller:
+                                          siteOfAdministrationController,
                                       onSaved: (value) {
                                         vaccinationLog[
                                             'Site_Of_Administration'] = value!;
@@ -211,6 +308,10 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                               ],
                             ),
                           ),
+                          siteOfAdministrationValidate == true
+                              ? const SizedBox()
+                              : ModularWidgets.validationDesign(
+                                  size, siteOfAdministrationValidateMessage),
                           Padding(
                             padding: const EdgeInsets.only(top: 24.0),
                             child: Column(
@@ -236,7 +337,7 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                       decoration: const InputDecoration(
                                           hintText: 'Enter Dosage Per Bird',
                                           border: InputBorder.none),
-                                      // controller: saleCodeController,
+                                      controller: dosagePerBirdController,
                                       onSaved: (value) {
                                         vaccinationLog['Dosage_Per_Bird'] =
                                             value!;
@@ -247,6 +348,10 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                               ],
                             ),
                           ),
+                          dosagePerBirdValidate == true
+                              ? const SizedBox()
+                              : ModularWidgets.validationDesign(
+                                  size, dosagePerBirdValidateMessage),
                           Padding(
                             padding: const EdgeInsets.only(top: 24.0),
                             child: Column(
@@ -267,56 +372,79 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 6),
-                                    child: TextFormField(
-                                      decoration: const InputDecoration(
-                                          hintText: 'Enter Dosage Unit',
-                                          border: InputBorder.none),
-                                      // controller: saleCodeController,
-                                      onSaved: (value) {
-                                        vaccinationLog['Dosage_Unit'] = value!;
-                                      },
+                                        horizontal: 5.0),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton(
+                                        value: selectedUnitOfMeasurement,
+                                        items: unitDetails
+                                            .map<DropdownMenuItem<String>>((e) {
+                                          return DropdownMenuItem(
+                                            value: e['Unit_Name'],
+                                            onTap: () {
+                                              vaccinationLog['Dosage_Unit'] =
+                                                  e['Unit_Id'];
+                                            },
+                                            child: Text(e['Unit_Name']),
+                                          );
+                                        }).toList(),
+                                        hint: const SizedBox(
+                                            width: 404, child: Text('Select')),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedUnitOfMeasurement =
+                                                value as String?;
+                                          });
+                                        },
+                                      ),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 24.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: size.width * 0.3,
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: const Text('Vaccinators'),
-                                ),
-                                Container(
-                                  width: size.width * 0.3,
-                                  height: 36,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: Colors.white,
-                                    border: Border.all(color: Colors.black26),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 6),
-                                    child: TextFormField(
-                                      decoration: const InputDecoration(
-                                          hintText: 'Vaccinators',
-                                          border: InputBorder.none),
-                                      // controller: saleCodeController,
-                                      onSaved: (value) {
-                                        vaccinationLog['Vaccinators'] = value!;
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          unitValidate == true
+                              ? const SizedBox()
+                              : ModularWidgets.validationDesign(
+                                  size, unitValidateMessage),
+                          // Padding(
+                          //   padding: const EdgeInsets.only(top: 24.0),
+                          //   child: Column(
+                          //     mainAxisAlignment: MainAxisAlignment.start,
+                          //     children: [
+                          //       Container(
+                          //         width: size.width * 0.3,
+                          //         padding: const EdgeInsets.only(bottom: 12),
+                          //         child: const Text('Vaccinators'),
+                          //       ),
+                          //       Container(
+                          //         width: size.width * 0.3,
+                          //         height: 36,
+                          //         decoration: BoxDecoration(
+                          //           borderRadius: BorderRadius.circular(8),
+                          //           color: Colors.white,
+                          //           border: Border.all(color: Colors.black26),
+                          //         ),
+                          //         child: Padding(
+                          //           padding: const EdgeInsets.symmetric(
+                          //               horizontal: 12, vertical: 6),
+                          //           child: TextFormField(
+                          //             decoration: const InputDecoration(
+                          //                 hintText: 'Vaccinators',
+                          //                 border: InputBorder.none),
+                          //             controller: vaccinatorController,
+                          //             onSaved: (value) {
+                          //               vaccinationLog['Vaccinators'] = value!;
+                          //             },
+                          //           ),
+                          //         ),
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // vaccinatorValidate == true
+                          //     ? const SizedBox()
+                          //     : ModularWidgets.validationDesign(
+                          //         size, vaccinatorValidateMessage),
                           Padding(
                             padding: const EdgeInsets.only(top: 24.0),
                             child: Column(
@@ -342,7 +470,7 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                       decoration: const InputDecoration(
                                           hintText: 'Enter Description',
                                           border: InputBorder.none),
-                                      // controller: saleCodeController,
+                                      controller: descriptionController,
                                       onSaved: (value) {
                                         vaccinationLog['Description'] = value!;
                                       },
@@ -352,6 +480,10 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                               ],
                             ),
                           ),
+                          descriptionValidate == true
+                              ? const SizedBox()
+                              : ModularWidgets.validationDesign(
+                                  size, descriptionValidateMessage),
                           const SizedBox(
                             height: 24,
                           ),
@@ -363,7 +495,13 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                     backgroundColor: MaterialStateProperty.all(
                                         ProjectColors.themecolor)),
                                 onPressed: () {
+                                  bool validateData = validateVaccination();
+                                  if (validateData != true) {
+                                    setState(() {});
+                                    return;
+                                  }
                                   _formKey.currentState!.save();
+
                                   if (data['Status'] == 'False') {
                                     String dateTime =
                                         DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
@@ -383,7 +521,10 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                           if (value == 202 || value == 204) {
                                             Get.back();
                                             searchBook(
-                                                batchPlanCode, searchQuery);
+                                                batchPlanCode,
+                                                searchQuery == ''
+                                                    ? 'None'
+                                                    : searchQuery);
                                           } else {
                                             failureSnackbar(
                                                 'Something went wrong unable to update the data');
@@ -440,7 +581,8 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                     }, token).then((value) {
                       if (value == 202 || value == 204) {
                         Get.back();
-                        searchBook(batchPlanCode, searchQuery);
+                        searchBook(batchPlanCode,
+                            searchQuery == '' ? 'None' : searchQuery);
                       } else {
                         failureSnackbar(
                             'Something went wrong unable to update the data');
@@ -465,10 +607,11 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
     vaccinationLogDetails = Provider.of<LogsApi>(context).vaccinationLog;
     // print(size.width * 0.95);
     // print(size.height * 0.6);
+
     firmList = Provider.of<InfrastructureApis>(context).firmDetails;
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: loading == true
           ? const SizedBox()
           : extratedPermissions['View'] == false
@@ -721,6 +864,18 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                             MaterialStateProperty.all(
                                                 ProjectColors.themecolor)),
                                     onPressed: () {
+                                      Provider.of<InfrastructureApis>(context,
+                                              listen: false)
+                                          .plantDetails
+                                          .clear();
+                                      Provider.of<InfrastructureApis>(context,
+                                              listen: false)
+                                          .warehouseDetails
+                                          .clear();
+                                      Provider.of<InfrastructureApis>(context,
+                                              listen: false)
+                                          .batchCodeDetails
+                                          .clear();
                                       filterBasedOnPlant(
                                           firmList,
                                           plantList,
@@ -874,6 +1029,15 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                             MaterialStateProperty.all(
                                                 ProjectColors.themecolor)),
                                     onPressed: () {
+                                      Provider.of<InfrastructureApis>(context)
+                                          .plantDetails
+                                          .clear();
+                                      Provider.of<InfrastructureApis>(context)
+                                          .warehouseDetails
+                                          .clear();
+                                      Provider.of<InfrastructureApis>(context)
+                                          .batchCodeDetails
+                                          .clear();
                                       filterBasedOnPlant(
                                           firmList,
                                           plantList,
@@ -888,7 +1052,7 @@ class _VaccinationLogsScreenState extends State<VaccinationLogsScreen> {
                                           selectedBatchCode,
                                           searchBook);
                                     },
-                                    child: const Text('Filter Based on Plant'))
+                                    child: const Text('Search By Firm'))
                                 // Padding(
                                 //   padding: const EdgeInsets.symmetric(
                                 //       horizontal: 12, vertical: 6),

@@ -28,11 +28,13 @@ class _EggCollectionState extends State<EggCollection> {
   List list = [];
 
   void update(int data) {
-    selectedEggCollectionIds.clear();
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<InventoryAdjustemntApis>(context, listen: false)
-            .getEggCollection(token);
+            .getEggCollection(token)
+            .then((value) {
+          selectedEggCollectionIds.clear();
+        });
       }
     });
   }
@@ -91,9 +93,12 @@ class _EggCollectionState extends State<EggCollection> {
               .deleteEggCollection(temp, token)
               .then((value) {
             if (value == 204) {
+              selectedEggCollectionIds.clear();
               update(100);
               successSnackbar('Successfully deleted the data');
             } else {
+              selectedEggCollectionIds.clear();
+              update(100);
               failureSnackbar('Unable to delete the data please try again');
             }
           });
@@ -104,9 +109,9 @@ class _EggCollectionState extends State<EggCollection> {
 
   void searchBook(String query) {
     final searchOutput = eggCollectionDetails.where((details) {
-      final batchCode = details['WareHouse_Id'].toString();
+      final batchCode = details['Egg_Collection_Code'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
       return batchCode.contains(searchName);
     }).toList();
@@ -153,7 +158,7 @@ class _EggCollectionState extends State<EggCollection> {
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'Record Code'),
                       ),
                     ),
                     Container(

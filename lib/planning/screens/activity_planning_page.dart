@@ -34,7 +34,10 @@ class _ActivityPlanningPageState extends State<ActivityPlanningPage> {
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<ActivityApis>(context, listen: false)
-            .getActivityPlan(token);
+            .getActivityPlan(token)
+            .then((value) {
+          selectedActivityCodes.clear();
+        });
       }
     });
   }
@@ -91,9 +94,11 @@ class _ActivityPlanningPageState extends State<ActivityPlanningPage> {
             if (value == 204) {
               successSnackbar('Successfully deleted the data');
               update(100);
+              selectedActivityCodes.clear();
             } else {
               failureSnackbar('Something went wrong unable to delete the data');
               update(100);
+              selectedActivityCodes.clear();
             }
           });
         }
@@ -105,9 +110,9 @@ class _ActivityPlanningPageState extends State<ActivityPlanningPage> {
 
   void searchBook(String query) {
     final searchOutput = activityPlanData.where((details) {
-      final activityCode = details['Activity_Code'];
+      final activityCode = details['Activity_Code'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
       return activityCode.contains(searchName);
     }).toList();
@@ -157,7 +162,7 @@ class _ActivityPlanningPageState extends State<ActivityPlanningPage> {
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'Activity Code'),
                       ),
                     ),
                     Container(
@@ -281,7 +286,6 @@ class MySearchData extends DataTableSource {
               selectedActivityCodes.remove(data[index]['Activity_Id']);
             }
           }
-          print(selectedActivityCodes);
         },
         selected: data[index]['Is_Selected'],
         cells: [

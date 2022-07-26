@@ -83,7 +83,7 @@ class _InventoryScreenState extends State<InventoryScreen>
     final breadCrumpsStyle = Theme.of(context).textTheme.headline4;
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: Padding(
         padding: const EdgeInsets.only(top: 18),
         child: SingleChildScrollView(

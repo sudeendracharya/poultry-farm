@@ -4,6 +4,8 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
+import '../main.dart';
+
 class DashBoardApicalls with ChangeNotifier {
   var _token;
 
@@ -30,8 +32,7 @@ class DashBoardApicalls with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/infrastructure/load-firm-plant/');
+    final url = Uri.parse('${baseUrl}api/v1/infrastructure/load-firm-plant/');
     try {
       final response = await http.get(
         url,
@@ -48,8 +49,6 @@ class DashBoardApicalls with ChangeNotifier {
           _firmDetails.add(key);
           _plantDetails.add(value);
         });
-
-        log(responseData.toString());
       }
       notifyListeners();
     } catch (e) {
@@ -62,8 +61,7 @@ class DashBoardApicalls with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/infrastructure/');
+    final url = Uri.parse('${baseUrl}api/v1/infrastructure/');
     try {
       final response = await http.get(
         url,
@@ -78,7 +76,6 @@ class DashBoardApicalls with ChangeNotifier {
       //   _firmDetails.add(data['Firm_Name']);
       // }
       _firmDetails = responseData;
-      log(responseData.toString());
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -90,8 +87,7 @@ class DashBoardApicalls with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/infrastructure/plant/');
+    final url = Uri.parse('${baseUrl}api/v1/infrastructure/plant/');
     try {
       final response = await http.get(
         url,

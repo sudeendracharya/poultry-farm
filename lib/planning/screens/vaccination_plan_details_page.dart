@@ -198,7 +198,7 @@ class _VaccinationPlanDetailsState extends State<VaccinationPlanDetails> {
         Provider.of<ActivityApis>(context).singleVaccinationPlan;
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: loading == true
           ? const Center(
               child: Text('Loading'),
@@ -297,8 +297,6 @@ class _VaccinationPlanDetailsState extends State<VaccinationPlanDetails> {
                                             breedVersionId: _vaccinationDetails[
                                                     'Breed_Version_Id__Breed_Version']
                                                 .toString(),
-                                            description: _vaccinationDetails[
-                                                'Description'],
                                           ),
                                       direction: AxisDirection.right);
                                 },
@@ -386,21 +384,6 @@ class _VaccinationPlanDetailsState extends State<VaccinationPlanDetails> {
                                   : getDataContainer(_vaccinationDetails[
                                           'Breed_Version_Id__Breed_Version']
                                       .toString()),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 14,
-                          ),
-                          Row(
-                            children: [
-                              getHeadingContainer('Description'),
-                              const SizedBox(
-                                width: 49,
-                              ),
-                              _vaccinationDetails.isEmpty
-                                  ? const SizedBox()
-                                  : getDataContainer(
-                                      _vaccinationDetails['Description']),
                             ],
                           ),
                           const SizedBox(

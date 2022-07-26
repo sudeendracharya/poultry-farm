@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/cupertino.dart';
+
+import '../../main.dart';
 
 class ItemApis with ChangeNotifier {
   var _token;
@@ -17,7 +20,6 @@ class ItemApis with ChangeNotifier {
   List itemSubCategoryAllData = [];
 
   ItemApis([this._token]);
-  var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
 
   List _itemcategory = [];
 
@@ -94,9 +96,9 @@ class ItemApis with ChangeNotifier {
           "Authorization": 'Token $token',
         },
       );
-
+      forbidden(response);
       print(response.statusCode);
-      print(response.body);
+      print('Item Category ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         var responseData = json.decode(response.body);
@@ -115,6 +117,8 @@ class ItemApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -134,9 +138,9 @@ class ItemApis with ChangeNotifier {
         },
       );
 
-      // print(response.statusCode);
-      // print(response.body);
-
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
+      forbidden(response);
       if (response.statusCode == 200 || response.statusCode == 201) {
         var responseData = json.decode(response.body);
         List temp = [];
@@ -166,6 +170,7 @@ class ItemApis with ChangeNotifier {
           });
         }
         _productDetails = temp;
+        notifyListeners();
         return {
           'Status_Code': response.statusCode,
           'Body': responseData,
@@ -178,6 +183,8 @@ class ItemApis with ChangeNotifier {
         'Body': response.body,
       };
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -194,9 +201,9 @@ class ItemApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      // print(response.statusCode);
-      // print('individual product ${response.body}');
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint('individual product ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         var responseData = json.decode(response.body);
@@ -206,6 +213,8 @@ class ItemApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -224,12 +233,14 @@ class ItemApis with ChangeNotifier {
           'Product_Category_Name': data['Product_Category_Name'],
         }),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -248,7 +259,7 @@ class ItemApis with ChangeNotifier {
         //   'Product_Category_Name': data['Product_Category_Name'],
         // }),
       );
-
+      forbidden(response);
       if (response.statusCode == 200 || response.statusCode == 201) {
         var responseData = json.decode(response.body);
         List temp = [];
@@ -264,12 +275,13 @@ class ItemApis with ChangeNotifier {
         itemSubCategoryAllData = temp;
         notifyListeners();
       }
-
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -286,12 +298,14 @@ class ItemApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -308,11 +322,14 @@ class ItemApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
-      print(response.statusCode);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -321,7 +338,6 @@ class ItemApis with ChangeNotifier {
     var token,
     var id,
   ) async {
-    log(token);
     //log(data.toString());
     final url =
         Uri.parse('${baseUrl}product-management/product-subcategory-list/$id/');
@@ -333,6 +349,7 @@ class ItemApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
@@ -345,6 +362,8 @@ class ItemApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -366,11 +385,13 @@ class ItemApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-      print(response.statusCode);
-      print(response.body);
-
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -391,11 +412,14 @@ class ItemApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -416,18 +440,20 @@ class ItemApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
       // }
       _productList = responseData;
-      log(responseData.toString());
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -451,12 +477,14 @@ class ItemApis with ChangeNotifier {
           'Product_Sub_Category_Name': data['Product_Sub_Category_Name'],
         }),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -474,12 +502,14 @@ class ItemApis with ChangeNotifier {
         },
         body: json.encode(ids),
       );
-
-      // print(response.statusCode);
+      forbidden(response);
+      // print(res forbidden(response);ponse.statusCode);
       // print(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -489,8 +519,7 @@ class ItemApis with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/inventory-management/product-details/');
+    final url = Uri.parse('${baseUrl}inventory-management/product-details/');
     try {
       final response = await http.get(
         url,
@@ -499,7 +528,7 @@ class ItemApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
@@ -509,6 +538,8 @@ class ItemApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -517,7 +548,7 @@ class ItemApis with ChangeNotifier {
     var responseData = json.decode(response.body) as Map<String, dynamic>;
     _productException.clear();
     responseData.forEach((key, value) {
-      _productException.add(value);
+      _productException.add({'Key': key, 'Value': value});
     });
 
     notifyListeners();
@@ -537,7 +568,7 @@ class ItemApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -547,6 +578,8 @@ class ItemApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -558,7 +591,7 @@ class ItemApis with ChangeNotifier {
   ) async {
     final url = Uri.parse('${baseUrl}product-management/product-details/$id/');
     try {
-      final response = await http.put(
+      final response = await http.patch(
         url,
         headers: <String, String>{
           "Content-Type": "application/json; charset=UTF-8",
@@ -566,16 +599,18 @@ class ItemApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
 
-      // print(response.statusCode);
-      // print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -585,8 +620,7 @@ class ItemApis with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/inventory-management/product-mapping/');
+    final url = Uri.parse('${baseUrl}inventory-management/product-mapping/');
     try {
       final response = await http.get(
         url,
@@ -595,7 +629,7 @@ class ItemApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
@@ -605,6 +639,8 @@ class ItemApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -614,8 +650,7 @@ class ItemApis with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/inventory-management/inventory-view/');
+    final url = Uri.parse('${baseUrl}inventory-management/inventory-view/');
     try {
       final response = await http.get(
         url,
@@ -624,7 +659,7 @@ class ItemApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
@@ -633,6 +668,8 @@ class ItemApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -641,8 +678,7 @@ class ItemApis with ChangeNotifier {
     var data,
     var token,
   ) async {
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/inventory-management/inventory-view/');
+    final url = Uri.parse('${baseUrl}inventory-management/inventory-view/');
     try {
       final response = await http.post(
         url,
@@ -657,9 +693,11 @@ class ItemApis with ChangeNotifier {
           'Quantity': data['Quantity'],
         }),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -669,8 +707,8 @@ class ItemApis with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/inventory-management/inventory-adjustment/');
+    final url =
+        Uri.parse('${baseUrl}inventory-management/inventory-adjustment/');
     try {
       final response = await http.get(
         url,
@@ -679,7 +717,7 @@ class ItemApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
@@ -689,6 +727,8 @@ class ItemApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -697,8 +737,8 @@ class ItemApis with ChangeNotifier {
     var data,
     var token,
   ) async {
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/inventory-management/inventory-adjustment/');
+    final url =
+        Uri.parse('${baseUrl}inventory-management/inventory-adjustment/');
     try {
       final response = await http.post(
         url,
@@ -717,9 +757,11 @@ class ItemApis with ChangeNotifier {
           'Description': data['Inventory_Adjustment_Description'],
         }),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }

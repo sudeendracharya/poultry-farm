@@ -9,6 +9,7 @@ import 'package:poultry_login_signup/infrastructure/providers/infrastructure_api
 
 import 'package:provider/provider.dart';
 
+import '../../main.dart';
 import '../../styles.dart';
 import '../../widgets/modular_widgets.dart';
 
@@ -92,6 +93,7 @@ class _AddPlantDetailsState extends State<AddPlantDetails> {
   @override
   void initState() {
     super.initState();
+    clearPlantException(context);
     plantCodeController.text = widget.plantCode ?? getRandom(4, 'Plant-');
     plantNameController.text = widget.plantName ?? '';
     plantPincodeController.text =
@@ -635,7 +637,6 @@ class _AddPlantDetailsState extends State<AddPlantDetails> {
                                     setState(() {
                                       ///store value in country variable
                                       countryValue = value.removeAllWhitespace;
-                                      print(countryValue);
                                     });
                                   },
 
@@ -955,7 +956,7 @@ class _AddPlantDetailsState extends State<AddPlantDetails> {
                           itemBuilder: (BuildContext context, int index) {
                             return ModularWidgets.exceptionDesign(
                                 MediaQuery.of(context).size,
-                                value.plantException[index][0]);
+                                value.plantException[index]);
                           },
                         );
                       }),

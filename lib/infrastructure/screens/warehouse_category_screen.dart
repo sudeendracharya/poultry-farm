@@ -42,12 +42,13 @@ class _WarehouseCategoryScreenState extends State<WarehouseCategoryScreen> {
   }
 
   void update(int data) {
-    selectedCategory.clear();
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<InfrastructureApis>(context, listen: false)
             .getWarehouseCategory(token)
-            .then((value1) {});
+            .then((value1) {
+          selectedCategory.clear();
+        });
       }
     });
   }
@@ -80,7 +81,7 @@ class _WarehouseCategoryScreenState extends State<WarehouseCategoryScreen> {
       for (var data in selectedCategory) {
         temp.add(data['WareHouse_Category_Id']);
       }
-      print(temp);
+
       fetchCredientials().then((token) {
         if (token != '') {
           Provider.of<InfrastructureApis>(context, listen: false)
@@ -89,7 +90,10 @@ class _WarehouseCategoryScreenState extends State<WarehouseCategoryScreen> {
             if (value == 204) {
               successSnackbar('Successfully deleted the data');
               update(100);
+              selectedCategory.clear();
             } else {
+              update(100);
+              selectedCategory.clear();
               failureSnackbar('Unable to delete the data Something went wrong');
             }
           });
@@ -100,11 +104,11 @@ class _WarehouseCategoryScreenState extends State<WarehouseCategoryScreen> {
 
   void searchBook(String query) {
     final searchOutput = warehouseCategory.where((details) {
-      final breedName = details['Breed_Name'];
-      final breedVendor = details['Vendor'].toString().toLowerCase();
+      final breedVendor =
+          details['WareHouse_Category_Name'].toString().toLowerCase();
       final searchName = query.toLowerCase();
 
-      return breedName.contains(searchName) || breedVendor.contains(searchName);
+      return breedVendor.contains(searchName);
     }).toList();
 
     setState(() {
@@ -155,7 +159,7 @@ class _WarehouseCategoryScreenState extends State<WarehouseCategoryScreen> {
                   reFresh: (value) {},
                   text: query,
                   onChanged: searchBook,
-                  hintText: 'Search'),
+                  hintText: 'Category Name'),
             ),
           ),
           Container(
@@ -188,7 +192,6 @@ class _WarehouseCategoryScreenState extends State<WarehouseCategoryScreen> {
                 selectedCategory.length == 1
                     ? IconButton(
                         onPressed: () {
-                          print(selectedCategory);
                           showGlobalDrawer(
                               context: context,
                               builder: (ctx) => AddWareHouseCategoryDialog(

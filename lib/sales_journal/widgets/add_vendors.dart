@@ -113,6 +113,8 @@ class _AddVendorsState extends State<AddVendors> {
   @override
   void initState() {
     super.initState();
+    clearSalesException(context);
+
     selectedVendorType = widget.vendorType;
     if (widget.editData.isNotEmpty && selectedVendorType == 'Individual') {
       vendorId = widget.editData['Vendor'];
@@ -449,7 +451,6 @@ class _AddVendorsState extends State<AddVendors> {
           'Contact_Email_Id': companyContactPersonEmailController.text,
         }
       };
-      print(addCustomer);
       fetchCredientials().then((token) {
         Provider.of<JournalApi>(context, listen: false)
             .addVendorCompanyInfo(addCustomer, token)
@@ -479,7 +480,6 @@ class _AddVendorsState extends State<AddVendors> {
           'Email_Id': individualEmailIdController.text,
         }
       };
-      print(addCustomer);
 
       fetchCredientials().then((token) {
         Provider.of<JournalApi>(context, listen: false)
@@ -519,7 +519,6 @@ class _AddVendorsState extends State<AddVendors> {
           'Contact_Email_Id': companyContactPersonEmailController.text,
         }
       };
-      print('Company Details $addCustomer');
       fetchCredientials().then((token) {
         Provider.of<JournalApi>(context, listen: false)
             .updateVendorCompanyInfo(vendorId, addCustomer, token)
@@ -551,7 +550,6 @@ class _AddVendorsState extends State<AddVendors> {
           'Email_Id': individualEmailIdController.text,
         }
       };
-      print(addCustomer);
 
       fetchCredientials().then((token) {
         Provider.of<JournalApi>(context, listen: false)
@@ -710,6 +708,7 @@ class _AddVendorsState extends State<AddVendors> {
                                         countrySearchPlaceholder: "Country",
                                         stateSearchPlaceholder: "State",
                                         citySearchPlaceholder: "City",
+                                        flagState: CountryFlag.DISABLE,
 
                                         ///labels for dropdown
                                         countryDropdownLabel: "*Country",
@@ -841,6 +840,7 @@ class _AddVendorsState extends State<AddVendors> {
                                         countrySearchPlaceholder: "Country",
                                         stateSearchPlaceholder: "State",
                                         citySearchPlaceholder: "City",
+                                        flagState: CountryFlag.DISABLE,
 
                                         ///labels for dropdown
                                         countryDropdownLabel: "*Country",

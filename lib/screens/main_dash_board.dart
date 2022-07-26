@@ -170,7 +170,7 @@ class _MainDashBoardScreenState extends State<MainDashBoardScreen> {
       drawer: PrimarySideBar(
           controller: controller, expansionHeaderTheme: expansionHeaderTheme),
       appBar: AppBar(
-        title: const Text('DashBoard Screen'),
+        title: const Text('Main DashBoard Screen'),
         backgroundColor: Theme.of(context).backgroundColor,
         actions: [
           IconButton(
@@ -222,7 +222,7 @@ class _MainDashBoardScreenState extends State<MainDashBoardScreen> {
                         // });
                       },
                       child: Text(
-                        'View by Plant',
+                        'View by Firm',
                         style: GoogleFonts.roboto(
                           textStyle: const TextStyle(
                             fontWeight: FontWeight.w500,
@@ -1207,26 +1207,10 @@ class _MainDashBoardScreenState extends State<MainDashBoardScreen> {
                                   return DropdownMenuItem(
                                     value: e['Firm_Name'],
                                     onTap: () async {
-                                      await Provider.of<Apicalls>(context,
-                                              listen: false)
-                                          .tryAutoLogin()
-                                          .then((value) async {
-                                        var token = Provider.of<Apicalls>(
-                                                context,
-                                                listen: false)
-                                            .token;
-                                        await Provider.of<InfrastructureApis>(
-                                                context,
-                                                listen: false)
-                                            .getPlantDetails(
-                                                token, e['Firm_Id'])
-                                            .then((value1) {
-                                          setState(() {
-                                            firmSelected = true;
-                                            selectedFirmName = e['Firm_Name'];
-                                            selectedFirmId = e['Firm_Id'];
-                                          });
-                                        });
+                                      setState(() {
+                                        firmSelected = true;
+                                        selectedFirmName = e['Firm_Name'];
+                                        selectedFirmId = e['Firm_Id'];
                                       });
 
                                       // itemDetails['Product_Id'] =
@@ -1364,6 +1348,7 @@ class _MainDashBoardScreenState extends State<MainDashBoardScreen> {
                               },
                             );
                             prefs.setString('FirmAndPlantDetails', userData);
+                            clearDatas(context);
                             Get.toNamed(SecondaryDashBoardScreen.routeName,
                                 arguments: {
                                   'plantName': selectedPlantName,
@@ -1666,7 +1651,7 @@ class _PrimarySideBarState extends State<PrimarySideBar> {
                                   width: 13,
                                 ),
                                 Text(
-                                  'Sales',
+                                  'Customers',
                                   style: widget.expansionHeaderTheme,
                                 ),
                                 const SizedBox(

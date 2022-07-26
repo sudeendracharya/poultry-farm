@@ -118,7 +118,7 @@ class _ProductManagementSecondaryBarState
       },
       child: Scaffold(
           drawer: MainDrawer(controller: controller),
-          appBar: GlobalAppBar(query: query, appbar: AppBar()),
+          appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
           body: Padding(
             padding: const EdgeInsets.only(top: 18),
             child: SingleChildScrollView(

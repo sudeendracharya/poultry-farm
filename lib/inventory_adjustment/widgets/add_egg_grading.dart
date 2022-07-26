@@ -47,6 +47,10 @@ class _AddEggGradingState extends State<AddEggGrading>
   var eggGradingId;
 
   var eggGradingToId;
+
+  var plantId;
+
+  List plantList = [];
   EdgeInsetsGeometry getPadding() {
     return const EdgeInsets.only(left: 8.0);
   }
@@ -276,6 +280,8 @@ class _AddEggGradingState extends State<AddEggGrading>
 
   @override
   void initState() {
+    clearInventoryAdjustmentException(context);
+
     super.initState();
     controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 450));
@@ -305,10 +311,11 @@ class _AddEggGradingState extends State<AddEggGrading>
         .tryAutoLogin()
         .then((value) async {
       var token = Provider.of<Apicalls>(context, listen: false).token;
-      var plantId = await fetchPlant();
-      Provider.of<InfrastructureApis>(context, listen: false)
-          .getWarehouseDetails(plantId, token)
-          .then((value1) {});
+      var firmId = await getFirmData();
+      if (firmId != '') {
+        fechplantList(firmId, context);
+      }
+
       Provider.of<InventoryApi>(context, listen: false).getBatch(token);
       Provider.of<Apicalls>(context, listen: false)
           .getStandardEggGradeList(token);
@@ -370,7 +377,9 @@ class _AddEggGradingState extends State<AddEggGrading>
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     double formWidth = size.width * 0.25;
-
+    plantDetails = Provider.of<InfrastructureApis>(
+      context,
+    ).plantDetails;
     wareHouseDetails = Provider.of<InfrastructureApis>(
       context,
     ).warehouseDetails;
@@ -487,14 +496,14 @@ class _AddEggGradingState extends State<AddEggGrading>
                                 items: batchPlanDetails
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['Batch_Code']),
-                                    value: e['Batch_Code'],
+                                    value: e['Batch_Plan_Code'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
-                                      eggGradingDetails['Batch_Id'] =
-                                          e['Batch_Id'];
+                                      eggGradingDetails['Batch_Plan_Id'] =
+                                          e['Batch_Plan_Id'];
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['Batch_Plan_Code']),
                                   );
                                 }).toList(),
                                 hint: const Text('Please choose batch code'),
@@ -578,6 +587,54 @@ class _AddEggGradingState extends State<AddEggGrading>
                         Container(
                           width: formWidth,
                           padding: const EdgeInsets.only(bottom: 12),
+                          child: const Text('Plant Id'),
+                        ),
+                        Container(
+                          width: formWidth,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white,
+                            border: Border.all(color: Colors.black26),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                value: plantId,
+                                items: plantDetails
+                                    .map<DropdownMenuItem<String>>((e) {
+                                  return DropdownMenuItem(
+                                    value: e['Plant_Name'],
+                                    onTap: () {
+                                      fechWareHouseList(e['Plant_Id'], context);
+                                      wareHouseId = null;
+                                    },
+                                    child: Text(e['Plant_Name']),
+                                  );
+                                }).toList(),
+                                hint: const Text('Please Choose plant Name'),
+                                onChanged: (value) {
+                                  setState(() {
+                                    plantId = value as String;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: formWidth,
+                          padding: const EdgeInsets.only(bottom: 12),
                           child: const Text('Ware house Id'),
                         ),
                         Container(
@@ -597,7 +654,6 @@ class _AddEggGradingState extends State<AddEggGrading>
                                 items: wareHouseDetails
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['WareHouse_Code']),
                                     value: e['WareHouse_Code'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
@@ -605,6 +661,7 @@ class _AddEggGradingState extends State<AddEggGrading>
                                           e['WareHouse_Id'];
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['WareHouse_Code']),
                                   );
                                 }).toList(),
                                 hint: const Text('Please Choose wareHouse Id'),
@@ -690,7 +747,6 @@ class _AddEggGradingState extends State<AddEggGrading>
                                 items: eggGradingList
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['Egg_Grade']),
                                     value: e['Egg_Grade'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
@@ -698,6 +754,7 @@ class _AddEggGradingState extends State<AddEggGrading>
                                           e['Egg_Grade_Id'];
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['Egg_Grade']),
                                   );
                                 }).toList(),
                                 hint: const Text('Please Choose Grade From'),
@@ -744,7 +801,6 @@ class _AddEggGradingState extends State<AddEggGrading>
                                 items: eggGradingList
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['Egg_Grade']),
                                     value: e['Egg_Grade'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
@@ -752,6 +808,7 @@ class _AddEggGradingState extends State<AddEggGrading>
                                           e['Egg_Grade_Id'];
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['Egg_Grade']),
                                   );
                                 }).toList(),
                                 hint: const Text('Please Choose Grade To'),
@@ -798,13 +855,14 @@ class _AddEggGradingState extends State<AddEggGrading>
                                 items: standardUnitList
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['Unit_Name']),
                                     value: e['Unit_Name'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
-                                      eggGradingDetails['Unit'] = e['Unit_Id'];
+                                      eggGradingDetails['Unit_Id'] =
+                                          e['Unit_Id'];
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['Unit_Name']),
                                   );
                                 }).toList(),
                                 hint: const Text('Please Choose Unit'),
@@ -834,7 +892,7 @@ class _AddEggGradingState extends State<AddEggGrading>
                       itemBuilder: (BuildContext context, int index) {
                         return ModularWidgets.exceptionDesign(
                             MediaQuery.of(context).size,
-                            value.inventoryAdjustemntExceptions[index][0]);
+                            value.inventoryAdjustemntExceptions[index]);
                       },
                     );
                   }),

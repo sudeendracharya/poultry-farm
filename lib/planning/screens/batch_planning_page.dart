@@ -176,15 +176,15 @@ class _BatchPlanningPageState extends State<BatchPlanningPage> {
                           extratedBatchPlanningPermissions['Create'] == true
                               ? IconButton(
                                   onPressed: () {
-                                    showGlobalDrawer(
-                                        context: context,
-                                        builder: (ctx) =>
-                                            AddBatchPlanDetailsDialog(
-                                              editData: {},
-                                              id: '',
-                                              reFresh: update,
-                                            ),
-                                        direction: AxisDirection.right);
+                                    // showGlobalDrawer(
+                                    //     context: context,
+                                    //     builder: (ctx) =>
+                                    //         AddBatchPlanDetailsDialog(
+                                    //           editData: {},
+                                    //           id: '',
+                                    //           reFresh: update,
+                                    //         ),
+                                    //     direction: AxisDirection.right);
                                   },
                                   icon: const Icon(Icons.add),
                                 )
@@ -286,7 +286,6 @@ class MySearchData extends DataTableSource {
               selectedBatchCodes.remove(data[index]['Batch_Plan_Id']);
             }
           }
-          print(selectedBatchCodes);
         },
         selected: data[index]['Is_Selected'],
         cells: [

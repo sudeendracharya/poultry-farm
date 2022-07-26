@@ -11,17 +11,22 @@ import '../../styles.dart';
 import '../../widgets/modular_widgets.dart';
 
 class AddItemDetailsDialog extends StatefulWidget {
-  AddItemDetailsDialog({Key? key}) : super(key: key);
-
+  AddItemDetailsDialog({Key? key, required this.refresh}) : super(key: key);
+  final ValueChanged<int> refresh;
   @override
   State<AddItemDetailsDialog> createState() => _AddItemDetailsDialogState();
 }
+
+enum Transfer { yes, no }
+
+enum InventoryAdjustment { yes, no }
 
 class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final GlobalKey<FormState> _productTypeFormKey = GlobalKey();
   final GlobalKey<FormState> _productSubTypeFormKey = GlobalKey();
-
+  Transfer selectedTransfer = Transfer.yes;
+  InventoryAdjustment selectedInventoryAdjustmentData = InventoryAdjustment.yes;
   var transferSelectedName;
 
   var selectedInventoryAdjustment;
@@ -41,6 +46,8 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
   var productTypeError;
 
   List unitDetails = [];
+
+  var selectedAllowedQuantityType;
   EdgeInsetsGeometry getPadding() {
     return const EdgeInsets.only(left: 8.0);
   }
@@ -58,8 +65,6 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
     'Description': '',
     'Batch_Request_For_Transfer': '',
     'Batch_Request_Inventory_Adjustment': '',
-    'Batch_Request_For_Mortality': '',
-    'Batch_Request_For_Grading': '',
   };
 
   Map<String, dynamic> productSubType = {
@@ -188,10 +193,10 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
     if (productCodeValidation == true &&
         productNameValidation == true &&
         stockKeepingUnitValidation == true &&
-        gradeValidation == true &&
-        batchRequestForTransferValidation == true &&
-        batchRequestInventoryValidation == true &&
-        batchrequestMortalityValidation == true &&
+        // gradeValidation == true &&
+        // batchRequestForTransferValidation == true &&
+        // batchRequestInventoryValidation == true &&
+        // batchrequestMortalityValidation == true &&
         unitOfMeasurementValidation == true &&
         batchRequestGradingValidation == true &&
         productCategoryValidation == true &&
@@ -204,6 +209,7 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
 
   @override
   void initState() {
+    clearProductException(context);
     productCodeController.text = getRandom(4, 'Product-');
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
@@ -213,7 +219,8 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
       Provider.of<Apicalls>(context, listen: false)
           .getStandardUnitValues(token);
     });
-
+    itemDetails['Batch_Request_Inventory_Adjustment'] = true;
+    itemDetails['Batch_Request_For_Transfer'] = true;
     super.initState();
   }
 
@@ -229,7 +236,6 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
   }
 
   void getProductSubCategory(var id) {
-    print(id);
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
       Provider.of<ItemApis>(context, listen: false)
@@ -247,7 +253,6 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
       return;
     }
     _formKey.currentState!.save();
-    print(itemDetails);
 
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
@@ -256,6 +261,7 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
           .then((value) {
         if (value == 200 || value == 201) {
           // Navigator.of(context).pop('success');
+          widget.refresh(100);
           Get.back(result: 'success');
           successSnackbar('Successfully added the product');
         } else {
@@ -287,7 +293,7 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
     unitDetails = Provider.of<Apicalls>(context).standardUnitList;
     var size = MediaQuery.of(context).size;
     return SafeArea(
-        child: Container(
+        child: SizedBox(
       width: 500,
       height: MediaQuery.of(context).size.height,
       child: Drawer(
@@ -474,8 +480,6 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                                         items: itemCategoryData
                                             .map<DropdownMenuItem<String>>((e) {
                                           return DropdownMenuItem(
-                                            child: Text(
-                                                e['Product_Category_Name']),
                                             value: e['Product_Category_Name'],
                                             onTap: () {
                                               itemDetails[
@@ -485,11 +489,12 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                                               getProductSubCategory(
                                                   e['Product_Category_Id']);
                                             },
+                                            child: Text(
+                                                e['Product_Category_Name']),
                                           );
                                         }).toList(),
-                                        hint: Container(
-                                            width: 330,
-                                            child: const Text('Select')),
+                                        hint: const SizedBox(
+                                            width: 330, child: Text('Select')),
                                         onChanged: (value) {
                                           setState(() {
                                             selectedProductType =
@@ -591,8 +596,6 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                                         items: itemSubCategoryData
                                             .map<DropdownMenuItem<String>>((e) {
                                           return DropdownMenuItem(
-                                            child: Text(
-                                                e['Product_Sub_Category_Name']),
                                             value:
                                                 e['Product_Sub_Category_Name'],
                                             onTap: () {
@@ -600,11 +603,12 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                                                       'Product_Sub_Category_Id'] =
                                                   e['Product_Sub_Category_Id'];
                                             },
+                                            child: Text(
+                                                e['Product_Sub_Category_Name']),
                                           );
                                         }).toList(),
-                                        hint: Container(
-                                            width: 330,
-                                            child: const Text('Select')),
+                                        hint: const SizedBox(
+                                            width: 330, child: Text('Select')),
                                         onChanged: (value) {
                                           setState(() {
                                             selectedProductSubType =
@@ -742,17 +746,16 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                                     items: unitDetails
                                         .map<DropdownMenuItem<String>>((e) {
                                       return DropdownMenuItem(
-                                        child: Text(e['Unit_Name']),
                                         value: e['Unit_Name'],
                                         onTap: () {
                                           itemDetails['Unit_Of_Measure'] =
                                               e['Unit_Id'];
                                         },
+                                        child: Text(e['Unit_Name']),
                                       );
                                     }).toList(),
-                                    hint: Container(
-                                        width: 404,
-                                        child: const Text('Select')),
+                                    hint: const SizedBox(
+                                        width: 404, child: Text('Select')),
                                     onChanged: (value) {
                                       setState(() {
                                         selectedUnitOfMeasurement =
@@ -771,6 +774,53 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                         ? const SizedBox()
                         : ModularWidgets.validationDesign(
                             size, unitOfMeasurementValidationMessage),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(top: 24.0),
+                    //   child: Align(
+                    //     alignment: Alignment.topLeft,
+                    //     child: Column(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       children: [
+                    //         Container(
+                    //           width: 440,
+                    //           padding: const EdgeInsets.only(bottom: 12),
+                    //           child: const Text('Grade'),
+                    //         ),
+                    //         Container(
+                    //           width: 440,
+                    //           height: 36,
+                    //           decoration: BoxDecoration(
+                    //             borderRadius: BorderRadius.circular(8),
+                    //             color: Colors.white,
+                    //             border: Border.all(
+                    //                 color: plantCodeError == false
+                    //                     ? Colors.black26
+                    //                     : const Color.fromRGBO(243, 60, 60, 1)),
+                    //           ),
+                    //           child: Padding(
+                    //             padding: const EdgeInsets.symmetric(
+                    //                 horizontal: 12, vertical: 6),
+                    //             child: TextFormField(
+                    //               decoration: InputDecoration(
+                    //                   hintText: plantCodeError == false
+                    //                       ? 'Grade'
+                    //                       : '',
+                    //                   border: InputBorder.none),
+                    //               controller: gradeController,
+                    //               onSaved: (value) {
+                    //                 itemDetails['Grade'] = value!;
+                    //               },
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // gradeValidation == true
+                    //     ? const SizedBox()
+                    //     : ModularWidgets.validationDesign(
+                    //         size, gradeValidationMessage),
                     Padding(
                       padding: const EdgeInsets.only(top: 24.0),
                       child: Align(
@@ -781,7 +831,7 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                             Container(
                               width: 440,
                               padding: const EdgeInsets.only(bottom: 12),
-                              child: const Text('Grade'),
+                              child: const Text('Allowed Quantity Type'),
                             ),
                             Container(
                               width: 440,
@@ -789,24 +839,34 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
                                 color: Colors.white,
-                                border: Border.all(
-                                    color: plantCodeError == false
-                                        ? Colors.black26
-                                        : const Color.fromRGBO(243, 60, 60, 1)),
+                                border: Border.all(color: Colors.black26),
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
-                                child: TextFormField(
-                                  decoration: InputDecoration(
-                                      hintText: plantCodeError == false
-                                          ? 'Grade'
-                                          : '',
-                                      border: InputBorder.none),
-                                  controller: gradeController,
-                                  onSaved: (value) {
-                                    itemDetails['Grade'] = value!;
-                                  },
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 5.0),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton(
+                                    value: selectedAllowedQuantityType,
+                                    items: ['Number', 'Decimal']
+                                        .map<DropdownMenuItem<String>>((e) {
+                                      return DropdownMenuItem(
+                                        value: e,
+                                        onTap: () {
+                                          itemDetails['Allowed_Quantity_Type'] =
+                                              e;
+                                        },
+                                        child: Text(e),
+                                      );
+                                    }).toList(),
+                                    hint: const SizedBox(
+                                        width: 404, child: Text('Select')),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedAllowedQuantityType =
+                                            value as String?;
+                                      });
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
@@ -814,10 +874,7 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                         ),
                       ),
                     ),
-                    gradeValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, gradeValidationMessage),
+
                     Padding(
                       padding: const EdgeInsets.only(top: 24.0),
                       child: Align(
@@ -834,48 +891,95 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                             Container(
                               width: 440,
                               height: 36,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                                border: Border.all(color: Colors.black26),
-                              ),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    value: transferSelectedName,
-                                    items: ['Yes', 'No']
-                                        .map<DropdownMenuItem<String>>((e) {
-                                      return DropdownMenuItem(
-                                        child: Text(e),
-                                        value: e,
-                                        onTap: () {
-                                          itemDetails[
-                                              'Batch_Request_For_Transfer'] = e;
-                                        },
-                                      );
-                                    }).toList(),
-                                    hint: Container(
-                                        width: 404,
-                                        child: const Text('Select')),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        transferSelectedName = value as String?;
-                                      });
-                                    },
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 40, child: Text('Yes')),
+                                  const SizedBox(
+                                    width: 20,
                                   ),
-                                ),
+                                  Radio(
+                                      activeColor: ProjectColors.themecolor,
+                                      value: Transfer.yes,
+                                      groupValue: selectedTransfer,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          itemDetails[
+                                                  'Batch_Request_For_Transfer'] =
+                                              true;
+                                          selectedTransfer = value as Transfer;
+                                        });
+                                      })
+                                ],
                               ),
                             ),
+                            Container(
+                              width: 440,
+                              height: 36,
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 40, child: Text('No')),
+                                  const SizedBox(
+                                    width: 20,
+                                  ),
+                                  Radio(
+                                      activeColor: ProjectColors.themecolor,
+                                      value: Transfer.no,
+                                      groupValue: selectedTransfer,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          itemDetails[
+                                                  'Batch_Request_For_Transfer'] =
+                                              false;
+                                          selectedTransfer = value as Transfer;
+                                        });
+                                      })
+                                ],
+                              ),
+                            ),
+                            // Container(
+                            //   width: 440,
+                            //   height: 36,
+                            //   decoration: BoxDecoration(
+                            //     borderRadius: BorderRadius.circular(8),
+                            //     color: Colors.white,
+                            //     border: Border.all(color: Colors.black26),
+                            //   ),
+                            //   child: Padding(
+                            //     padding:
+                            //         const EdgeInsets.symmetric(horizontal: 5.0),
+                            //     child: DropdownButtonHideUnderline(
+                            //       child: DropdownButton(
+                            //         value: transferSelectedName,
+                            //         items: ['Yes', 'No']
+                            //             .map<DropdownMenuItem<String>>((e) {
+                            //           return DropdownMenuItem(
+                            //             value: e,
+                            //             onTap: () {
+                            //               itemDetails[
+                            //                   'Batch_Request_For_Transfer'] = e;
+                            //             },
+                            //             child: Text(e),
+                            //           );
+                            //         }).toList(),
+                            //         hint: const SizedBox(
+                            //             width: 404, child: Text('Select')),
+                            //         onChanged: (value) {
+                            //           setState(() {
+                            //             transferSelectedName = value as String?;
+                            //           });
+                            //         },
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
                     ),
-                    batchRequestForTransferValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, batchRequestForTransferValidationMessage),
+                    // batchRequestForTransferValidation == true
+                    //     ? const SizedBox()
+                    //     : ModularWidgets.validationDesign(
+                    //         size, batchRequestForTransferValidationMessage),
                     Padding(
                       padding: const EdgeInsets.only(top: 24.0),
                       child: Align(
@@ -892,49 +996,100 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                             Container(
                               width: 440,
                               height: 36,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                                border: Border.all(color: Colors.black26),
-                              ),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    value: selectedInventoryAdjustment,
-                                    items: ['Yes', 'No']
-                                        .map<DropdownMenuItem<String>>((e) {
-                                      return DropdownMenuItem(
-                                        child: Text(e),
-                                        value: e,
-                                        onTap: () {
-                                          itemDetails[
-                                              'Batch_Request_Inventory_Adjustment'] = e;
-                                        },
-                                      );
-                                    }).toList(),
-                                    hint: Container(
-                                        width: 404,
-                                        child: const Text('Select')),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedInventoryAdjustment =
-                                            value as String?;
-                                      });
-                                    },
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 40, child: Text('Yes')),
+                                  const SizedBox(
+                                    width: 20,
                                   ),
-                                ),
+                                  Radio(
+                                      activeColor: ProjectColors.themecolor,
+                                      value: InventoryAdjustment.yes,
+                                      groupValue:
+                                          selectedInventoryAdjustmentData,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          itemDetails[
+                                                  'Batch_Request_Inventory_Adjustment'] =
+                                              true;
+                                          selectedInventoryAdjustmentData =
+                                              value as InventoryAdjustment;
+                                        });
+                                      })
+                                ],
                               ),
                             ),
+                            Container(
+                              width: 440,
+                              height: 36,
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 40, child: Text('No')),
+                                  const SizedBox(
+                                    width: 20,
+                                  ),
+                                  Radio(
+                                      activeColor: ProjectColors.themecolor,
+                                      value: InventoryAdjustment.no,
+                                      groupValue:
+                                          selectedInventoryAdjustmentData,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          itemDetails[
+                                                  'Batch_Request_Inventory_Adjustment'] =
+                                              false;
+                                          selectedInventoryAdjustmentData =
+                                              value as InventoryAdjustment;
+                                        });
+                                      })
+                                ],
+                              ),
+                            ),
+                            // Container(
+                            //   width: 440,
+                            //   height: 36,
+                            //   decoration: BoxDecoration(
+                            //     borderRadius: BorderRadius.circular(8),
+                            //     color: Colors.white,
+                            //     border: Border.all(color: Colors.black26),
+                            //   ),
+                            //   child: Padding(
+                            //     padding:
+                            //         const EdgeInsets.symmetric(horizontal: 5.0),
+                            //     child: DropdownButtonHideUnderline(
+                            //       child: DropdownButton(
+                            //         value: selectedInventoryAdjustment,
+                            //         items: ['Yes', 'No']
+                            //             .map<DropdownMenuItem<String>>((e) {
+                            //           return DropdownMenuItem(
+                            //             value: e,
+                            //             onTap: () {
+                            //               itemDetails[
+                            //                   'Batch_Request_Inventory_Adjustment'] = e;
+                            //             },
+                            //             child: Text(e),
+                            //           );
+                            //         }).toList(),
+                            //         hint: const SizedBox(
+                            //             width: 404, child: Text('Select')),
+                            //         onChanged: (value) {
+                            //           setState(() {
+                            //             selectedInventoryAdjustment =
+                            //                 value as String?;
+                            //           });
+                            //         },
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
                     ),
-                    batchRequestInventoryValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, batchRequestInventoryValidationMessage),
+                    // batchRequestInventoryValidation == true
+                    //     ? const SizedBox()
+                    //     : ModularWidgets.validationDesign(
+                    //         size, batchRequestInventoryValidationMessage),
                     // Padding(
                     //   padding: const EdgeInsets.only(top: 24.0),
                     //   child: Align(
@@ -1103,7 +1258,7 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                         itemBuilder: (BuildContext context, int index) {
                           return ModularWidgets.exceptionDesign(
                               MediaQuery.of(context).size,
-                              value.productException[index][0]);
+                              value.productException[index]);
                         },
                       );
                     }),
@@ -1404,20 +1559,18 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                                                       DropdownMenuItem<String>>(
                                                   (e) {
                                                 return DropdownMenuItem(
-                                                  child: Text(e[
-                                                      'Product_Category_Name']),
                                                   value: e[
                                                       'Product_Category_Name'],
                                                   onTap: () {
                                                     productSubType[
                                                             'Product_Category_Id'] =
                                                         e['Product_Category_Id'];
-                                                    print(productSubType[
-                                                        'Product_Category_Id']);
                                                   },
+                                                  child: Text(e[
+                                                      'Product_Category_Name']),
                                                 );
                                               }).toList(),
-                                              hint: Container(
+                                              hint: SizedBox(
                                                   width: size.width * 0.15,
                                                   child: const Text('Select')),
                                               onChanged: (value) {
@@ -1461,7 +1614,7 @@ class _AddItemDetailsDialogState extends State<AddItemDetailsDialog> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 6),
                                 child: TextFormField(
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                       hintText: 'Product Sub Type',
                                       border: InputBorder.none),
                                   validator: (value) {

@@ -85,12 +85,13 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
     }
   }
 
-  void searchBook(String batchPlanCode, var activityNumber) {
+  void searchBook(String batchPlanCodeData, var activityNumber) {
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<LogsApi>(context, listen: false).logException.clear();
         Provider.of<LogsApi>(context, listen: false)
             .getActivityLog(batchPlanCode, 'None', token);
+        batchPlanCode = batchPlanCodeData;
       }
     });
   }
@@ -119,7 +120,8 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
             'From_Date': dateTime,
           }, token).then((value) {
             if (value == 202 || value == 204) {
-              searchBook(batchPlanCode, searchQuery);
+              searchBook(
+                  batchPlanCode, searchQuery == '' ? 'None' : searchQuery);
             } else {
               failureSnackbar('Something went wrong unable to update the data');
             }
@@ -148,7 +150,8 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                     }, token).then((value) {
                       if (value == 202 || value == 204) {
                         print(searchQuery);
-                        searchBook(batchPlanCode, searchQuery);
+                        searchBook(batchPlanCode,
+                            searchQuery == '' ? 'None' : searchQuery);
                         Get.back();
                       } else {
                         failureSnackbar(
@@ -176,7 +179,7 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
     firmList = Provider.of<InfrastructureApis>(context).firmDetails;
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: loading == true
           ? const SizedBox()
           : extratedPermissions['View'] == false
@@ -490,6 +493,20 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                                             MaterialStateProperty.all(
                                                 ProjectColors.themecolor)),
                                     onPressed: () {
+                                      Provider.of<InfrastructureApis>(context,
+                                              listen: false)
+                                          .plantDetails
+                                          .clear();
+
+                                      Provider.of<InfrastructureApis>(context,
+                                              listen: false)
+                                          .warehouseDetails
+                                          .clear();
+
+                                      Provider.of<InfrastructureApis>(context,
+                                              listen: false)
+                                          .batchCodeDetails
+                                          .clear();
                                       filterBasedOnPlant(
                                           firmList,
                                           plantList,
@@ -504,7 +521,7 @@ class _ActivityLogsScreenState extends State<ActivityLogsScreen> {
                                           selectedBatchCode,
                                           searchBook);
                                     },
-                                    child: const Text('Filter Based on Plant'))
+                                    child: const Text('Search By Firm'))
                                 // Padding(
                                 //   padding: const EdgeInsets.symmetric(
                                 //       horizontal: 12, vertical: 6),

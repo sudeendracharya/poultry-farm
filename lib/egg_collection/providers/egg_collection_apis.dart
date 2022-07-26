@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 
 import 'package:flutter/cupertino.dart';
 
+import '../../main.dart';
+
 class EggCollectionApis with ChangeNotifier {
   List _eggCollection = [];
   List _mortality = [];
@@ -21,8 +23,7 @@ class EggCollectionApis with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/egg-collection/egg-collection/');
+    final url = Uri.parse('${baseUrl}egg-collection/egg-collection/');
     try {
       final response = await http.get(
         url,
@@ -37,7 +38,6 @@ class EggCollectionApis with ChangeNotifier {
       //   _firmDetails.add(data['Firm_Name']);
       // }
       _eggCollection = responseData;
-      log(responseData.toString());
       notifyListeners();
       return response.statusCode;
     } catch (e) {
@@ -49,8 +49,7 @@ class EggCollectionApis with ChangeNotifier {
     var data,
     var token,
   ) async {
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/egg-collection/egg-collection/');
+    final url = Uri.parse('${baseUrl}egg-collection/egg-collection/');
     try {
       final response = await http.post(
         url,
@@ -82,8 +81,7 @@ class EggCollectionApis with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/inventory-management/bird-mortality/');
+    final url = Uri.parse('${baseUrl}inventory-management/bird-mortality/');
     try {
       final response = await http.get(
         url,
@@ -110,8 +108,7 @@ class EggCollectionApis with ChangeNotifier {
     var data,
     var token,
   ) async {
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/inventory-management/bird-mortality/');
+    final url = Uri.parse('${baseUrl}inventory-management/bird-mortality/');
     try {
       final response = await http.post(
         url,

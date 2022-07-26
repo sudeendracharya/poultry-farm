@@ -94,12 +94,17 @@ class _AddCustomerState extends State<AddCustomer> {
   var customerId;
   var companyId;
 
+  var individualCustomerId;
+
+  var individualCompanyId;
+
   @override
   void initState() {
     super.initState();
     selectedCustomerType = widget.customerType;
     if (widget.editData.isNotEmpty && selectedCustomerType == 'Individual') {
       customerId = widget.editData['Customer_Id'];
+      individualCustomerId = widget.editData['Individual_Customer_Id'];
       individualNameController.text = widget.editData['Customer_Name'];
       individualPanNumberController.text =
           widget.editData['Customer_Permanent_Account_Number'];
@@ -113,6 +118,7 @@ class _AddCustomerState extends State<AddCustomer> {
       individualEmailIdController.text = widget.editData['Email_Id'];
     } else if (widget.editData.isNotEmpty &&
         selectedCustomerType == 'Company') {
+      individualCompanyId = widget.editData['Individual_Company_Id'];
       companyId = widget.editData['Company_Id'];
       companyNameController.text = widget.editData['Company_Name'];
       panNumberController.text =
@@ -393,20 +399,21 @@ class _AddCustomerState extends State<AddCustomer> {
     Map<String, dynamic> addCustomer = {};
     if (selectedCustomerType == 'Company') {
       addCustomer = {
-        'Company_Type': selectedCustomerType,
-        'Company_Name': companyNameController.text,
-        'Company_Permanent_Account_Number': panNumberController.text,
+        'Customer_Type': selectedCustomerType,
+        'Permanent_Account_Number': panNumberController.text,
         'Country': countryValue.toString(),
         'State': stateValue.toString(),
         'City': cityValue.toString(),
         'Street': companyStreetController.text,
         'Pincode': companyPincodeController.text,
-        'Contact_Person_Name': companyContactPersonNameController.text,
-        'Contact_Person_Designation':
-            companyContactPersonDesignationController.text,
         'Contact_Number': companyContactNumberController.text,
+        'Company_Customer': {
+          'Company_Name': companyNameController.text,
+          'Contact_Person_Name': companyContactPersonNameController.text,
+          'Contact_Person_Designation':
+              companyContactPersonDesignationController.text,
+        }
       };
-      print(addCustomer);
       fetchCredientials().then((token) {
         Provider.of<JournalApi>(context, listen: false)
             .addCompanyInfo(addCustomer, token)
@@ -423,17 +430,18 @@ class _AddCustomerState extends State<AddCustomer> {
     } else {
       addCustomer = {
         'Customer_Type': selectedCustomerType,
-        'Customer_Name': individualNameController.text,
-        'Customer_Permanent_Account_Number': individualPanNumberController.text,
+        'Permanent_Account_Number': individualPanNumberController.text,
         'Country': countryValue.toString(),
         'State': stateValue.toString(),
         'City': cityValue.toString(),
         'Street': individualStreetController.text,
         'Pincode': individualPincodeController.text,
         'Contact_Number': individualContactNumberController.text,
-        'Email_Id': individualEmailIdController.text,
+        'Individual_Customer': {
+          'Individual_Customer_Name': individualNameController.text,
+          'Email_Id': individualEmailIdController.text,
+        },
       };
-      print(addCustomer);
 
       fetchCredientials().then((token) {
         Provider.of<JournalApi>(context, listen: false)
@@ -457,19 +465,21 @@ class _AddCustomerState extends State<AddCustomer> {
       addCustomer = {
         'Company_Id': companyId,
         'Company_Type': selectedCustomerType,
-        'Company_Name': companyNameController.text,
         'Company_Permanent_Account_Number': panNumberController.text,
         'Country': countryValue.toString(),
         'State': stateValue.toString(),
         'City': cityValue.toString(),
         'Street': companyStreetController.text,
         'Pincode': companyPincodeController.text,
-        'Contact_Person_Name': companyContactPersonNameController.text,
-        'Contact_Person_Designation':
-            companyContactPersonDesignationController.text,
         'Contact_Number': companyContactNumberController.text,
+        'Company_Customer': {
+          'Company_Id': individualCompanyId,
+          'Company_Name': companyNameController.text,
+          'Contact_Person_Name': companyContactPersonNameController.text,
+          'Contact_Person_Designation':
+              companyContactPersonDesignationController.text,
+        }
       };
-      print('Company Details $addCustomer');
       fetchCredientials().then((token) {
         Provider.of<JournalApi>(context, listen: false)
             .updateCompanyInfo(companyId, addCustomer, token)
@@ -487,7 +497,6 @@ class _AddCustomerState extends State<AddCustomer> {
       addCustomer = {
         'Customer_Id': customerId,
         'Customer_Type': selectedCustomerType,
-        'Customer_Name': individualNameController.text,
         'Customer_Permanent_Account_Number': individualPanNumberController.text,
         'Country': countryValue.toString(),
         'State': stateValue.toString(),
@@ -495,9 +504,12 @@ class _AddCustomerState extends State<AddCustomer> {
         'Street': individualStreetController.text,
         'Pincode': individualPincodeController.text,
         'Contact_Number': individualContactNumberController.text,
-        'Email_Id': individualEmailIdController.text,
+        'Individual_Customer': {
+          'Individual_Customer_Id': individualCustomerId,
+          'Individual_Customer_Name': individualNameController.text,
+          'Email_Id': individualEmailIdController.text,
+        },
       };
-      print(addCustomer);
 
       fetchCredientials().then((token) {
         Provider.of<JournalApi>(context, listen: false)
@@ -650,6 +662,7 @@ class _AddCustomerState extends State<AddCustomer> {
                                         countrySearchPlaceholder: "Country",
                                         stateSearchPlaceholder: "State",
                                         citySearchPlaceholder: "City",
+                                        flagState: CountryFlag.DISABLE,
 
                                         ///labels for dropdown
                                         countryDropdownLabel: "*Country",
@@ -772,6 +785,7 @@ class _AddCustomerState extends State<AddCustomer> {
                                         countrySearchPlaceholder: "Country",
                                         stateSearchPlaceholder: "State",
                                         citySearchPlaceholder: "City",
+                                        flagState: CountryFlag.DISABLE,
 
                                         ///labels for dropdown
                                         countryDropdownLabel: "*Country",

@@ -171,7 +171,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         return true;
       },
       child: Scaffold(
-        appBar: GlobalAppBar(query: query, appbar: AppBar()),
+        appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
         body: loading == true
             ? const Center(
                 child: Text('Loading'),
@@ -240,39 +240,46 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                             context: context,
                                             builder: (ctx) =>
                                                 EditProductDetails(
+                                                  unitOfMeasureId: productDetails[
+                                                      'Unit_Of_Measure__Unit_Id'],
                                                   barchRequestInventoryAdjustment:
                                                       productDetails[
-                                                          'Batch_Request_Inventory_Adjustment'],
-                                                  batchRequestForGrading:
-                                                      productDetails[
-                                                          'Batch_Request_For_Grading'],
-                                                  batchRequestForMortality:
-                                                      productDetails[
-                                                          'Batch_Request_For_Mortality'],
+                                                              'Batch_Request_Inventory_Adjustment'] ??
+                                                          '',
                                                   batchRequestForTransfer:
                                                       productDetails[
-                                                          'Batch_Request_For_Transfer'],
+                                                              'Batch_Request_For_Transfer'] ??
+                                                          '',
                                                   description: productDetails[
-                                                      'Description'],
-                                                  grade:
-                                                      productDetails['Grade'],
+                                                          'Description'] ??
+                                                      '',
                                                   productCategoryId: productDetails[
-                                                      'Product_Category_Id__Product_Category_Name'],
+                                                          'Product_Category_Id__Product_Category_Name'] ??
+                                                      '',
                                                   productCode: productDetails[
-                                                      'Product_Code'],
+                                                          'Product_Code'] ??
+                                                      '',
                                                   productId: productDetails[
-                                                      'Product_Id'],
+                                                          'Product_Id'] ??
+                                                      '',
                                                   productName: productDetails[
-                                                      'Product_Name'],
+                                                          'Product_Name'] ??
+                                                      '',
                                                   productSubCategoryId:
                                                       productDetails[
-                                                          'Product_Sub_Category_Id__Product_Sub_Category_Name'],
+                                                              'Product_Sub_Category_Id__Product_Sub_Category_Name'] ??
+                                                          '',
                                                   reFresh: update,
                                                   stockKeepingUnit: productDetails[
-                                                          'Stock_Keeping_Unit']
-                                                      .toString(),
+                                                              'Stock_Keeping_Unit'] ==
+                                                          null
+                                                      ? ''
+                                                      : productDetails[
+                                                              'Stock_Keeping_Unit']
+                                                          .toString(),
                                                   unitOfMeasure: productDetails[
-                                                      'Unit_Of_Measure'],
+                                                          'Unit_Of_Measure__Unit_Name'] ??
+                                                      '',
                                                 ),
                                             direction: AxisDirection.right);
                                       },
@@ -358,7 +365,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                   productDetails.isEmpty
                                       ? const SizedBox()
                                       : getDataContainer(productDetails[
-                                          'Product_Category_Id__Product_Category_Name']),
+                                              'Product_Category_Id__Product_Category_Name'] ??
+                                          ''),
                                 ],
                               ),
                               const SizedBox(
@@ -374,7 +382,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                       ? const SizedBox()
                                       : getDataContainer(
                                           productDetails[
-                                              'Product_Sub_Category_Id__Product_Sub_Category_Name'],
+                                                  'Product_Sub_Category_Id__Product_Sub_Category_Name'] ??
+                                              '',
                                         ),
                                 ],
                               ),
@@ -390,8 +399,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                   ),
                                   productDetails.isEmpty
                                       ? const SizedBox()
-                                      : getDataContainer(
-                                          productDetails['Unit_Of_Measure']),
+                                      : getDataContainer(productDetails[
+                                          'Unit_Of_Measure__Unit_Name']),
                                 ],
                               ),
                               const SizedBox(
@@ -422,7 +431,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                   productDetails.isEmpty
                                       ? const SizedBox()
                                       : getDataContainer(productDetails[
-                                          'Batch_Request_For_Transfer']),
+                                                  'Batch_Request_For_Transfer']
+                                              .toString() ??
+                                          ''),
                                 ],
                               ),
                               const SizedBox(
@@ -438,41 +449,45 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                   productDetails.isEmpty
                                       ? const SizedBox()
                                       : getDataContainer(productDetails[
-                                          'Batch_Request_Inventory_Adjustment']),
+                                                  'Batch_Request_Inventory_Adjustment']
+                                              .toString() ??
+                                          ''),
                                 ],
                               ),
-                              const SizedBox(
-                                height: 15,
-                              ),
-                              Row(
-                                children: [
-                                  getHeadingContainer(
-                                      'Required batch number for inventory mortality'),
-                                  const SizedBox(
-                                    width: 55,
-                                  ),
-                                  productDetails.isEmpty
-                                      ? const SizedBox()
-                                      : getDataContainer(productDetails[
-                                          'Batch_Request_For_Mortality']),
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 15,
-                              ),
-                              Row(
-                                children: [
-                                  getHeadingContainer(
-                                      'Required batch number for grading'),
-                                  const SizedBox(
-                                    width: 55,
-                                  ),
-                                  productDetails.isEmpty
-                                      ? const SizedBox()
-                                      : getDataContainer(productDetails[
-                                          'Batch_Request_For_Grading']),
-                                ],
-                              )
+                              // const SizedBox(
+                              //   height: 15,
+                              // ),
+                              // Row(
+                              //   children: [
+                              //     getHeadingContainer(
+                              //         'Required batch number for inventory mortality'),
+                              //     const SizedBox(
+                              //       width: 55,
+                              //     ),
+                              //     productDetails.isEmpty
+                              //         ? const SizedBox()
+                              //         : getDataContainer(productDetails[
+                              //                 'Batch_Request_For_Mortality'] ??
+                              //             ''),
+                              //   ],
+                              // ),
+                              // const SizedBox(
+                              //   height: 15,
+                              // ),
+                              // Row(
+                              //   children: [
+                              //     getHeadingContainer(
+                              //         'Required batch number for grading'),
+                              //     const SizedBox(
+                              //       width: 55,
+                              //     ),
+                              //     productDetails.isEmpty
+                              //         ? const SizedBox()
+                              //         : getDataContainer(productDetails[
+                              //                 'Batch_Request_For_Grading'] ??
+                              //             ''),
+                              //   ],
+                              // )
                             ],
                           ),
                         ),

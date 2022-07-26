@@ -422,6 +422,8 @@ class _AddInventoryAdjustmentJournalState
   @override
   void initState() {
     super.initState();
+    clearSalesException(context);
+
     controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 450));
     //scaleAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
@@ -431,9 +433,7 @@ class _AddInventoryAdjustmentJournalState
     controller.addListener(() {
       setState(() {});
     });
-    fetchPlant().then((value) {
-      getWarehouseDetails(value);
-    });
+
     controller.forward();
     if (widget.editData.isNotEmpty) {
       inventoryAdjustmentCodeController.text =
@@ -472,7 +472,10 @@ class _AddInventoryAdjustmentJournalState
         .tryAutoLogin()
         .then((value) async {
       var token = Provider.of<Apicalls>(context, listen: false).token;
-      var platId = await fetchPlant();
+      var firmId = await getFirmData();
+      if (firmId != '') {
+        fechplantList(firmId, context);
+      }
 
       Provider.of<InventoryApi>(context, listen: false).getBatch(token);
 
@@ -790,59 +793,57 @@ class _AddInventoryAdjustmentJournalState
                   //     ? const SizedBox()
                   //     : ModularWidgets.validationDesign(
                   //         size, firmIdValidationMessage),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 24.0),
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: [
-                  //       Container(
-                  //         width: formWidth,
-                  //         padding: const EdgeInsets.only(bottom: 12),
-                  //         child: const Text('Plant Name'),
-                  //       ),
-                  //       Container(
-                  //         width: formWidth,
-                  //         height: 36,
-                  //         decoration: BoxDecoration(
-                  //           borderRadius: BorderRadius.circular(8),
-                  //           color: Colors.white,
-                  //           border: Border.all(color: Colors.black26),
-                  //         ),
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.symmetric(
-                  //               horizontal: 12, vertical: 6),
-                  //           child: DropdownButtonHideUnderline(
-                  //             child: DropdownButton(
-                  //               value: plantId,
-                  //               items: plantList
-                  //                   .map<DropdownMenuItem<String>>((e) {
-                  //                 return DropdownMenuItem(
-                  //                   value: e['Plant_Name'],
-                  //                   onTap: () {
-                  //                     // firmId = e['Firm_Code'];
-                  //                     getWarehouseDetails(e['Plant_Id']);
-                  //                     //print(warehouseCategory);
-                  //                   },
-                  //                   child: Text(e['Plant_Name']),
-                  //                 );
-                  //               }).toList(),
-                  //               hint: const Text('Please Choose Plant Name'),
-                  //               onChanged: (value) {
-                  //                 setState(() {
-                  //                   plantId = value as String;
-                  //                 });
-                  //               },
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // plantIdValidation == true
-                  //     ? const SizedBox()
-                  //     : ModularWidgets.validationDesign(
-                  //         size, plantIdValidationMessage),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: formWidth,
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: const Text('Plant Name'),
+                        ),
+                        Container(
+                          width: formWidth,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white,
+                            border: Border.all(color: Colors.black26),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                value: plantId,
+                                items: plantList
+                                    .map<DropdownMenuItem<String>>((e) {
+                                  return DropdownMenuItem(
+                                    value: e['Plant_Name'],
+                                    onTap: () {
+                                      getWarehouseDetails(e['Plant_Id']);
+                                    },
+                                    child: Text(e['Plant_Name']),
+                                  );
+                                }).toList(),
+                                hint: const Text('Please Choose Plant Name'),
+                                onChanged: (value) {
+                                  setState(() {
+                                    plantId = value as String;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  plantIdValidation == true
+                      ? const SizedBox()
+                      : ModularWidgets.validationDesign(
+                          size, plantIdValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Column(
@@ -1469,7 +1470,7 @@ class _AddInventoryAdjustmentJournalState
                       itemBuilder: (BuildContext context, int index) {
                         return ModularWidgets.exceptionDesign(
                             MediaQuery.of(context).size,
-                            value.salesException[index][0]);
+                            value.salesException[index]);
                       },
                     );
                   }),

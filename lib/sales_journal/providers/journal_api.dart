@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:poultry_login_signup/main.dart';
 
 class JournalApi with ChangeNotifier {
-  var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
   List _journalInfo = [];
 
   Map<String, dynamic> _individualSalesData = {};
@@ -106,9 +105,9 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -118,17 +117,7 @@ class JournalApi with ChangeNotifier {
             'Sale_Id': data['Sale_Id'],
             'Sale_Code': data['Sale_Code'],
             'Customer_Id': data['Customer_Id'],
-            'Customer_Name': data['Customer_Id__Customer_Name'],
-            'Rate': data['Rate'],
-            'WareHouse_Code': data['WareHouse_Id__WareHouse_Name'],
-            'Shipped_Date': data['Shipped_Date'],
-            'Batch_Plan_Id': data['Batch_Plan_Id__Batch_Plan_Code'],
-            'Item': data['Product_Id__Product_Name'],
-            'Item_Category': data['Product_Category_Id__Product_Category_Name'],
-            'Quantity': data['Quantity'],
-            'Quantity_Unit': data['Quantity_Unit'],
-            'CW_Quantity': data['CW_Quantity'],
-            'CW_Unit': data['CW_Unit'],
+            'Despatch_Date': data['Despatch_Date'],
             'Is_Selected': false,
           });
         }
@@ -154,7 +143,7 @@ class JournalApi with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse('${baseUrl}sale-data/company-sale-list/$id/');
+    final url = Uri.parse('${baseUrl}sale-data/customer-sale-list/$id/');
     try {
       final response = await http.get(
         url,
@@ -163,9 +152,9 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -174,18 +163,7 @@ class JournalApi with ChangeNotifier {
           temp.add({
             'Sale_Id': data['Sale_Id'],
             'Sale_Code': data['Sale_Code'],
-            'Company_Id': data['Company_Id'],
-            'Customer_Name': data['Company_Id__Company_Name'],
-            'Rate': data['Rate'],
-            'WareHouse_Code': data['WareHouse_Id__WareHouse_Name'],
-            'Shipped_Date': data['Shipped_Date'],
-            'Batch_Plan_Id': data['Batch_Plan_Id__Batch_Plan_Code'],
-            'Item': data['Product_Id__Product_Name'],
-            'Item_Category': data['Product_Category_Id__Product_Category_Name'],
-            'Quantity': data['Quantity'],
-            'Quantity_Unit': data['Quantity_Unit'],
-            'CW_Quantity': data['CW_Quantity'],
-            'CW_Unit': data['CW_Unit'],
+            'Despatch_Date': data['Despatch_Date'],
             'Is_Selected': false,
           });
         }
@@ -232,7 +210,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -262,7 +240,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -291,7 +269,7 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         List temp = [];
@@ -358,7 +336,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -390,7 +368,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -421,7 +399,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -441,7 +419,7 @@ class JournalApi with ChangeNotifier {
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse('${baseUrl}customer/customer-list/');
+    final url = Uri.parse('${baseUrl}customer/customer-list/Individual/');
     try {
       final response = await http.post(
         url,
@@ -451,7 +429,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -481,7 +459,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -501,7 +479,7 @@ class JournalApi with ChangeNotifier {
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse('${baseUrl}customer/company-list/');
+    final url = Uri.parse('${baseUrl}customer/customer-list/Company/');
     try {
       final response = await http.post(
         url,
@@ -513,7 +491,7 @@ class JournalApi with ChangeNotifier {
       );
       print(response.statusCode);
       print(response.body);
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -540,6 +518,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
+      forbidden(response);
       print(response.statusCode);
       print(response.body);
 
@@ -560,7 +539,7 @@ class JournalApi with ChangeNotifier {
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse('${baseUrl}customer/company-details/$id/');
+    final url = Uri.parse('${baseUrl}customer/customer-details/Company/$id/');
     try {
       final response = await http.patch(
         url,
@@ -570,6 +549,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
+      forbidden(response);
       print(response.statusCode);
       print(response.body);
 
@@ -600,6 +580,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
+      forbidden(response);
       print(response.statusCode);
       print(response.body);
 
@@ -620,7 +601,8 @@ class JournalApi with ChangeNotifier {
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse('${baseUrl}customer/customer-details/$id/');
+    final url =
+        Uri.parse('${baseUrl}customer/customer-details/Individual/$id/');
     try {
       final response = await http.patch(
         url,
@@ -630,7 +612,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -661,7 +643,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -676,11 +658,9 @@ class JournalApi with ChangeNotifier {
     }
   }
 
-  Future<int> getCustomersInfo(
-    var token,
-  ) async {
+  Future<int> getCustomersInfo(var token, var type) async {
     // log(token);
-    final url = Uri.parse('${baseUrl}customer/customer-list/');
+    final url = Uri.parse('${baseUrl}customer/customer-list/$type/');
     try {
       final response = await http.get(
         url,
@@ -689,26 +669,27 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         List temp = [];
         for (var data in responseData) {
           temp.add({
-            "Customer_Id": data['Customer_Id'],
-            "Customer_Name": data['Customer_Name'],
-            "Customer_Type": data['Customer_Type'],
+            "Customer_Id": data['Customer'],
+            "Individual_Customer_Id": data['Individual_Customer_Id'],
+            "Customer_Name": data['Individual_Customer_Name'],
+            "Customer_Type": data['Customer__Customer_Type'],
             "Customer_Permanent_Account_Number":
-                data['Customer_Permanent_Account_Number'],
-            "Country": data['Country'],
-            "State": data['State'],
-            "City": data['City'],
-            "Street": data['Street'],
-            "Pincode": data['Pincode'],
-            "Contact_Number": data['Contact_Number'],
+                data['Customer__Permanent_Account_Number'],
+            "Country": data['Customer__Country'],
+            "State": data['Customer__State'],
+            "City": data['Customer__City'],
+            "Street": data['Customer__Street'],
+            "Pincode": data['Customer__Pincode'],
+            "Contact_Number": data['Customer__Contact_Number'],
             "Email_Id": data['Email_Id'],
             'Is_Selected': false,
           });
@@ -741,7 +722,7 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       print(response.statusCode);
       print(response.body);
 
@@ -783,8 +764,10 @@ class JournalApi with ChangeNotifier {
     var id,
     var token,
   ) async {
+    print(id);
     // log(token);
-    final url = Uri.parse('${baseUrl}customer/customer-details/$id/');
+    final url =
+        Uri.parse('${baseUrl}customer/customer-details/Individual/$id/');
     try {
       final response = await http.get(
         url,
@@ -793,9 +776,9 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       print(response.statusCode);
-      print(response.body);
+      print(' Individual customer details ${response.body}');
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -820,7 +803,7 @@ class JournalApi with ChangeNotifier {
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse('${baseUrl}customer/company-details/$id/');
+    final url = Uri.parse('${baseUrl}customer/customer-details/Company/$id/');
     try {
       final response = await http.get(
         url,
@@ -830,8 +813,9 @@ class JournalApi with ChangeNotifier {
         },
       );
 
+      forbidden(response);
       print(response.statusCode);
-      print(response.body);
+      print('Individual Company Body ${response.body}');
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -855,7 +839,7 @@ class JournalApi with ChangeNotifier {
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse('${baseUrl}customer/company-list/');
+    final url = Uri.parse('${baseUrl}customer/customer-list/Company/');
     try {
       final response = await http.get(
         url,
@@ -864,7 +848,7 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       print(response.statusCode);
       print(response.body);
 
@@ -873,19 +857,21 @@ class JournalApi with ChangeNotifier {
         List temp = [];
         for (var data in responseData) {
           temp.add({
-            "Company_Id": data['Company_Id'],
-            "Company_Name": data['Company_Name'],
-            "Company_Type": data['Company_Type'],
+            "Company_Id": data['Customer'] ?? '',
+            'Individual_Company_Id': data['Company_Id'] ?? '',
+            "Company_Name": data['Company_Name'] ?? '',
+            "Company_Type": data['Customer__Customer_Type'] ?? '',
             "Company_Permanent_Account_Number":
-                data['Company_Permanent_Account_Number'],
-            "Country": data['Country'],
-            "State": data['State'],
-            "City": data['City'],
-            "Street": data['Street'],
-            "Pincode": data['Pincode'],
-            "Contact_Person_Name": data['Contact_Person_Name'],
-            "Contact_Person_Designation": data['Contact_Person_Designation'],
-            "Contact_Number": data['Contact_Number'],
+                data['Customer__Permanent_Account_Number'] ?? '',
+            "Country": data['Customer__Country'] ?? '',
+            "State": data['Customer__State'] ?? '',
+            "City": data['Customer__City'] ?? '',
+            "Street": data['Customer__Street'] ?? '',
+            "Pincode": data['Customer__Pincode'] ?? '',
+            "Contact_Person_Name": data['Contact_Person_Name'] ?? '',
+            "Contact_Person_Designation":
+                data['Contact_Person_Designation'] ?? '',
+            "Contact_Number": data['Customer__Contact_Number'] ?? '',
             'Is_Selected': false,
           });
         }
@@ -917,7 +903,7 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       print(response.statusCode);
       print(response.body);
 
@@ -973,7 +959,7 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       print(response.statusCode);
       print(response.body);
 
@@ -1010,7 +996,7 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       print(response.statusCode);
       print(response.body);
 
@@ -1064,11 +1050,12 @@ class JournalApi with ChangeNotifier {
   // }
 
   Future<int> deleteCustomerInfo(
-    var data,
+    var id,
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse('${baseUrl}customer/customer-details/0/');
+    final url =
+        Uri.parse('${baseUrl}customer/customer-details/Individual/$id/');
     try {
       final response = await http.delete(
         url,
@@ -1076,9 +1063,8 @@ class JournalApi with ChangeNotifier {
           "Content-Type": "application/json; charset=UTF-8",
           "Authorization": 'Token $token'
         },
-        body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -1108,7 +1094,7 @@ class JournalApi with ChangeNotifier {
         },
         // body: json.encode(id),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -1124,11 +1110,11 @@ class JournalApi with ChangeNotifier {
   }
 
   Future<int> deleteCompaniesInfo(
-    var data,
+    var id,
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse('${baseUrl}customer/company-details/0/');
+    final url = Uri.parse('${baseUrl}customer/customer-details/Company/$id/');
     try {
       final response = await http.delete(
         url,
@@ -1136,9 +1122,8 @@ class JournalApi with ChangeNotifier {
           "Content-Type": "application/json; charset=UTF-8",
           "Authorization": 'Token $token'
         },
-        body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -1168,7 +1153,7 @@ class JournalApi with ChangeNotifier {
         },
         // body: json.encode(id),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -1198,7 +1183,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
@@ -1225,7 +1210,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -1256,7 +1241,7 @@ class JournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -1285,15 +1270,15 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         _individualSalesData = responseData;
         notifyListeners();
       }
 
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
@@ -1307,7 +1292,7 @@ class JournalApi with ChangeNotifier {
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse('${baseUrl}sale-data/company-sale-details/$id/');
+    final url = Uri.parse('${baseUrl}sale-data/customer-sale-details/$id/');
     try {
       final response = await http.get(
         url,
@@ -1316,15 +1301,15 @@ class JournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         _individualCompanySalesData = responseData;
         notifyListeners();
       }
 
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {

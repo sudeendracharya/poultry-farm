@@ -16,14 +16,14 @@ import '../../providers/apicalls.dart';
 import '../../widgets/modular_widgets.dart';
 
 class AddSalesJournal extends StatefulWidget {
-  AddSalesJournal(
-      {Key? key,
-      required this.reFresh,
-      required this.editData,
-      required this.customerType,
-      required this.id,
-      required this.name})
-      : super(key: key);
+  AddSalesJournal({
+    Key? key,
+    required this.reFresh,
+    required this.editData,
+    required this.customerType,
+    required this.id,
+    required this.name,
+  }) : super(key: key);
   final ValueChanged<int> reFresh;
   final Map<String, dynamic> editData;
   final String customerType;
@@ -398,7 +398,7 @@ class _AddSalesJournalState extends State<AddSalesJournal>
       }
       // _startDate = pickedDate.millisecondsSinceEpoch;
       shippingDateController.text = DateFormat('dd-MM-yyyy').format(pickedDate);
-      salesJournal['Shipped_Date'] =
+      salesJournal['Despatch_Date'] =
           DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(pickedDate);
 
       setState(() {});
@@ -456,6 +456,7 @@ class _AddSalesJournalState extends State<AddSalesJournal>
   @override
   void initState() {
     super.initState();
+    clearSalesException(context);
     // customerNameFocus.addListener(_onCustomerFocusChange);
     if (widget.editData.isEmpty) {
       saleCodeController.text = getRandom(4, 'INV-');
@@ -501,7 +502,7 @@ class _AddSalesJournalState extends State<AddSalesJournal>
         .tryAutoLogin()
         .then((value) async {
       var token = Provider.of<Apicalls>(context, listen: false).token;
-      var platId = await fetchPlant();
+      // var platId = await fetchPlant();
 
       Provider.of<InventoryApi>(context, listen: false).getBatch(token);
 
@@ -571,20 +572,23 @@ class _AddSalesJournalState extends State<AddSalesJournal>
       setState(() {});
       return;
     }
-    String total = (double.parse(quantityController.text) *
-            double.parse(priceController.text))
-        .toStringAsFixed(2);
+    double quantityControllerData = double.parse(
+        quantityController.text.isNum != true ? '0' : quantityController.text);
+    double pricecontrollerData = double.parse(
+        priceController.text.isNum != true ? '0' : priceController.text);
+    String total =
+        (quantityControllerData * pricecontrollerData).toStringAsFixed(2);
     itemList.add({
-      'WarehouseCode': wareHouseId,
-      'Item': productId,
-      'Batch_Code': batchId,
+      'WarehouseCode': wareHouseId ?? '',
+      'Product_Name': productId ?? '',
+      'Batch_Code': batchId ?? '',
       'Price': priceController.text,
       'Quantity': quantityController.text,
-      'Unit': unitId,
+      'Unit': unitId ?? '',
       'CW_Quantity': cwQuantityController.text,
       'CW_Unit': cwUnitId,
-      'Item_Category': itemCategoryId,
-      'Item_SubCategory': itemSubCategoryId,
+      'Product_Category_Name': itemCategoryId ?? '',
+      'Product_Sub_Category_Name': itemSubCategoryId ?? '',
       'Total': total,
     });
     setState(() {
@@ -621,68 +625,66 @@ class _AddSalesJournalState extends State<AddSalesJournal>
     if (selectedCustomerType == 'Individual') {
       salesJournal['Customer_Id'] = customerId;
     } else {
-      salesJournal['Company_Id'] = customerId;
+      salesJournal['Customer_Id'] = customerId;
     }
 
     salesJournal['Item_Details'] = itemList;
 
-    print(salesJournal.toString());
-
-    // if (widget.editData.isNotEmpty) {
-    //   Provider.of<Apicalls>(context, listen: false)
-    //       .tryAutoLogin()
-    //       .then((value) {
-    //     var token = Provider.of<Apicalls>(context, listen: false).token;
-    //     Provider.of<JournalApi>(context, listen: false)
-    //         .updateCustomerSalesJournalInfo(
-    //             salesJournal, widget.editData['Sale_Id'], token)
-    //         .then((value) {
-    //       if (value == 202 || value == 201) {
-    //         widget.reFresh(100);
-    //         Get.back();
-    //         successSnackbar('Successfully updated sales data');
-    //       } else {
-    //         failureSnackbar('Unable to update data something went wrong');
-    //       }
-    //     });
-    //   });
-    // } else {
-    //   if (selectedCustomerType == 'Individual') {
-    //     Provider.of<Apicalls>(context, listen: false)
-    //         .tryAutoLogin()
-    //         .then((value) {
-    //       var token = Provider.of<Apicalls>(context, listen: false).token;
-    //       Provider.of<JournalApi>(context, listen: false)
-    //           .addCustomerSalesJournalInfo(salesJournal, token)
-    //           .then((value) {
-    //         if (value == 200 || value == 201) {
-    //           widget.reFresh(100);
-    //           Get.back();
-    //           successSnackbar('Successfully added sales data');
-    //         } else {
-    //           failureSnackbar('Unable to add data something went wrong');
-    //         }
-    //       });
-    //     });
-    //   } else {
-    //     Provider.of<Apicalls>(context, listen: false)
-    //         .tryAutoLogin()
-    //         .then((value) {
-    //       var token = Provider.of<Apicalls>(context, listen: false).token;
-    //       Provider.of<JournalApi>(context, listen: false)
-    //           .addCompanySalesJournalInfo(salesJournal, token)
-    //           .then((value) {
-    //         if (value == 200 || value == 201) {
-    //           widget.reFresh(100);
-    //           Get.back();
-    //           successSnackbar('Successfully added sales data');
-    //         } else {
-    //           failureSnackbar('Unable to add data something went wrong');
-    //         }
-    //       });
-    //     });
-    //   }
-    // }
+    if (widget.editData.isNotEmpty) {
+      Provider.of<Apicalls>(context, listen: false)
+          .tryAutoLogin()
+          .then((value) {
+        var token = Provider.of<Apicalls>(context, listen: false).token;
+        Provider.of<JournalApi>(context, listen: false)
+            .updateCustomerSalesJournalInfo(
+                salesJournal, widget.editData['Sale_Id'], token)
+            .then((value) {
+          if (value == 202 || value == 201) {
+            widget.reFresh(100);
+            Get.back();
+            successSnackbar('Successfully updated sales data');
+          } else {
+            failureSnackbar('Unable to update data something went wrong');
+          }
+        });
+      });
+    } else {
+      if (selectedCustomerType == 'Individual') {
+        Provider.of<Apicalls>(context, listen: false)
+            .tryAutoLogin()
+            .then((value) {
+          var token = Provider.of<Apicalls>(context, listen: false).token;
+          Provider.of<JournalApi>(context, listen: false)
+              .addCustomerSalesJournalInfo(salesJournal, token)
+              .then((value) {
+            if (value == 200 || value == 201) {
+              widget.reFresh(100);
+              Get.back();
+              successSnackbar('Successfully added sales data');
+            } else {
+              failureSnackbar('Unable to add data something went wrong');
+            }
+          });
+        });
+      } else {
+        Provider.of<Apicalls>(context, listen: false)
+            .tryAutoLogin()
+            .then((value) {
+          var token = Provider.of<Apicalls>(context, listen: false).token;
+          Provider.of<JournalApi>(context, listen: false)
+              .addCustomerSalesJournalInfo(salesJournal, token)
+              .then((value) {
+            if (value == 200 || value == 201) {
+              widget.reFresh(100);
+              Get.back();
+              successSnackbar('Successfully added sales data');
+            } else {
+              failureSnackbar('Unable to add data something went wrong');
+            }
+          });
+        });
+      }
+    }
   }
 
   Container headerContainer(String name) {
@@ -1054,7 +1056,7 @@ class _AddSalesJournalState extends State<AddSalesJournal>
                                   Container(
                                     width: formWidth,
                                     padding: const EdgeInsets.only(bottom: 12),
-                                    child: const Text('Shipped Date'),
+                                    child: const Text('Dispatch Date'),
                                   ),
                                 ],
                               ),
@@ -1075,7 +1077,7 @@ class _AddSalesJournalState extends State<AddSalesJournal>
                                       child: TextFormField(
                                         controller: shippingDateController,
                                         decoration: const InputDecoration(
-                                            hintText: 'Choose Shipped date',
+                                            hintText: 'Choose Dispatch date',
                                             border: InputBorder.none),
                                         enabled: false,
                                         // onSaved: (value) {
@@ -1370,45 +1372,8 @@ class _AddSalesJournalState extends State<AddSalesJournal>
                                         Container(
                                           width: 150,
                                           child: Text(
-                                            itemList[index]['WarehouseCode'],
-                                            style: headerStyle(),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: columnWidth,
-                                        ),
-                                        headerContainer(
-                                            itemList[index]['Item']),
-                                        SizedBox(
-                                          width: columnWidth,
-                                        ),
-                                        headerContainer(
-                                          itemList[index]['Batch_Code'],
-                                        ),
-                                        SizedBox(
-                                          width: columnWidth,
-                                        ),
-                                        headerContainer(
-                                          itemList[index]['Quantity']
-                                              .toString(),
-                                        ),
-                                        SizedBox(
-                                          width: columnWidth,
-                                        ),
-                                        Container(
-                                          width: 60,
-                                          child: Text(
-                                            itemList[index]['Price'].toString(),
-                                            style: headerStyle(),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: columnWidth,
-                                        ),
-                                        Container(
-                                          width: 60,
-                                          child: Text(
-                                            itemList[index]['Unit'],
+                                            itemList[index]['WarehouseCode'] ??
+                                                '',
                                             style: headerStyle(),
                                           ),
                                         ),
@@ -1416,18 +1381,56 @@ class _AddSalesJournalState extends State<AddSalesJournal>
                                           width: columnWidth,
                                         ),
                                         headerContainer(itemList[index]
-                                                ['CW_Quantity']
-                                            .toString()),
+                                                ['Product_Name'] ??
+                                            ''),
                                         SizedBox(
                                           width: columnWidth,
                                         ),
                                         headerContainer(
-                                            itemList[index]['CW_Unit']),
+                                          itemList[index]['Batch_Code'] ?? '',
+                                        ),
                                         SizedBox(
                                           width: columnWidth,
                                         ),
                                         headerContainer(
-                                            itemList[index]['Total']),
+                                          itemList[index]['Quantity'] ?? '',
+                                        ),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        Container(
+                                          width: 60,
+                                          child: Text(
+                                            itemList[index]['Price'] ?? '',
+                                            style: headerStyle(),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        Container(
+                                          width: 60,
+                                          child: Text(
+                                            itemList[index]['Unit'] ?? '',
+                                            style: headerStyle(),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        headerContainer(itemList[index]
+                                                ['CW_Quantity'] ??
+                                            ''),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        headerContainer(
+                                            itemList[index]['CW_Unit'] ?? ''),
+                                        SizedBox(
+                                          width: columnWidth,
+                                        ),
+                                        headerContainer(
+                                            itemList[index]['Total'] ?? ''),
                                         const SizedBox(
                                           width: 20,
                                         ),
@@ -1877,9 +1880,6 @@ class _AddSalesJournalState extends State<AddSalesJournal>
                                         hintText: 'Enter Price',
                                         border: InputBorder.none),
                                     controller: priceController,
-                                    onSaved: (value) {
-                                      salesJournal['Rate'] = value!;
-                                    },
                                   ),
                                 ),
                               ),
@@ -1916,9 +1916,6 @@ class _AddSalesJournalState extends State<AddSalesJournal>
                                         hintText: 'Enter Quantity',
                                         border: InputBorder.none),
                                     controller: quantityController,
-                                    onSaved: (value) {
-                                      salesJournal['Quantity'] = value!;
-                                    },
                                   ),
                                 ),
                               ),
@@ -2004,9 +2001,6 @@ class _AddSalesJournalState extends State<AddSalesJournal>
                                         hintText: 'Enter cw quantity',
                                         border: InputBorder.none),
                                     controller: cwQuantityController,
-                                    onSaved: (value) {
-                                      salesJournal['CW_Quantity'] = value!;
-                                    },
                                   ),
                                 ),
                               ),
@@ -2144,7 +2138,7 @@ class _AddSalesJournalState extends State<AddSalesJournal>
                         itemBuilder: (BuildContext context, int index) {
                           return ModularWidgets.exceptionDesign(
                               MediaQuery.of(context).size,
-                              value.salesException[index][0]);
+                              value.salesException[index]);
                         },
                       );
                     }),

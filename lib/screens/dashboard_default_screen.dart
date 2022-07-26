@@ -149,7 +149,7 @@ class _DashBoardDefaultScreenState extends State<DashBoardDefaultScreen>
       },
       child: Scaffold(
           drawer: MainDrawer(controller: controller),
-          appBar: GlobalAppBar(query: query, appbar: AppBar()),
+          appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
           body: Padding(
             padding: const EdgeInsets.only(top: 18),
             child: SingleChildScrollView(
@@ -479,18 +479,18 @@ class _OperationsDropDownState extends State<OperationsDropDown> {
         ],
       ),
       children: [
-        Padding(
-          padding: getpadding(),
-          child: ListTile(
-            title: Text(
-              'planning',
-              style: expansionDataTheme,
-            ),
-            onTap: () {
-              Get.toNamed(OperationsScreen.routeName, arguments: 0);
-            },
-          ),
-        ),
+        // Padding(
+        //   padding: getpadding(),
+        //   child: ListTile(
+        //     title: Text(
+        //       'planning',
+        //       style: expansionDataTheme,
+        //     ),
+        //     onTap: () {
+        //       Get.toNamed(OperationsScreen.routeName, arguments: 0);
+        //     },
+        //   ),
+        // ),
         // Padding(
         //   padding: getpadding(),
         //   child: ListTile(
@@ -535,7 +535,7 @@ class _OperationsDropDownState extends State<OperationsDropDown> {
               style: expansionDataTheme,
             ),
             onTap: () {
-              Get.toNamed(OperationsScreen.routeName, arguments: 1);
+              Get.toNamed(OperationsScreen.routeName, arguments: 0);
             },
           ),
         ),

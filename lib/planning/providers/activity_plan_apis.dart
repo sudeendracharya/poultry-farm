@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/cupertino.dart';
+
+import '../../main.dart';
 
 class ActivityApis with ChangeNotifier {
   var _token;
@@ -18,7 +21,6 @@ class ActivityApis with ChangeNotifier {
   List _activityPlanException = [];
 
   ActivityApis([this._token]);
-  var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
   List _activityPlan = [];
 
   List _activityHeader = [];
@@ -100,9 +102,9 @@ class ActivityApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      // print(response.statusCode);
-      // print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         var responseData = json.decode(response.body);
@@ -125,6 +127,8 @@ class ActivityApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -142,7 +146,7 @@ class ActivityApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
@@ -155,6 +159,8 @@ class ActivityApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -162,6 +168,7 @@ class ActivityApis with ChangeNotifier {
   Future<int> getSingleVaccinationPlan(var token, var id) async {
     // log(token);
     //log(data.toString());
+
     final url =
         Uri.parse('${baseUrl}breedversion-info/vaccinationplan-details/$id/');
     try {
@@ -172,9 +179,9 @@ class ActivityApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      // print(response.statusCode);
-      // print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
@@ -185,6 +192,8 @@ class ActivityApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -193,7 +202,7 @@ class ActivityApis with ChangeNotifier {
     var responseData = json.decode(response.body) as Map<String, dynamic>;
     _activityPlanException.clear();
     responseData.forEach((key, value) {
-      _activityPlanException.add(value);
+      _activityPlanException.add({'Key': key, 'Value': value});
     });
 
     notifyListeners();
@@ -214,6 +223,7 @@ class ActivityApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
+      forbidden(response);
 
       if (response.statusCode == 400) {
         handleException(response);
@@ -223,6 +233,8 @@ class ActivityApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -243,9 +255,11 @@ class ActivityApis with ChangeNotifier {
         body: json.encode(data),
       );
       // print(response.statusCode);
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -265,15 +279,18 @@ class ActivityApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
+      forbidden(response);
 
       if (response.statusCode == 400) {
         handleException(response);
       }
-      // print(response.statusCode);
-      // print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -296,9 +313,11 @@ class ActivityApis with ChangeNotifier {
       );
       // print(response.statusCode);
       // print(response.body);
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -318,7 +337,7 @@ class ActivityApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -327,6 +346,8 @@ class ActivityApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -349,9 +370,11 @@ class ActivityApis with ChangeNotifier {
       );
       // print(response.statusCode);
       // print(response.body);
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -370,7 +393,7 @@ class ActivityApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
@@ -394,6 +417,8 @@ class ActivityApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -411,7 +436,7 @@ class ActivityApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
@@ -424,6 +449,8 @@ class ActivityApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -445,7 +472,7 @@ class ActivityApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -454,6 +481,8 @@ class ActivityApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -475,7 +504,7 @@ class ActivityApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -484,6 +513,8 @@ class ActivityApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -505,15 +536,17 @@ class ActivityApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -523,8 +556,7 @@ class ActivityApis with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/activity-plan/add-recommendar/');
+    final url = Uri.parse('${baseUrl}activity-plan/add-recommendar/');
     try {
       final response = await http.get(
         url,
@@ -533,7 +565,7 @@ class ActivityApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
@@ -554,6 +586,8 @@ class ActivityApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -572,7 +606,7 @@ class ActivityApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -583,6 +617,8 @@ class ActivityApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -593,8 +629,7 @@ class ActivityApis with ChangeNotifier {
   ) async {
     // log(token);
     // log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/activity-plan/add-recommendar/');
+    final url = Uri.parse('${baseUrl}activity-plan/add-recommendar/');
     try {
       final response = await http.post(
         url,
@@ -607,9 +642,11 @@ class ActivityApis with ChangeNotifier {
           'Breed_Version_Id': data['Breed_Version_Id'],
         }),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -619,8 +656,7 @@ class ActivityApis with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/activity-plan/vaccination-header/');
+    final url = Uri.parse('${baseUrl}activity-plan/vaccination-header/');
     try {
       final response = await http.get(
         url,
@@ -629,7 +665,7 @@ class ActivityApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
@@ -650,6 +686,8 @@ class ActivityApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -660,8 +698,7 @@ class ActivityApis with ChangeNotifier {
   ) async {
     // log(token);
     // log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/activity-plan/vaccination-header/');
+    final url = Uri.parse('${baseUrl}activity-plan/vaccination-header/');
     try {
       final response = await http.post(
         url,
@@ -674,9 +711,11 @@ class ActivityApis with ChangeNotifier {
           'Breed_Version_Id': data['Breed_Version_Id'],
         }),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -695,7 +734,9 @@ class ActivityApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       if (response.statusCode == 200 || response.statusCode == 201) {
         var responseData = json.decode(response.body);
         List temp = [];
@@ -717,6 +758,8 @@ class ActivityApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -726,8 +769,7 @@ class ActivityApis with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/activity-plan/medication-header/');
+    final url = Uri.parse('${baseUrl}activity-plan/medication-header/');
     try {
       final response = await http.get(
         url,
@@ -736,7 +778,7 @@ class ActivityApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
@@ -756,6 +798,8 @@ class ActivityApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -764,8 +808,7 @@ class ActivityApis with ChangeNotifier {
     var data,
     var token,
   ) async {
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/activity-plan/medication-header/');
+    final url = Uri.parse('${baseUrl}activity-plan/medication-header/');
     try {
       final response = await http.post(
         url,
@@ -778,9 +821,12 @@ class ActivityApis with ChangeNotifier {
           'Breed_Version_Id': data['Breed_Version_Id'],
         }),
       );
+      forbidden(response);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -789,8 +835,7 @@ class ActivityApis with ChangeNotifier {
     var data,
     var token,
   ) async {
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/activity-plan/add-medication-plan/');
+    final url = Uri.parse('${baseUrl}activity-plan/add-medication-plan/');
     try {
       final response = await http.post(
         url,
@@ -803,9 +848,11 @@ class ActivityApis with ChangeNotifier {
           'Medication_Header': data['Medication_Header'],
         }),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }

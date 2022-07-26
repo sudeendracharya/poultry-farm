@@ -100,6 +100,7 @@ class _UserState extends State<User> {
     debugPrint(data.toString());
     fetchCredientials().then((token) {
       if (token != '') {
+        EasyLoading.show();
         Provider.of<AdminApis>(context, listen: false)
             .updateUser(data, token, data['id'])
             .then((value) {
@@ -183,6 +184,9 @@ class _UserState extends State<User> {
 
                 // html.window.open('http://localhost:58731/#/', '_self');
               } else {
+                Provider.of<AdminApis>(context, listen: false).updateUser({
+                  "had_Access": false,
+                }, token, data['id']);
                 if (value != 400) {
                   showDialog(
                     context: context,
@@ -228,12 +232,11 @@ class _UserState extends State<User> {
 
   void searchBook(String query) {
     final searchOutput = users.where((details) {
-      final batchCode = details['Batch_Code'];
-      final breedName = details['Breed_Id'];
+      final userName = details['username'];
 
       final searchName = query;
 
-      return batchCode.contains(searchName) || breedName.contains(searchName);
+      return userName.contains(searchName);
     }).toList();
 
     setState(() {
@@ -277,7 +280,7 @@ class _UserState extends State<User> {
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'User Name'),
                       ),
                     ),
                     Container(
@@ -334,8 +337,12 @@ class _UserState extends State<User> {
                       child: Container(
                         width: size.width * 0.7,
                         child: PaginatedDataTable(
-                          source: MySearchData(query == '' ? users : list,
-                              updateCheckBox, context, approve),
+                          source: MySearchData(
+                              query == '' ? users : list,
+                              updateCheckBox,
+                              context,
+                              approve,
+                              extratedPermissions['Approve']),
                           arrowHeadColor: ProjectColors.themecolor,
 
                           columns: [
@@ -434,9 +441,10 @@ class MySearchData extends DataTableSource {
   final List<dynamic> data;
   final ValueChanged<int> reFresh;
   final BuildContext context;
-  MySearchData(this.data, this.reFresh, this.context, this.approve);
+  MySearchData(
+      this.data, this.reFresh, this.context, this.approve, this.checkApprove);
   final ValueChanged<Map<String, dynamic>> approve;
-
+  final bool checkApprove;
   @override
   int get selectedRowCount => 0;
 
@@ -471,30 +479,35 @@ class MySearchData extends DataTableSource {
             ),
           )),
           DataCell(Text(data[index]['had_Access'].toString())),
-          data[index]['had_Access'] == false
-              ? DataCell(
-                  ElevatedButton(
-                    onPressed: () {
-                      approve({
-                        "id": data[index]['id'],
-                        // "password": data[index]['password'],
-                        // "last_login": data[index]['last_login'],
-                        "email": data[index]['email'],
-                        // "First_Name": data[index]['First_Name'],
-                        // "Last_Name": data[index]['Last_Name'],
-                        // "Mobile_Number": data[index]['Mobile_Number'],
-                        // "created": data[index]['created'],
-                        // "Joining_Date": data[index]['Joining_Date'],
-                        // "is_active": data[index]['is_active'],
-                        // "username": data[index]['username'],
-                        "had_Access": true,
-                        // "Role_Id": data[index]['Role_Id'],
-                      });
-                    },
-                    child: const Text('Approve'),
-                  ),
-                )
-              : const DataCell(SizedBox())
+          checkApprove == false
+              ? const DataCell(SizedBox())
+              : data[index]['had_Access'] == false
+                  ? DataCell(
+                      ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(
+                                ProjectColors.themecolor)),
+                        onPressed: () {
+                          approve({
+                            "id": data[index]['id'],
+                            // "password": data[index]['password'],
+                            // "last_login": data[index]['last_login'],
+                            "email": data[index]['email'],
+                            // "First_Name": data[index]['First_Name'],
+                            // "Last_Name": data[index]['Last_Name'],
+                            // "Mobile_Number": data[index]['Mobile_Number'],
+                            // "created": data[index]['created'],
+                            // "Joining_Date": data[index]['Joining_Date'],
+                            // "is_active": data[index]['is_active'],
+                            // "username": data[index]['username'],
+                            "had_Access": true,
+                            // "Role_Id": data[index]['Role_Id'],
+                          });
+                        },
+                        child: const Text('Approve'),
+                      ),
+                    )
+                  : const DataCell(SizedBox())
         ]);
   }
 
@@ -507,3 +520,275 @@ class MySearchData extends DataTableSource {
   @override
   int get rowCount => data.length;
 }
+
+var dta = [
+  {
+    "username": "Kiran",
+    "Role_Id": 3,
+    "Role_Id__Role_Name": "Employee",
+    "Role_Id__Role_Permission": [
+      {
+        "Firms": [
+          {
+            "Id": 15,
+            "Edit": false,
+            "View": true,
+            "Create": true,
+            "Delete": false
+          }
+        ],
+        "Roles": {
+          "Id": "Roles",
+          "Edit": true,
+          "View": true,
+          "Create": true,
+          "Delete": false
+        },
+        "Sales": {
+          "Id": "Sales",
+          "Edit": false,
+          "View": true,
+          "Create": false,
+          "Delete": false
+        },
+        "Users": {
+          "Id": "Users",
+          "Edit": true,
+          "View": true,
+          "Create": true,
+          "Delete": true,
+          "Approve": true
+        },
+        "Plants": [
+          {
+            "Id": 14,
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          {
+            "Id": 15,
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          }
+        ],
+        "Sections": [
+          {
+            "Id": 11,
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          {
+            "Id": 12,
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          {
+            "Id": 14,
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          {
+            "Id": 15,
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          }
+        ],
+        "Add_Batch": {
+          "Id": "Add Batch",
+          "Edit": false,
+          "View": true,
+          "Create": false,
+          "Delete": false
+        },
+        "Transfers": {
+          "Transfer_In": {
+            "Id": "Transfer In",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          "Transfer_Out": {
+            "Id": "Transfer Out",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          }
+        },
+        "WareHouses": [
+          {
+            "Id": 20,
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          {
+            "Id": 21,
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          {
+            "Id": 22,
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          {
+            "Id": 23,
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          {
+            "Id": 25,
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          }
+        ],
+        "Activity_Log": {
+          "Id": "Activity Log",
+          "Edit": false,
+          "View": true,
+          "Create": false,
+          "Delete": false
+        },
+        "Batch_Planning": {
+          "Id": "Batch Planning",
+          "Edit": false,
+          "View": true,
+          "Create": false,
+          "Delete": false
+        },
+        "Medication_Log": {
+          "Id": "Medication Log",
+          "Edit": false,
+          "View": true,
+          "Create": false,
+          "Delete": false
+        },
+        "Reference_Data": {
+          "Breed": {
+            "Id": "Breed",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          "Activity_Plan": {
+            "Id": "Activity Plan",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          "Breed_Version": {
+            "Id": "Breed Version",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          "Medication_Plan": {
+            "Id": "Medication Plan",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          "Vaccination_Plan": {
+            "Id": "Vaccination Plan",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          "Bird_Age_Grouping": {
+            "Id": "Bird Age Grouping",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          }
+        },
+        "Vaccination_Log": {
+          "Id": "vaccination Log",
+          "Edit": false,
+          "View": true,
+          "Create": false,
+          "Delete": false
+        },
+        "Log_Daily_Batches": {
+          "Id": "Log Daily Batches",
+          "Edit": false,
+          "View": true,
+          "Create": false,
+          "Delete": false
+        },
+        "Product_Management": {
+          "Id": "Product Management",
+          "Edit": false,
+          "View": true,
+          "Create": false,
+          "Delete": false
+        },
+        "Inventory_Adjustment": {
+          "Mortality": {
+            "Id": "Mortality",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          "Egg_Grading": {
+            "Id": "Egg Grading",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          "Bird_Grading": {
+            "Id": "Bird Grading",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          "Egg_Collection": {
+            "Id": "Egg Collection",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          },
+          "Inventory_Adjustment_Journal": {
+            "Id": "Inventory Adjustment Journal",
+            "Edit": false,
+            "View": true,
+            "Create": false,
+            "Delete": false
+          }
+        }
+      }
+    ]
+  }
+];

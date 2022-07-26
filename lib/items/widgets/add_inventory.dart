@@ -87,7 +87,6 @@ class _AddInventoryState extends State<AddInventory> {
       return;
     }
     _formKey.currentState!.save();
-    print(inventoryAdjustment);
 
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;

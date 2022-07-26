@@ -107,24 +107,24 @@ class _InventoryAdjustmentScreenState extends State<InventoryAdjustmentScreen>
       ),
       // text: 'Administration',
     ),
-    Tab(
-      child: Container(
-        width: 180,
-        height: 44,
-        alignment: Alignment.center,
-        child: Text(
-          'Egg Grading',
-          style: GoogleFonts.roboto(
-            textStyle: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 16,
-              color: Colors.black,
-            ),
-          ),
-        ),
-      ),
-      // text: 'Administration',
-    ),
+    // Tab(
+    //   child: Container(
+    //     width: 180,
+    //     height: 44,
+    //     alignment: Alignment.center,
+    //     child: Text(
+    //       'Egg Grading',
+    //       style: GoogleFonts.roboto(
+    //         textStyle: const TextStyle(
+    //           fontWeight: FontWeight.w500,
+    //           fontSize: 16,
+    //           color: Colors.black,
+    //         ),
+    //       ),
+    //     ),
+    //   ),
+    //   // text: 'Administration',
+    // ),
   ];
   @override
   Widget build(BuildContext context) {
@@ -181,9 +181,9 @@ class _InventoryAdjustmentScreenState extends State<InventoryAdjustmentScreen>
                 SingleChildScrollView(
                   child: EggCollection(),
                 ),
-                SingleChildScrollView(
-                  child: EggGrading(),
-                ),
+                // SingleChildScrollView(
+                //   child: EggGrading(),
+                // ),
               ]),
             ),
           ),

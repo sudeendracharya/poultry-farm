@@ -63,7 +63,7 @@ class _WareHouseManagementPageState extends State<WareHouseManagementPage> {
     final extratedUserData =
         json.decode(prefs.getString('FirmAndPlantDetails')!)
             as Map<String, dynamic>;
-    print(extratedUserData);
+
     firmId = extratedUserData['FirmId'];
     // _storedPlantId = extratedUserData['PlantId'];
   }
@@ -97,10 +97,12 @@ class _WareHouseManagementPageState extends State<WareHouseManagementPage> {
       var token = Provider.of<Apicalls>(context, listen: false).token;
       Provider.of<InfrastructureApis>(context, listen: false)
           .getWarehouseDetailsForAll(
-            id,
-            token,
-          )
-          .then((value1) {});
+        id,
+        token,
+      )
+          .then((value1) {
+        temp.clear();
+      });
       // Provider.of<InfrastructureApis>(context, listen: false)
       //     .getPlantDetails(token)
       //     .then((value1) {});
@@ -134,19 +136,12 @@ class _WareHouseManagementPageState extends State<WareHouseManagementPage> {
         if (value1 == 204 || value1 == 203) {
           temp.clear();
           refresh(100);
-          Get.showSnackbar(GetSnackBar(
-            duration: const Duration(seconds: 2),
-            backgroundColor: Theme.of(context).backgroundColor,
-            message: 'Successfully Deleted the wareHouse',
-            title: 'Success',
-          ));
+          successSnackbar('Successfully deleted the warehouse');
         } else {
-          Get.showSnackbar(GetSnackBar(
-            duration: const Duration(seconds: 2),
-            backgroundColor: Theme.of(context).backgroundColor,
-            message: 'Something Went Wrong Please Try Again',
-            title: 'Failed',
-          ));
+          temp.clear();
+          refresh(100);
+          failureSnackbar(
+              'Something went wrong unable to delete the warehouse');
         }
       });
       // Provider.of<InfrastructureApis>(context, listen: false)
@@ -217,7 +212,7 @@ class _WareHouseManagementPageState extends State<WareHouseManagementPage> {
                               reFresh: (value) {},
                               text: query,
                               onChanged: searchBook,
-                              hintText: 'Search'),
+                              hintText: 'Warehouse Name'),
                         ),
                         const SizedBox(width: 10),
                         // Container(

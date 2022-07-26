@@ -24,6 +24,8 @@ class _AddEggCollectionDataState extends State<AddEggCollectionData> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   status statusSelected = status.pending;
 
+  List plantList = [];
+
   EdgeInsetsGeometry getPadding() {
     return const EdgeInsets.only(left: 8.0);
   }
@@ -45,9 +47,13 @@ class _AddEggCollectionDataState extends State<AddEggCollectionData> {
       // Provider.of<ItemApis>(context, listen: false)
       //     .getItemDetails(token)
       //     .then((value1) {});
-      var plantId = await fetchPlant();
+      var firmId = await getFirmData();
+      if (firmId != '') {
+        fechplantList(firmId, context);
+      }
+
       Provider.of<InfrastructureApis>(context, listen: false)
-          .getWarehouseDetails(plantId, token)
+          .getWarehouseDetails(firmId, token)
           .then((value1) {});
       Provider.of<GradingApis>(context, listen: false)
           .getEggGrading(token)
@@ -130,6 +136,9 @@ class _AddEggCollectionDataState extends State<AddEggCollectionData> {
       context,
     ).warehouseDetails;
     eggGradeList = Provider.of<GradingApis>(context).eggGradingList;
+    plantList = Provider.of<InfrastructureApis>(
+      context,
+    ).plantDetails;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Egg Collection Details'),
@@ -176,13 +185,13 @@ class _AddEggCollectionDataState extends State<AddEggCollectionData> {
                       value: eggGradeId,
                       items: eggGradeList.map<DropdownMenuItem<String>>((e) {
                         return DropdownMenuItem(
-                          child: Text(e['Egg_Grade_Name']),
                           value: e['Egg_Grade_Name'],
                           onTap: () {
                             eggCollectionData['Egg_Grade_Id'] =
                                 int.parse(e['Egg_Grade_Id'].toString());
                             // print(eggCollectionData['Egg_Grade_Id']);
                           },
+                          child: Text(e['Egg_Grade_Name']),
                         );
                       }).toList(),
                       hint: Container(
@@ -363,12 +372,12 @@ class _AddEggCollectionDataState extends State<AddEggCollectionData> {
                         items:
                             warehouseDetails.map<DropdownMenuItem<String>>((e) {
                           return DropdownMenuItem(
-                            child: Text(e['WareHouse_Code']),
                             value: e['WareHouse_Code'],
                             onTap: () {
                               eggCollectionData['Ware_House_Id'] =
                                   e['WareHouse_Id'];
                             },
+                            child: Text(e['WareHouse_Code']),
                           );
                         }).toList(),
                         hint: Container(

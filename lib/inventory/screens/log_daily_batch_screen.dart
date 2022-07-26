@@ -1,12 +1,8 @@
-import 'dart:convert';
-
 import 'package:aligned_dialog/aligned_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:poultry_login_signup/inventory/providers/inventory_api.dart';
-import 'package:poultry_login_signup/inventory/widgets/add_batch_screen.dart';
 import 'package:poultry_login_signup/inventory/widgets/add_daily_batches.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../colors.dart';
 import '../../main.dart';
@@ -29,7 +25,11 @@ class _LogDailyBatchScreenState extends State<LogDailyBatchScreen> {
   void update(int data) {
     fetchCredientials().then((token) {
       if (token != '') {
-        Provider.of<InventoryApi>(context, listen: false).getDailyBatch(token);
+        Provider.of<InventoryApi>(context, listen: false)
+            .getDailyBatch(token)
+            .then((value) {
+          selectedBatchCodes.clear();
+        });
       }
     });
   }
@@ -88,12 +88,12 @@ class _LogDailyBatchScreenState extends State<LogDailyBatchScreen> {
 
   void searchBook(String query) {
     final searchOutput = dailyBatchDetails.where((details) {
-      final batchCode = details['Batch_Code'];
-      final breedName = details['Breed_Id'];
+      final batchCode =
+          details['Batch_Plan_Id__Batch_Plan_Code'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
-      return batchCode.contains(searchName) || breedName.contains(searchName);
+      return batchCode.contains(searchName);
     }).toList();
 
     setState(() {
@@ -137,7 +137,7 @@ class _LogDailyBatchScreenState extends State<LogDailyBatchScreen> {
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'Batch Plan Code'),
                       ),
                     ),
                     Container(
@@ -267,24 +267,10 @@ class MySearchData extends DataTableSource {
         // },
         // selected: data[index]['Is_Selected'],
         cells: [
-          DataCell(TextButton(
-              onPressed: () async {
-                final prefs = await SharedPreferences.getInstance();
-                if (prefs.containsKey('Batch_Plan_Id')) {
-                  prefs.remove('Batch_Plan_Id');
-                }
-                final userData = json.encode(
-                  {
-                    'Batch_Plan_Id': data[index]['Batch_Plan_Id'],
-                  },
-                );
-                prefs.setString('Batch_Plan_Id', userData);
-
-                // Get.toNamed(BatchPlanDetailsPage.routeName);
-              },
-              child: Text(
-                  data[index]['WareHouse_Id__WareHouse_Name'].toString()))),
-          DataCell(Text(data[index]['Batch_Id__Batch_Code'].toString())),
+          DataCell(
+              Text(data[index]['WareHouse_Id__WareHouse_Name'].toString())),
+          DataCell(
+              Text(data[index]['Batch_Plan_Id__Batch_Plan_Code'].toString())),
           DataCell(Text(data[index]['Average_Body_Weight'].toString())),
           DataCell(Text(data[index]['Weight_Unit'].toString())),
           DataCell(Text(data[index]['Total_Feed_Consumption'].toString())),

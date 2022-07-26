@@ -206,7 +206,7 @@ class ModularWidgets {
   }
 
   static Padding exceptionDesign(Size size, var message) {
-    print('$size, $message');
+    debugPrint('$size, $message');
     return Padding(
       padding: const EdgeInsets.only(top: 24.0),
       child: Align(

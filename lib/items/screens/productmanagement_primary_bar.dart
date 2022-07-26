@@ -119,7 +119,7 @@ class _ProductManagementPrimaryBarState
           drawer: PrimarySideBar(
               controller: controller,
               expansionHeaderTheme: expansionHeaderTheme),
-          appBar: GlobalAppBar(query: query, appbar: AppBar()),
+          appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
           body: Padding(
             padding: const EdgeInsets.only(top: 18),
             child: SingleChildScrollView(

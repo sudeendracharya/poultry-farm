@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:developer';
 
-class TransferJournalApi with ChangeNotifier {
-  var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
+import '../../main.dart';
 
+class TransferJournalApi with ChangeNotifier {
   List _transferOutJournalData = [];
 
   Map<String, dynamic> _individualTransferOutJournalData = {};
@@ -28,7 +29,7 @@ class TransferJournalApi with ChangeNotifier {
     var responseData = json.decode(response.body) as Map<String, dynamic>;
     _transferException.clear();
     responseData.forEach((key, value) {
-      _transferException.add(value);
+      _transferException.add({'Key': key, 'Value': value});
     });
 
     notifyListeners();
@@ -49,16 +50,16 @@ class TransferJournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
-
-      print(response.statusCode);
-      print(response.body);
-
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -80,6 +81,7 @@ class TransferJournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -89,6 +91,8 @@ class TransferJournalApi with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -109,12 +113,14 @@ class TransferJournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
-      // print(response.statusCode);
-      // print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -132,21 +138,48 @@ class TransferJournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         List temp = [];
         for (var data in responseData) {
           temp.add({
             "Transfer_Out_Id": data['Transfer_Out_Id'],
-            "Transfer_Code": data['Transfer_Code'],
-            "Despatch_Date": data['Despatch_Date'],
-            "Transfer_Status": data['Transfer_Status'],
-            "Product": data['Product__Product_Name'],
+            "Created_Date": data['Created_Date'],
+            "Transfer_Out_Code": data['Transfer_Out_Code'],
+            "Dispatch_Date": data['Dispatch_Date'],
+            "WareHouse_Id": data['WareHouse_Id_From'],
+            "From_WareHouse_Name": data['WareHouse_Id_From__WareHouse_Code'],
+            "Product_Id": data['Product'],
+            "Product_Name": data['Product__Product_Name'],
+            "Product_Category_Id": data['Product__Product_Category_Id'],
+            "Product_Category_Name":
+                data['Product__Product_Category_Id__Product_Category_Name'],
+            "Product_Sub_Category_Id": data['Product__Product_Sub_Category_Id'],
+            "Product_Sub_Category_Name": data[
+                'Product__Product_Sub_Category_Id__Product_Sub_Category_Name'],
+            "Batch_Plan_Id": data['Batch_Plan_Id'],
+            "Batch_Plan_Code": data['Batch_Plan_Id__Batch_Plan_Code'],
             "Transfer_Quantity": data['Transfer_Quantity'],
+            "Unit_Id": data['Unit_Id'],
+            "Unit_Name": data['Unit_Id__Unit_Name'],
+            "Transfer_Status": data['Transfer_Status'],
             "Remarks": data['Remarks'],
-            "WareHouse_Id": data['WareHouse_Id__WareHouse_Name'],
-            "Batch_Id": data['Batch_Id__Batch_Code'],
+            "From_Plant_Id": data['WareHouse_Id_From__WareHouse_Plant_Id'],
+            "From_Plant_Name":
+                data['WareHouse_Id_From__WareHouse_Plant_Id__Plant_Name'],
+            "From_Firm_Id":
+                data['WareHouse_Id_From__WareHouse_Plant_Id__Firm_Id'],
+            "From_Firm_Name": data[
+                'WareHouse_Id_From__WareHouse_Plant_Id__Firm_Id__Firm_Name'],
+            "WareHouse_Id_To": data['WareHouse_Id_To'],
+            "To_WareHouse_Name": data['WareHouse_Id_To__WareHouse_Name'],
+            "To_Plant_Id": data['WareHouse_Id_To__WareHouse_Plant_Id'],
+            "To_Plant_Name":
+                data['WareHouse_Id_To__WareHouse_Plant_Id__Plant_Name'],
+            "To_Firm_Id": data['WareHouse_Id_To__WareHouse_Plant_Id__Firm_Id'],
+            "To_Firm_Name":
+                data['WareHouse_Id_To__WareHouse_Plant_Id__Firm_Id__Firm_Name'],
             'Is_Selected': false,
           });
         }
@@ -154,12 +187,13 @@ class TransferJournalApi with ChangeNotifier {
 
         notifyListeners();
       }
-
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -179,8 +213,9 @@ class TransferJournalApi with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -192,6 +227,8 @@ class TransferJournalApi with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -211,6 +248,7 @@ class TransferJournalApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
+      forbidden(response);
 
       if (response.statusCode == 400) {
         handleException(response);
@@ -221,6 +259,8 @@ class TransferJournalApi with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }

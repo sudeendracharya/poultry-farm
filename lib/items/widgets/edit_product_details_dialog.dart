@@ -19,14 +19,12 @@ class EditProductDetails extends StatefulWidget {
       required this.productSubCategoryId,
       required this.productName,
       required this.unitOfMeasure,
-      required this.grade,
       required this.stockKeepingUnit,
       required this.description,
       required this.batchRequestForTransfer,
       required this.barchRequestInventoryAdjustment,
-      required this.batchRequestForMortality,
-      required this.batchRequestForGrading,
-      required this.productId})
+      required this.productId,
+      required this.unitOfMeasureId})
       : super(key: key);
 
   final ValueChanged<int> reFresh;
@@ -35,24 +33,28 @@ class EditProductDetails extends StatefulWidget {
   final String productSubCategoryId;
   final String productName;
   final String unitOfMeasure;
-  final String grade;
+  final int unitOfMeasureId;
   final String stockKeepingUnit;
   final String description;
-  final String batchRequestForTransfer;
-  final String barchRequestInventoryAdjustment;
-  final String batchRequestForMortality;
-  final String batchRequestForGrading;
+  final bool batchRequestForTransfer;
+  final bool barchRequestInventoryAdjustment;
+
   final int productId;
 
   @override
   State<EditProductDetails> createState() => _EditProductDetailsState();
 }
 
+enum Transfer { yes, no }
+
+enum InventoryAdjustment { yes, no }
+
 class _EditProductDetailsState extends State<EditProductDetails> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final GlobalKey<FormState> _productTypeFormKey = GlobalKey();
   final GlobalKey<FormState> _productSubTypeFormKey = GlobalKey();
-
+  Transfer selectedTransfer = Transfer.yes;
+  InventoryAdjustment selectedInventoryAdjustmentData = InventoryAdjustment.yes;
   var transferSelectedName;
 
   var selectedInventoryAdjustment;
@@ -70,6 +72,8 @@ class _EditProductDetailsState extends State<EditProductDetails> {
   var selectedProductSubType;
 
   var productTypeError;
+
+  List unitDetails = [];
   EdgeInsetsGeometry getPadding() {
     return const EdgeInsets.only(left: 8.0);
   }
@@ -82,13 +86,10 @@ class _EditProductDetailsState extends State<EditProductDetails> {
     'Product_Sub_Category_Id': '',
     'Product_Name': '',
     'Unit_Of_Measure': '',
-    'Grade': '',
     'Stock_Keeping_Unit': '',
     'Description': '',
     'Batch_Request_For_Transfer': '',
     'Batch_Request_Inventory_Adjustment': '',
-    'Batch_Request_For_Mortality': '',
-    'Batch_Request_For_Grading': '',
   };
 
   Map<String, dynamic> productSubType = {
@@ -204,12 +205,7 @@ class _EditProductDetailsState extends State<EditProductDetails> {
     if (productCodeValidation == true &&
         productNameValidation == true &&
         stockKeepingUnitValidation == true &&
-        gradeValidation == true &&
-        batchRequestForTransferValidation == true &&
-        batchRequestInventoryValidation == true &&
-        batchrequestMortalityValidation == true &&
         unitOfMeasurementValidation == true &&
-        batchRequestGradingValidation == true &&
         productCategoryValidation == true &&
         productSubCategoryValidation == true) {
       return true;
@@ -220,37 +216,42 @@ class _EditProductDetailsState extends State<EditProductDetails> {
 
   @override
   void initState() {
+    clearProductException(context);
+
     productCodeController.text = widget.productCode;
     productNameController.text = widget.productName;
     stockKeepingUnitController.text = widget.stockKeepingUnit;
-    gradeController.text = widget.grade;
     descriptionController.text = widget.description;
 
-    transferSelectedName = widget.batchRequestForTransfer;
-    selectedInventoryAdjustment = widget.barchRequestInventoryAdjustment;
-    selectedNumberForMortality = widget.batchRequestForMortality;
+    selectedTransfer =
+        widget.batchRequestForTransfer == true ? Transfer.yes : Transfer.no;
+    selectedInventoryAdjustmentData =
+        widget.barchRequestInventoryAdjustment == true
+            ? InventoryAdjustment.yes
+            : InventoryAdjustment.no;
+    // selectedNumberForMortality = widget.batchRequestForMortality;
     selectedUnitOfMeasurement = widget.unitOfMeasure;
-    selectedBatchNumberForGrading = widget.batchRequestForGrading;
+    // selectedBatchNumberForGrading = widget.batchRequestForGrading;
     itemDetails['Batch_Request_For_Transfer'] = widget.batchRequestForTransfer;
     itemDetails['Batch_Request_Inventory_Adjustment'] =
         widget.barchRequestInventoryAdjustment;
-    itemDetails['Batch_Request_For_Mortality'] =
-        widget.batchRequestForMortality;
-    itemDetails['Batch_Request_For_Grading'] = widget.batchRequestForGrading;
-    itemDetails['Unit_Of_Measure'] = widget.unitOfMeasure;
-
+    // itemDetails['Batch_Request_For_Mortality'] =
+    //     widget.batchRequestForMortality;
+    // itemDetails['Batch_Request_For_Grading'] = widget.batchRequestForGrading;
+    itemDetails['Unit_Of_Measure'] = widget.unitOfMeasureId;
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
       Provider.of<ItemApis>(context, listen: false)
           .getItemCategory(token)
           .then((value1) {});
+      Provider.of<Apicalls>(context, listen: false)
+          .getStandardUnitValues(token);
     });
 
     super.initState();
   }
 
   void getProductSubCategory(var id) {
-    print(id);
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
       Provider.of<ItemApis>(context, listen: false)
@@ -268,7 +269,6 @@ class _EditProductDetailsState extends State<EditProductDetails> {
       return;
     }
     _formKey.currentState!.save();
-    print(itemDetails);
 
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
@@ -380,6 +380,8 @@ class _EditProductDetailsState extends State<EditProductDetails> {
   Widget build(BuildContext context) {
     itemCategoryData = Provider.of<ItemApis>(context).itemcategory;
     itemSubCategoryData = Provider.of<ItemApis>(context).itemSubCategory;
+    unitDetails = Provider.of<Apicalls>(context).standardUnitList;
+
     var size = MediaQuery.of(context).size;
     return SafeArea(
         child: Container(
@@ -569,17 +571,17 @@ class _EditProductDetailsState extends State<EditProductDetails> {
                                         items: itemCategoryData
                                             .map<DropdownMenuItem<String>>((e) {
                                           return DropdownMenuItem(
-                                            child: Text(
-                                                e['Product_Category_Name']),
                                             value: e['Product_Category_Name'],
                                             onTap: () {
                                               itemDetails[
                                                       'Product_Category_Id'] =
                                                   e['Product_Category_Id'];
-                                              print('product type');
+
                                               getProductSubCategory(
                                                   e['Product_Category_Id']);
                                             },
+                                            child: Text(
+                                                e['Product_Category_Name']),
                                           );
                                         }).toList(),
                                         hint: Container(
@@ -683,8 +685,6 @@ class _EditProductDetailsState extends State<EditProductDetails> {
                                         items: itemSubCategoryData
                                             .map<DropdownMenuItem<String>>((e) {
                                           return DropdownMenuItem(
-                                            child: Text(
-                                                e['Product_Sub_Category_Name']),
                                             value:
                                                 e['Product_Sub_Category_Name'],
                                             onTap: () {
@@ -692,6 +692,8 @@ class _EditProductDetailsState extends State<EditProductDetails> {
                                                       'Product_Sub_Category_Id'] =
                                                   e['Product_Sub_Category_Id'];
                                             },
+                                            child: Text(
+                                                e['Product_Sub_Category_Name']),
                                           );
                                         }).toList(),
                                         hint: Container(
@@ -830,24 +832,19 @@ class _EditProductDetailsState extends State<EditProductDetails> {
                                 child: DropdownButtonHideUnderline(
                                   child: DropdownButton(
                                     value: selectedUnitOfMeasurement,
-                                    items: [
-                                      'gram',
-                                      'kilogram',
-                                      'metric ton',
-                                      'pound',
-                                      'liter'
-                                    ].map<DropdownMenuItem<String>>((e) {
+                                    items: unitDetails
+                                        .map<DropdownMenuItem<String>>((e) {
                                       return DropdownMenuItem(
-                                        child: Text(e),
-                                        value: e,
+                                        value: e['Unit_Name'],
                                         onTap: () {
-                                          itemDetails['Unit_Of_Measure'] = e;
+                                          itemDetails['Unit_Of_Measure'] =
+                                              e['Unit_Id'];
                                         },
+                                        child: Text(e['Unit_Name']),
                                       );
                                     }).toList(),
-                                    hint: Container(
-                                        width: 404,
-                                        child: const Text('Select')),
+                                    hint: const SizedBox(
+                                        width: 404, child: Text('Select')),
                                     onChanged: (value) {
                                       setState(() {
                                         selectedUnitOfMeasurement =
@@ -866,53 +863,53 @@ class _EditProductDetailsState extends State<EditProductDetails> {
                         ? const SizedBox()
                         : ModularWidgets.validationDesign(
                             size, unitOfMeasurementValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 440,
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: const Text('Grade'),
-                            ),
-                            Container(
-                              width: 440,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                                border: Border.all(
-                                    color: plantCodeError == false
-                                        ? Colors.black26
-                                        : const Color.fromRGBO(243, 60, 60, 1)),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
-                                child: TextFormField(
-                                  decoration: InputDecoration(
-                                      hintText: plantCodeError == false
-                                          ? 'Grade'
-                                          : '',
-                                      border: InputBorder.none),
-                                  controller: gradeController,
-                                  onSaved: (value) {
-                                    itemDetails['Grade'] = value!;
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    gradeValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, gradeValidationMessage),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(top: 24.0),
+                    //   child: Align(
+                    //     alignment: Alignment.topLeft,
+                    //     child: Column(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       children: [
+                    //         Container(
+                    //           width: 440,
+                    //           padding: const EdgeInsets.only(bottom: 12),
+                    //           child: const Text('Grade'),
+                    //         ),
+                    //         Container(
+                    //           width: 440,
+                    //           height: 36,
+                    //           decoration: BoxDecoration(
+                    //             borderRadius: BorderRadius.circular(8),
+                    //             color: Colors.white,
+                    //             border: Border.all(
+                    //                 color: plantCodeError == false
+                    //                     ? Colors.black26
+                    //                     : const Color.fromRGBO(243, 60, 60, 1)),
+                    //           ),
+                    //           child: Padding(
+                    //             padding: const EdgeInsets.symmetric(
+                    //                 horizontal: 12, vertical: 6),
+                    //             child: TextFormField(
+                    //               decoration: InputDecoration(
+                    //                   hintText: plantCodeError == false
+                    //                       ? 'Grade'
+                    //                       : '',
+                    //                   border: InputBorder.none),
+                    //               controller: gradeController,
+                    //               onSaved: (value) {
+                    //                 itemDetails['Grade'] = value!;
+                    //               },
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // gradeValidation == true
+                    //     ? const SizedBox()
+                    //     : ModularWidgets.validationDesign(
+                    //         size, gradeValidationMessage),
                     Padding(
                       padding: const EdgeInsets.only(top: 24.0),
                       child: Align(
@@ -929,48 +926,96 @@ class _EditProductDetailsState extends State<EditProductDetails> {
                             Container(
                               width: 440,
                               height: 36,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                                border: Border.all(color: Colors.black26),
-                              ),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    value: transferSelectedName,
-                                    items: ['Yes', 'No']
-                                        .map<DropdownMenuItem<String>>((e) {
-                                      return DropdownMenuItem(
-                                        child: Text(e),
-                                        value: e,
-                                        onTap: () {
-                                          itemDetails[
-                                              'Batch_Request_For_Transfer'] = e;
-                                        },
-                                      );
-                                    }).toList(),
-                                    hint: Container(
-                                        width: 404,
-                                        child: const Text('Select')),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        transferSelectedName = value as String?;
-                                      });
-                                    },
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 40, child: Text('Yes')),
+                                  const SizedBox(
+                                    width: 20,
                                   ),
-                                ),
+                                  Radio(
+                                      activeColor: ProjectColors.themecolor,
+                                      value: Transfer.yes,
+                                      groupValue: selectedTransfer,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          itemDetails[
+                                                  'Batch_Request_For_Transfer'] =
+                                              true;
+                                          selectedTransfer = value as Transfer;
+                                        });
+                                      })
+                                ],
                               ),
                             ),
+                            Container(
+                              width: 440,
+                              height: 36,
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 40, child: Text('No')),
+                                  const SizedBox(
+                                    width: 20,
+                                  ),
+                                  Radio(
+                                      activeColor: ProjectColors.themecolor,
+                                      value: Transfer.no,
+                                      groupValue: selectedTransfer,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          itemDetails[
+                                                  'Batch_Request_For_Transfer'] =
+                                              false;
+                                          selectedTransfer = value as Transfer;
+                                        });
+                                      })
+                                ],
+                              ),
+                            ),
+                            // Container(
+                            //   width: 440,
+                            //   height: 36,
+                            //   decoration: BoxDecoration(
+                            //     borderRadius: BorderRadius.circular(8),
+                            //     color: Colors.white,
+                            //     border: Border.all(color: Colors.black26),
+                            //   ),
+                            //   child: Padding(
+                            //     padding:
+                            //         const EdgeInsets.symmetric(horizontal: 5.0),
+                            //     child: DropdownButtonHideUnderline(
+                            //       child: DropdownButton(
+                            //         value: transferSelectedName,
+                            //         items: ['Yes', 'No']
+                            //             .map<DropdownMenuItem<String>>((e) {
+                            //           return DropdownMenuItem(
+                            //             child: Text(e),
+                            //             value: e,
+                            //             onTap: () {
+                            //               itemDetails[
+                            //                   'Batch_Request_For_Transfer'] = e;
+                            //             },
+                            //           );
+                            //         }).toList(),
+                            //         hint: Container(
+                            //             width: 404,
+                            //             child: const Text('Select')),
+                            //         onChanged: (value) {
+                            //           setState(() {
+                            //             transferSelectedName = value as String?;
+                            //           });
+                            //         },
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
                     ),
-                    batchRequestForTransferValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, batchRequestForTransferValidationMessage),
+                    // batchRequestForTransferValidation == true
+                    //     ? const SizedBox()
+                    //     : ModularWidgets.validationDesign(
+                    //         size, batchRequestForTransferValidationMessage),
                     Padding(
                       padding: const EdgeInsets.only(top: 24.0),
                       child: Align(
@@ -987,167 +1032,219 @@ class _EditProductDetailsState extends State<EditProductDetails> {
                             Container(
                               width: 440,
                               height: 36,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                                border: Border.all(color: Colors.black26),
-                              ),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    value: selectedInventoryAdjustment,
-                                    items: ['Yes', 'No']
-                                        .map<DropdownMenuItem<String>>((e) {
-                                      return DropdownMenuItem(
-                                        child: Text(e),
-                                        value: e,
-                                        onTap: () {
-                                          itemDetails[
-                                              'Batch_Request_Inventory_Adjustment'] = e;
-                                        },
-                                      );
-                                    }).toList(),
-                                    hint: Container(
-                                        width: 404,
-                                        child: const Text('Select')),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedInventoryAdjustment =
-                                            value as String?;
-                                      });
-                                    },
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 40, child: Text('Yes')),
+                                  const SizedBox(
+                                    width: 20,
                                   ),
-                                ),
+                                  Radio(
+                                      activeColor: ProjectColors.themecolor,
+                                      value: InventoryAdjustment.yes,
+                                      groupValue:
+                                          selectedInventoryAdjustmentData,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          itemDetails[
+                                                  'Batch_Request_Inventory_Adjustment'] =
+                                              true;
+                                          selectedInventoryAdjustmentData =
+                                              value as InventoryAdjustment;
+                                        });
+                                      })
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    batchRequestInventoryValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, batchRequestInventoryValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 440,
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: const Text(
-                                  'Required Batch Number for Mortality'),
                             ),
                             Container(
                               width: 440,
                               height: 36,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                                border: Border.all(color: Colors.black26),
-                              ),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    value: selectedNumberForMortality,
-                                    items: ['Yes', 'No']
-                                        .map<DropdownMenuItem<String>>((e) {
-                                      return DropdownMenuItem(
-                                        child: Text(e),
-                                        value: e,
-                                        onTap: () {
-                                          itemDetails[
-                                              'Batch_Request_For_Mortality'] = e;
-                                        },
-                                      );
-                                    }).toList(),
-                                    hint: Container(
-                                        width: 404,
-                                        child: const Text('Select')),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedNumberForMortality =
-                                            value as String?;
-                                      });
-                                    },
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 40, child: Text('No')),
+                                  const SizedBox(
+                                    width: 20,
                                   ),
-                                ),
+                                  Radio(
+                                      activeColor: ProjectColors.themecolor,
+                                      value: InventoryAdjustment.no,
+                                      groupValue:
+                                          selectedInventoryAdjustmentData,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          itemDetails[
+                                                  'Batch_Request_Inventory_Adjustment'] =
+                                              false;
+                                          selectedInventoryAdjustmentData =
+                                              value as InventoryAdjustment;
+                                        });
+                                      })
+                                ],
                               ),
                             ),
+                            // Container(
+                            //   width: 440,
+                            //   height: 36,
+                            //   decoration: BoxDecoration(
+                            //     borderRadius: BorderRadius.circular(8),
+                            //     color: Colors.white,
+                            //     border: Border.all(color: Colors.black26),
+                            //   ),
+                            //   child: Padding(
+                            //     padding:
+                            //         const EdgeInsets.symmetric(horizontal: 5.0),
+                            //     child: DropdownButtonHideUnderline(
+                            //       child: DropdownButton(
+                            //         value: selectedInventoryAdjustment,
+                            //         items: ['Yes', 'No']
+                            //             .map<DropdownMenuItem<String>>((e) {
+                            //           return DropdownMenuItem(
+                            //             child: Text(e),
+                            //             value: e,
+                            //             onTap: () {
+                            //               itemDetails[
+                            //                   'Batch_Request_Inventory_Adjustment'] = e;
+                            //             },
+                            //           );
+                            //         }).toList(),
+                            //         hint: Container(
+                            //             width: 404,
+                            //             child: const Text('Select')),
+                            //         onChanged: (value) {
+                            //           setState(() {
+                            //             selectedInventoryAdjustment =
+                            //                 value as String?;
+                            //           });
+                            //         },
+                            //       ),
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
                     ),
-                    batchrequestMortalityValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, batchrequestMortalityValidationMessage),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 440,
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: const Text(
-                                  'Required Batch Number for Grading'),
-                            ),
-                            Container(
-                              width: 440,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                                border: Border.all(color: Colors.black26),
-                              ),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                    value: selectedBatchNumberForGrading,
-                                    items: ['Yes', 'No']
-                                        .map<DropdownMenuItem<String>>((e) {
-                                      return DropdownMenuItem(
-                                        child: Text(e),
-                                        value: e,
-                                        onTap: () {
-                                          itemDetails[
-                                              'Batch_Request_For_Grading'] = e;
-                                        },
-                                      );
-                                    }).toList(),
-                                    hint: Container(
-                                        width: 404,
-                                        child: const Text('Select')),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedBatchNumberForGrading =
-                                            value as String?;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    batchRequestGradingValidation == true
-                        ? const SizedBox()
-                        : ModularWidgets.validationDesign(
-                            size, batchRequestGradingValidationMessage),
+                    // batchRequestInventoryValidation == true
+                    //     ? const SizedBox()
+                    //     : ModularWidgets.validationDesign(
+                    //         size, batchRequestInventoryValidationMessage),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(top: 24.0),
+                    //   child: Align(
+                    //     alignment: Alignment.topLeft,
+                    //     child: Column(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       children: [
+                    //         Container(
+                    //           width: 440,
+                    //           padding: const EdgeInsets.only(bottom: 12),
+                    //           child: const Text(
+                    //               'Required Batch Number for Mortality'),
+                    //         ),
+                    //         Container(
+                    //           width: 440,
+                    //           height: 36,
+                    //           decoration: BoxDecoration(
+                    //             borderRadius: BorderRadius.circular(8),
+                    //             color: Colors.white,
+                    //             border: Border.all(color: Colors.black26),
+                    //           ),
+                    //           child: Padding(
+                    //             padding:
+                    //                 const EdgeInsets.symmetric(horizontal: 5.0),
+                    //             child: DropdownButtonHideUnderline(
+                    //               child: DropdownButton(
+                    //                 value: selectedNumberForMortality,
+                    //                 items: ['Yes', 'No']
+                    //                     .map<DropdownMenuItem<String>>((e) {
+                    //                   return DropdownMenuItem(
+                    //                     child: Text(e),
+                    //                     value: e,
+                    //                     onTap: () {
+                    //                       itemDetails[
+                    //                           'Batch_Request_For_Mortality'] = e;
+                    //                     },
+                    //                   );
+                    //                 }).toList(),
+                    //                 hint: Container(
+                    //                     width: 404,
+                    //                     child: const Text('Select')),
+                    //                 onChanged: (value) {
+                    //                   setState(() {
+                    //                     selectedNumberForMortality =
+                    //                         value as String?;
+                    //                   });
+                    //                 },
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // batchrequestMortalityValidation == true
+                    //     ? const SizedBox()
+                    //     : ModularWidgets.validationDesign(
+                    //         size, batchrequestMortalityValidationMessage),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(top: 24.0),
+                    //   child: Align(
+                    //     alignment: Alignment.topLeft,
+                    //     child: Column(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       children: [
+                    //         Container(
+                    //           width: 440,
+                    //           padding: const EdgeInsets.only(bottom: 12),
+                    //           child: const Text(
+                    //               'Required Batch Number for Grading'),
+                    //         ),
+                    //         Container(
+                    //           width: 440,
+                    //           height: 36,
+                    //           decoration: BoxDecoration(
+                    //             borderRadius: BorderRadius.circular(8),
+                    //             color: Colors.white,
+                    //             border: Border.all(color: Colors.black26),
+                    //           ),
+                    //           child: Padding(
+                    //             padding:
+                    //                 const EdgeInsets.symmetric(horizontal: 5.0),
+                    //             child: DropdownButtonHideUnderline(
+                    //               child: DropdownButton(
+                    //                 value: selectedBatchNumberForGrading,
+                    //                 items: ['Yes', 'No']
+                    //                     .map<DropdownMenuItem<String>>((e) {
+                    //                   return DropdownMenuItem(
+                    //                     child: Text(e),
+                    //                     value: e,
+                    //                     onTap: () {
+                    //                       itemDetails[
+                    //                           'Batch_Request_For_Grading'] = e;
+                    //                     },
+                    //                   );
+                    //                 }).toList(),
+                    //                 hint: Container(
+                    //                     width: 404,
+                    //                     child: const Text('Select')),
+                    //                 onChanged: (value) {
+                    //                   setState(() {
+                    //                     selectedBatchNumberForGrading =
+                    //                         value as String?;
+                    //                   });
+                    //                 },
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // batchRequestGradingValidation == true
+                    //     ? const SizedBox()
+                    //     : ModularWidgets.validationDesign(
+                    //         size, batchRequestGradingValidationMessage),
                     Padding(
                       padding: const EdgeInsets.only(top: 24.0),
                       child: Align(
@@ -1199,7 +1296,7 @@ class _EditProductDetailsState extends State<EditProductDetails> {
                         itemBuilder: (BuildContext context, int index) {
                           return ModularWidgets.exceptionDesign(
                               MediaQuery.of(context).size,
-                              value.productException[index][0]);
+                              value.productException[index]);
                         },
                       );
                     }),
@@ -1502,17 +1599,15 @@ class _EditProductDetailsState extends State<EditProductDetails> {
                                                       DropdownMenuItem<String>>(
                                                   (e) {
                                                 return DropdownMenuItem(
-                                                  child: Text(e[
-                                                      'Product_Category_Name']),
                                                   value: e[
                                                       'Product_Category_Name'],
                                                   onTap: () {
                                                     productSubType[
                                                             'Product_Category_Id'] =
                                                         e['Product_Category_Id'];
-                                                    print(productSubType[
-                                                        'Product_Category_Id']);
                                                   },
+                                                  child: Text(e[
+                                                      'Product_Category_Name']),
                                                 );
                                               }).toList(),
                                               hint: Container(

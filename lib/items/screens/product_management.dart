@@ -43,6 +43,7 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
     // String plantId= await fetchPlant();
     getPermission('Product_Management').then((value) {
       extratedPermissions = value;
+      debugPrint(extratedPermissions.toString());
       setState(() {
         loading = false;
       });
@@ -68,7 +69,7 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
     super.initState();
   }
 
-  void fetchProducts() {
+  void fetchProducts(int data) {
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
       Provider.of<ItemApis>(context, listen: false)
@@ -96,11 +97,13 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
           .deleteProducts(token, ids)
           .then((value) {
         if (value == 204) {
-          fetchProducts();
+          fetchProducts(100);
           successSnackbar('Successfully deleted the product');
+          productDeleteList.clear();
         } else {
           failureSnackbar('something went wrong please try again');
-          fetchProducts();
+          fetchProducts(100);
+          productDeleteList.clear();
         }
       });
     });
@@ -201,11 +204,12 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
                                             showGlobalDrawer(
                                               context: context,
                                               builder: (ctx) =>
-                                                  AddItemDetailsDialog(),
+                                                  AddItemDetailsDialog(
+                                                      refresh: fetchProducts),
                                               direction: AxisDirection.right,
                                             ).then((value) {
                                               if (value == 'success') {
-                                                fetchProducts();
+                                                fetchProducts(100);
                                               }
                                             });
                                           },
@@ -241,7 +245,7 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
                                               reFresh: (value) {},
                                               text: query,
                                               onChanged: searchBook,
-                                              hintText: 'Search'),
+                                              hintText: 'Product Name'),
                                         ),
                                       ),
                                     ),
@@ -252,7 +256,7 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.end,
                                         children: [
-                                          extratedPermissions['View'] == true
+                                          extratedPermissions['Create'] == true
                                               ? IconButton(
                                                   onPressed: () {
                                                     // showDialog(
@@ -261,14 +265,12 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
                                                     showGlobalDrawer(
                                                       context: context,
                                                       builder: (ctx) =>
-                                                          AddItemDetailsDialog(),
+                                                          AddItemDetailsDialog(
+                                                              refresh:
+                                                                  fetchProducts),
                                                       direction:
                                                           AxisDirection.right,
-                                                    ).then((value) {
-                                                      if (value == 'success') {
-                                                        fetchProducts();
-                                                      }
-                                                    });
+                                                    );
 
                                                     //     direction: );
                                                   },

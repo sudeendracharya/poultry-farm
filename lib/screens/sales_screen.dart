@@ -138,7 +138,7 @@ class _SalesDisplayScreenState extends State<SalesDisplayScreen>
     return Scaffold(
       drawer: PrimarySideBar(
           controller: controller, expansionHeaderTheme: expansionHeaderTheme),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: Padding(
         padding: const EdgeInsets.only(top: 18),
         child: SingleChildScrollView(

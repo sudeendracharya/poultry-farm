@@ -114,7 +114,7 @@ class _BatchPlanDetailsState extends State<BatchPlanDetails> {
     _activityDetails = Provider.of<ActivityApis>(context).singleActivityPlan;
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 43, vertical: 18),
         child: Column(

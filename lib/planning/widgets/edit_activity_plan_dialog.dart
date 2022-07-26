@@ -80,6 +80,8 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
 
   @override
   void initState() {
+    clearActivityPlanException(context);
+
     breedVersionController.text = widget.breedVersion;
     activityCodeController.text = widget.activityId.toString();
     recommendedByController.text = widget.recommendedBy;
@@ -282,7 +284,7 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
 
   void save() {
     bool validateData = validate();
-    print('validatiopn $validateData');
+
     if (validateData != true) {
       setState(() {});
       return;
@@ -754,7 +756,7 @@ class _EditActivityPlanDialogState extends State<EditActivityPlanDialog> {
                             itemBuilder: (BuildContext context, int index) {
                               return ModularWidgets.exceptionDesign(
                                   MediaQuery.of(context).size,
-                                  value.activityPlanException[index][0]);
+                                  value.activityPlanException[index]);
                             },
                           );
                         }),

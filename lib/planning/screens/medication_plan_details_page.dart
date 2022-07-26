@@ -195,7 +195,7 @@ class _MedicationPlanDetailsState extends State<MedicationPlanDetails> {
         Provider.of<ActivityApis>(context).singleMedicationPlan;
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: loading == true
           ? const Center(
               child: Text('Loading'),
@@ -294,8 +294,6 @@ class _MedicationPlanDetailsState extends State<MedicationPlanDetails> {
                                             breedVersionId: _MedicationDetails[
                                                     'Breed_Version_Id__Breed_Version']
                                                 .toString(),
-                                            description: _MedicationDetails[
-                                                'Description'],
                                           ),
                                       direction: AxisDirection.right);
                                 },
@@ -383,21 +381,6 @@ class _MedicationPlanDetailsState extends State<MedicationPlanDetails> {
                                   : getDataContainer(_MedicationDetails[
                                           'Breed_Version_Id__Breed_Version']
                                       .toString()),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 14,
-                          ),
-                          Row(
-                            children: [
-                              getHeadingContainer('Description'),
-                              const SizedBox(
-                                width: 49,
-                              ),
-                              _MedicationDetails.isEmpty
-                                  ? const SizedBox()
-                                  : getDataContainer(
-                                      _MedicationDetails['Description']),
                             ],
                           ),
                           const SizedBox(

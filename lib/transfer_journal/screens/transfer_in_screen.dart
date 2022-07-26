@@ -78,6 +78,8 @@ class _TransferInScreenState extends State<TransferInScreen> {
 
   @override
   void initState() {
+    clearTransferException(context);
+
     getPermission().then((value) {
       setState(() {
         loading = false;
@@ -201,7 +203,6 @@ class _TransferInScreenState extends State<TransferInScreen> {
     transferIn['Transfer_Out_Id'] =
         individualTransferOutData['Transfer_Out_Id'];
     _formKey.currentState!.save();
-    print(transferIn);
 
     fetchCredientials().then((token) {
       Provider.of<TransferJournalApi>(context, listen: false)
@@ -238,7 +239,6 @@ class _TransferInScreenState extends State<TransferInScreen> {
         json.decode(prefs.getString('Transfer_In')!) as Map<String, dynamic>;
 
     extratedTransferInPermissions = extratedUserData['Transfer_In'];
-    print(extratedTransferInPermissions);
   }
 
   @override
@@ -302,7 +302,7 @@ class _TransferInScreenState extends State<TransferInScreen> {
                               onPressed: () {
                                 searchBook(query);
                               },
-                              child: const Text('Search'),
+                              child: const Text('Submit'),
                             ),
                           ),
                         ],
@@ -369,7 +369,7 @@ class _TransferInScreenState extends State<TransferInScreen> {
                                           DateFormat('dd-MM-yyyy').format(
                                               DateTime.parse(
                                                   individualTransferOutData[
-                                                      'Despatch_Date'])),
+                                                      'Dispatch_Date'])),
                                         ),
                                       ],
                                     ),
@@ -413,7 +413,7 @@ class _TransferInScreenState extends State<TransferInScreen> {
                                         contentWidth(),
                                         valueContainer(
                                           individualTransferOutData[
-                                                  'WareHouse_Id__WareHouse_Name']
+                                                  'WareHouse_Id_From__WareHouse_Name']
                                               .toString(),
                                         ),
                                       ],
@@ -428,7 +428,7 @@ class _TransferInScreenState extends State<TransferInScreen> {
                                         contentWidth(),
                                         valueContainer(
                                           individualTransferOutData[
-                                                  'Batch_Id__Batch_Code']
+                                                  'Batch_Plan_Id__Batch_Plan_Code']
                                               .toString(),
                                         ),
                                       ],
@@ -497,7 +497,7 @@ class _TransferInScreenState extends State<TransferInScreen> {
                                               DateTime.parse(
                                                   individualTransferOutData[
                                                           'Transfer_Out']
-                                                      ['Shipped_Date'])),
+                                                      ['Dispatch_Date'])),
                                         ),
                                       ],
                                     ),
@@ -544,7 +544,7 @@ class _TransferInScreenState extends State<TransferInScreen> {
                                         valueContainer(
                                           individualTransferOutData[
                                                       'Transfer_Out'][
-                                                  'WareHouse_Id__WareHouse_Name']
+                                                  'WareHouse_Id_From__WareHouse_Name']
                                               .toString(),
                                         ),
                                       ],
@@ -559,8 +559,8 @@ class _TransferInScreenState extends State<TransferInScreen> {
                                         contentWidth(),
                                         valueContainer(
                                           individualTransferOutData[
-                                                      'Transfer_Out']
-                                                  ['Batch_Id__Batch_Code']
+                                                      'Transfer_Out'][
+                                                  'Batch_Plan_Id__Batch_Plan_Code']
                                               .toString(),
                                         ),
                                       ],
@@ -1043,8 +1043,7 @@ class _TransferInScreenState extends State<TransferInScreen> {
                                             (BuildContext context, int index) {
                                           return ModularWidgets.exceptionDesign(
                                               MediaQuery.of(context).size,
-                                              value.transferException[index]
-                                                  [0]);
+                                              value.transferException[index]);
                                         },
                                       );
                                     }),

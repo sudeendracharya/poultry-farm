@@ -173,6 +173,7 @@ class _AddActivityPlanDialogState extends State<AddActivityPlanDialog> {
 
   @override
   void initState() {
+    clearActivityPlanException(context);
     activityCodeController.text = getRandom(3, 'A-');
     fetchCredientials().then((token) {
       if (token != '') {
@@ -788,7 +789,7 @@ class _AddActivityPlanDialogState extends State<AddActivityPlanDialog> {
                             itemBuilder: (BuildContext context, int index) {
                               return ModularWidgets.exceptionDesign(
                                   MediaQuery.of(context).size,
-                                  value.activityPlanException[index][0]);
+                                  value.activityPlanException[index]);
                             },
                           );
                         }),

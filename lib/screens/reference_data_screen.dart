@@ -43,6 +43,60 @@ class _ReferenceDataScreenState extends State<ReferenceDataScreen>
         height: 44,
         alignment: Alignment.center,
         child: Text(
+          'Breed',
+          style: GoogleFonts.roboto(
+            textStyle: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              color: Colors.black,
+            ),
+          ),
+        ),
+      ),
+      // text: 'Administration',
+    ),
+    Tab(
+      child: Container(
+        width: 160,
+        height: 44,
+        alignment: Alignment.center,
+        child: Text(
+          'Breed Version',
+          style: GoogleFonts.roboto(
+            textStyle: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              color: Colors.black,
+            ),
+          ),
+        ),
+      ),
+      // text: 'Administration',
+    ),
+    // Tab(
+    //   child: Container(
+    //     width: 180,
+    //     height: 44,
+    //     alignment: Alignment.center,
+    //     child: Text(
+    //       'Bird Age Grouping',
+    //       style: GoogleFonts.roboto(
+    //         textStyle: const TextStyle(
+    //           fontWeight: FontWeight.w500,
+    //           fontSize: 16,
+    //           color: Colors.black,
+    //         ),
+    //       ),
+    //     ),
+    //   ),
+    //   // text: 'Administration',
+    // ),
+    Tab(
+      child: Container(
+        width: 166,
+        height: 44,
+        alignment: Alignment.center,
+        child: Text(
           'Activity Plan',
           style: GoogleFonts.roboto(
             textStyle: const TextStyle(
@@ -80,60 +134,6 @@ class _ReferenceDataScreenState extends State<ReferenceDataScreen>
         alignment: Alignment.center,
         child: Text(
           'Medication Plan',
-          style: GoogleFonts.roboto(
-            textStyle: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 16,
-              color: Colors.black,
-            ),
-          ),
-        ),
-      ),
-      // text: 'Administration',
-    ),
-    Tab(
-      child: Container(
-        width: 166,
-        height: 44,
-        alignment: Alignment.center,
-        child: Text(
-          'Breed',
-          style: GoogleFonts.roboto(
-            textStyle: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 16,
-              color: Colors.black,
-            ),
-          ),
-        ),
-      ),
-      // text: 'Administration',
-    ),
-    Tab(
-      child: Container(
-        width: 160,
-        height: 44,
-        alignment: Alignment.center,
-        child: Text(
-          'Breed Version',
-          style: GoogleFonts.roboto(
-            textStyle: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 16,
-              color: Colors.black,
-            ),
-          ),
-        ),
-      ),
-      // text: 'Administration',
-    ),
-    Tab(
-      child: Container(
-        width: 180,
-        height: 44,
-        alignment: Alignment.center,
-        child: Text(
-          'Bird Age Grouping',
           style: GoogleFonts.roboto(
             textStyle: const TextStyle(
               fontWeight: FontWeight.w500,
@@ -189,12 +189,12 @@ class _ReferenceDataScreenState extends State<ReferenceDataScreen>
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height * 0.8,
               child: TabBarView(controller: _tabController, children: [
+                SingleChildScrollView(child: BreedPage()),
+                SingleChildScrollView(child: BreedVersion()),
+                // SingleChildScrollView(child: BirdAgeGroup()),
                 SingleChildScrollView(child: ActivityPlanningPage()),
                 SingleChildScrollView(child: VaccinationPlanningPage()),
                 SingleChildScrollView(child: MedicationPlanningPage()),
-                SingleChildScrollView(child: BreedPage()),
-                SingleChildScrollView(child: BreedVersion()),
-                SingleChildScrollView(child: BirdAgeGroup()),
               ]),
             ),
           ),

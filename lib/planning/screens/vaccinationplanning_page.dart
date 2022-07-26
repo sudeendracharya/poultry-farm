@@ -42,7 +42,10 @@ class _VaccinationPlanningPageState extends State<VaccinationPlanningPage> {
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<ActivityApis>(context, listen: false)
-            .getVaccinationPlan(token);
+            .getVaccinationPlan(token)
+            .then((value) {
+          selectedVaccinationCodes.clear();
+        });
       }
     });
   }
@@ -94,9 +97,11 @@ class _VaccinationPlanningPageState extends State<VaccinationPlanningPage> {
             if (value == 204) {
               successSnackbar('successfully deleted the data');
               update(100);
+              selectedVaccinationCodes.clear();
             } else {
               failureSnackbar('unable to delete the data something went wrong');
               update(100);
+              selectedVaccinationCodes.clear();
             }
           });
         }
@@ -108,9 +113,10 @@ class _VaccinationPlanningPageState extends State<VaccinationPlanningPage> {
 
   void searchBook(String query) {
     final searchOutput = _vaccinationPlanData.where((details) {
-      final vaccinationCode = details['Vaccination_Code'];
+      final vaccinationCode =
+          details['Vaccination_Code'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toString();
 
       return vaccinationCode.contains(searchName);
     }).toList();
@@ -126,7 +132,6 @@ class _VaccinationPlanningPageState extends State<VaccinationPlanningPage> {
     var size = MediaQuery.of(context).size;
     var width = MediaQuery.of(context).size.width;
     _vaccinationPlanData = Provider.of<ActivityApis>(context).vaccinationPlan;
-    List batchDetails = [];
     return loading == true
         ? const Center(
             child: Text('Loading'),
@@ -159,7 +164,7 @@ class _VaccinationPlanningPageState extends State<VaccinationPlanningPage> {
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'Vaccination Code'),
                       ),
                     ),
                     Container(

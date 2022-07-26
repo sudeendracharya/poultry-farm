@@ -265,6 +265,8 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
 
   @override
   void initState() {
+    clearActivityPlanException(context);
+
     vaccinationCodeController.text = getRandom(3, 'V-');
     fetchCredientials().then((token) {
       if (token != '') {
@@ -385,7 +387,6 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
             // print(excel.tables[table]!.rows[i].length.toString());
 
             for (int j = 0; j < excel.tables[table]!.rows[i].length; j++) {
-              print(excel.tables[table]!.rows[i][j]!.value.toString());
               temp[names[j]] = excel.tables[table]!.rows[i][j] == null
                   ? ''
                   : excel.tables[table]!.rows[i][j]!.value;
@@ -464,7 +465,7 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
     }
     vaccinationPlanData['Vaccination_Plan'] = sendData;
 
-    // print(vaccinationPlanData);
+    print(vaccinationPlanData);
 
     fetchCredientials().then((token) {
       if (token != '') {
@@ -690,55 +691,55 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
                       ? const SizedBox()
                       : ModularWidgets.validationDesign(
                           size, breedVersionValidationMessage),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 24.0),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: size.width * 0.25,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Description'),
-                          ),
-                          Container(
-                            width: size.width * 0.25,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(
-                                  color: activityPlanIdError == false
-                                      ? Colors.black26
-                                      : const Color.fromRGBO(243, 60, 60, 1)),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: TextFormField(
-                                decoration: InputDecoration(
-                                    hintText: activityPlanIdError == false
-                                        ? 'Enter description'
-                                        : '',
-                                    border: InputBorder.none),
-                                initialValue: '',
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    // showError('FirmCode');
-                                    return '';
-                                  }
-                                },
-                                onSaved: (value) {
-                                  vaccinationPlanData['Description'] = value!;
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(top: 24.0),
+                  //   child: Align(
+                  //     alignment: Alignment.topLeft,
+                  //     child: Column(
+                  //       mainAxisSize: MainAxisSize.min,
+                  //       children: [
+                  //         Container(
+                  //           width: size.width * 0.25,
+                  //           padding: const EdgeInsets.only(bottom: 12),
+                  //           child: const Text('Description'),
+                  //         ),
+                  //         Container(
+                  //           width: size.width * 0.25,
+                  //           height: 36,
+                  //           decoration: BoxDecoration(
+                  //             borderRadius: BorderRadius.circular(8),
+                  //             color: Colors.white,
+                  //             border: Border.all(
+                  //                 color: activityPlanIdError == false
+                  //                     ? Colors.black26
+                  //                     : const Color.fromRGBO(243, 60, 60, 1)),
+                  //           ),
+                  //           child: Padding(
+                  //             padding: const EdgeInsets.symmetric(
+                  //                 horizontal: 12, vertical: 6),
+                  //             child: TextFormField(
+                  //               decoration: InputDecoration(
+                  //                   hintText: activityPlanIdError == false
+                  //                       ? 'Enter description'
+                  //                       : '',
+                  //                   border: InputBorder.none),
+                  //               initialValue: '',
+                  //               validator: (value) {
+                  //                 if (value!.isEmpty) {
+                  //                   // showError('FirmCode');
+                  //                   return '';
+                  //                 }
+                  //               },
+                  //               onSaved: (value) {
+                  //                 vaccinationPlanData['Description'] = value!;
+                  //               },
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                   const SizedBox(
                     height: 36,
                   ),
@@ -1184,7 +1185,7 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
                                         }
                                       },
                                       onSaved: (value) {
-                                        singleVaccinationPlan['Descripption'] =
+                                        singleVaccinationPlan['Description'] =
                                             value!;
                                       },
                                     ),
@@ -1257,7 +1258,7 @@ class _AddVaccinationPlanDialogState extends State<AddVaccinationPlanDialog> {
                             itemBuilder: (BuildContext context, int index) {
                               return ModularWidgets.exceptionDesign(
                                   MediaQuery.of(context).size,
-                                  value.activityPlanException[index][0]);
+                                  value.activityPlanException[index]);
                             },
                           );
                         }),

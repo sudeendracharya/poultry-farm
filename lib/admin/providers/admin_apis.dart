@@ -2,13 +2,15 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
+import 'package:poultry_login_signup/main.dart';
 import 'package:poultry_login_signup/providers/exception_handle.dart';
 
 class AdminApis with ChangeNotifier {
   List _userRoles = [];
   List _users = [];
-  var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
+  // var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
 
   Map<String, dynamic> _individualUserRoles = {};
 
@@ -38,7 +40,7 @@ class AdminApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         // for (var data in responseData) {
@@ -47,11 +49,13 @@ class AdminApis with ChangeNotifier {
         _userRoles = responseData;
       }
 
-      // print(response.statusCode);
-      // print(response.body);
+      // debugPrint(response.statusCode);
+      // debugPrint(response.body);
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -71,7 +75,7 @@ class AdminApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         // for (var data in responseData) {
@@ -86,11 +90,13 @@ class AdminApis with ChangeNotifier {
         _individualUserRoles = temp;
       }
 
-      // print(response.statusCode);
+      // debugPrint(response.statusCode);
       debugPrint(response.body.toString());
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -109,16 +115,18 @@ class AdminApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         ExceptionHandle handle = ExceptionHandle();
         handle.handleException(response);
       }
-      // print(response.statusCode);
-      // print(response.body);
+      // debugPrint(response.statusCode);
+      // debugPrint(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -138,17 +146,19 @@ class AdminApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         ExceptionHandle handle = ExceptionHandle();
         handle.handleException(response);
       }
 
-      // print(response.statusCode);
-      // print(response.body);
+      // debugPrint(response.statusCode);
+      // debugPrint(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -158,9 +168,7 @@ class AdminApis with ChangeNotifier {
     var id,
     var token,
   ) async {
-    log(token);
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/users/roles-edit/$id');
+    final url = Uri.parse('${baseUrl}api/v1/users/roles-edit/$id');
     try {
       final response = await http.put(
         url,
@@ -174,9 +182,11 @@ class AdminApis with ChangeNotifier {
           'Role_Permissions': data['Role_Permission'],
         }),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -187,8 +197,7 @@ class AdminApis with ChangeNotifier {
   ) async {
     // log(token);
     // log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/users/roles-edit/$id');
+    final url = Uri.parse('${baseUrl}api/v1/users/roles-edit/$id');
     try {
       final response = await http.get(
         url,
@@ -197,16 +206,17 @@ class AdminApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
       // }
       _userRoles = responseData;
-      log(responseData.toString());
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -215,10 +225,8 @@ class AdminApis with ChangeNotifier {
     var token,
     var id,
   ) async {
-    log(token);
     // log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/users/roles-edit/$id');
+    final url = Uri.parse('${baseUrl}api/v1/users/roles-edit/$id');
     try {
       final response = await http.delete(
         url,
@@ -227,10 +235,12 @@ class AdminApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -249,12 +259,14 @@ class AdminApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
-      // print(response.statusCode);
-      // print(response.body);
+      forbidden(response);
+      // debugPrint(response.statusCode);
+      // debugPrint(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -270,8 +282,9 @@ class AdminApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-      // print(response.statusCode);
-      // print('update user ${response.body}');
+      forbidden(response);
+      // debugPrint(response.statusCode);
+      // debugPrint('update user ${response.body}');
       if (response.statusCode == 202 || response.statusCode == 201) {
         var responseData = json.decode(response.body);
         return {
@@ -285,6 +298,8 @@ class AdminApis with ChangeNotifier {
         };
       }
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -303,8 +318,9 @@ class AdminApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-      // print(response.statusCode);
-      // print('User ${response.body}');
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint('User ${response.body}');
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -334,6 +350,8 @@ class AdminApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -344,8 +362,7 @@ class AdminApis with ChangeNotifier {
     var token,
   ) async {
     // log(token);
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/users/list-edit/$id');
+    final url = Uri.parse('${baseUrl}api/v1/users/list-edit/$id');
     try {
       final response = await http.put(
         url,
@@ -361,9 +378,11 @@ class AdminApis with ChangeNotifier {
           'User_Permissions': data['User_Permissions'],
         }),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -374,8 +393,7 @@ class AdminApis with ChangeNotifier {
   ) async {
     // log(token);
 
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/users/list-edit/$id');
+    final url = Uri.parse('${baseUrl}api/v1/users/list-edit/$id');
     try {
       final response = await http.delete(
         url,
@@ -384,10 +402,12 @@ class AdminApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }

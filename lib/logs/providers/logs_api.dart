@@ -1,11 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
 
-class LogsApi with ChangeNotifier {
-  var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
+import '../../main.dart';
 
+class LogsApi with ChangeNotifier {
   Map<String, dynamic> _activityLog = {};
 
   Map<String, dynamic> _medicationLog = {};
@@ -66,7 +67,7 @@ class LogsApi with ChangeNotifier {
           "Authorization": 'Token $token',
         },
       );
-
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
 
@@ -79,9 +80,11 @@ class LogsApi with ChangeNotifier {
         notifyListeners();
       }
 
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -98,8 +101,9 @@ class LogsApi with ChangeNotifier {
         },
         // body: json.encode(batchCode),
       );
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -113,6 +117,8 @@ class LogsApi with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -129,8 +135,9 @@ class LogsApi with ChangeNotifier {
         },
         // body: json.encode(batchCode),
       );
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -144,6 +151,8 @@ class LogsApi with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -161,8 +170,9 @@ class LogsApi with ChangeNotifier {
         },
         // body: json.encode(batchCode),
       );
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -176,6 +186,8 @@ class LogsApi with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -192,8 +204,9 @@ class LogsApi with ChangeNotifier {
         },
         // body: json.encode(batchCode),
       );
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -207,6 +220,8 @@ class LogsApi with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -223,7 +238,9 @@ class LogsApi with ChangeNotifier {
           "Authorization": 'Token $token',
         },
       );
-
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         _medicationLog = responseData;
@@ -234,10 +251,9 @@ class LogsApi with ChangeNotifier {
 
         notifyListeners();
       }
-
-      print(response.statusCode);
-      print(response.body);
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -254,7 +270,7 @@ class LogsApi with ChangeNotifier {
           "Authorization": 'Token $token',
         },
       );
-
+      forbidden(response);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         _vaccinationLog = responseData;
@@ -267,9 +283,11 @@ class LogsApi with ChangeNotifier {
         notifyListeners();
       }
 
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -286,10 +304,14 @@ class LogsApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -306,10 +328,13 @@ class LogsApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -326,10 +351,13 @@ class LogsApi with ChangeNotifier {
         },
         body: json.encode(data),
       );
-      // print(response.statusCode);
-      // print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }

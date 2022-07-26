@@ -283,7 +283,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedRolePermissionList.add(data);
       }
     }
-    print('selected Role List $selectedRolePermissionList');
+    debugPrint('selected Role List $selectedRolePermissionList');
     setState(() {});
   }
 
@@ -305,7 +305,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedUsersPermissionList.add(data);
       }
     }
-    // print('selected User List $selectedUsersPermissionList');
+    // debugPrint('selected User List $selectedUsersPermissionList');
     setState(() {});
   }
 
@@ -327,7 +327,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedAddBatchPermissionList.add(data);
       }
     }
-    // print('selected Add batches List $selectedAddBatchPermissionList');
+    // debugPrint('selected Add batches List $selectedAddBatchPermissionList');
     setState(() {});
   }
 
@@ -349,7 +349,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedLogDailyBatchesPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected Log Daily batches List $selectedLogDailyBatchesPermissionList');
     setState(() {});
   }
@@ -372,7 +372,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedMedicationLogPermissionList.add(data);
       }
     }
-    // print('selected Medication Log List $selectedMedicationLogPermissionList');
+    // debugPrint('selected Medication Log List $selectedMedicationLogPermissionList');
     setState(() {});
   }
 
@@ -394,7 +394,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedVaccinationLogPermissionList.add(data);
       }
     }
-    print(
+    debugPrint(
         'selected Vaccination Log List $selectedVaccinationLogPermissionList');
     setState(() {});
   }
@@ -417,7 +417,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedActivityLogPermissionList.add(data);
       }
     }
-    // print('selected Activity Log List $selectedActivityLogPermissionList');
+    // debugPrint('selected Activity Log List $selectedActivityLogPermissionList');
     setState(() {});
   }
 
@@ -439,7 +439,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedEggGradingPermissionList.add(data);
       }
     }
-    // print('selected Egg grading List $selectedEggGradingPermissionList');
+    // debugPrint('selected Egg grading List $selectedEggGradingPermissionList');
     setState(() {});
   }
 
@@ -461,7 +461,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedEggCollectionPermissionList.add(data);
       }
     }
-    // print('selected Egg Collection List $selectedEggCollectionPermissionList');
+    // debugPrint('selected Egg Collection List $selectedEggCollectionPermissionList');
     setState(() {});
   }
 
@@ -483,7 +483,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedMortalityPermissionList.add(data);
       }
     }
-    // print('selected Mortality List $selectedMortalityPermissionList');
+    // debugPrint('selected Mortality List $selectedMortalityPermissionList');
     setState(() {});
   }
 
@@ -505,7 +505,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedBirdGradingPermissionList.add(data);
       }
     }
-    // print('selected bird grading List $selectedBirdGradingPermissionList');
+    // debugPrint('selected bird grading List $selectedBirdGradingPermissionList');
     setState(() {});
   }
 
@@ -527,7 +527,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedInventoryAdjustmentJournalPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected inventory Adjustment journal List $selectedInventoryAdjustmentJournalPermissionList');
     setState(() {});
   }
@@ -550,7 +550,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedSalesPermissionList.add(data);
       }
     }
-    // print('selected sales permission List $selectedSalesPermissionList');
+    // debugPrint('selected sales permission List $selectedSalesPermissionList');
     setState(() {});
   }
 
@@ -572,7 +572,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedTransferOutPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected transfer out permission List $selectedTransferOutPermissionList');
     setState(() {});
   }
@@ -595,7 +595,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedTransferInPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected transfer in permission List $selectedTransferInPermissionList');
     setState(() {});
   }
@@ -618,7 +618,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedBatchPlanningPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected Batch Planning permission List $selectedBatchPlanningPermissionList');
     setState(() {});
   }
@@ -641,7 +641,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedProductManagementPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected Product Management permission List $selectedProductManagementPermissionList');
     setState(() {});
   }
@@ -664,7 +664,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedBirdAgeGroupingPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected BirdAge Grouping permission List $selectedBirdAgeGroupingPermissionList');
     setState(() {});
   }
@@ -687,7 +687,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedBreedVersionPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected Breed Version permission List $selectedBreedVersionPermissionList');
     setState(() {});
   }
@@ -710,7 +710,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedBreedPermissionList.add(data);
       }
     }
-    // print('selected Breed permission List $selectedBreedPermissionList');
+    // debugPrint('selected Breed permission List $selectedBreedPermissionList');
     setState(() {});
   }
 
@@ -732,7 +732,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedMedicationPlanPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected Medication Plan permission List $selectedMedicationPlanPermissionList');
     setState(() {});
   }
@@ -755,7 +755,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedVaccinationPlanPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected Vaccination Plan permission List $selectedVaccinationPlanPermissionList');
     setState(() {});
   }
@@ -778,7 +778,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedActivityPlanPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected Activity Plan permission List $selectedActivityPlanPermissionList');
     setState(() {});
   }
@@ -801,7 +801,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedSectionPermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected WareHouse Section permission List $selectedSectionPermissionList');
     setState(() {});
   }
@@ -836,7 +836,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedWareHousePermissionList.add(data);
       }
     }
-    // print(
+    // debugPrint(
     // 'selected WareHouse permission List $selectedWareHousePermissionList');
     setState(() {});
   }
@@ -887,7 +887,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedPlantPermissionList.add(data);
       }
     }
-    // print('selected plant permission List $selectedPlantPermissionList');
+    // debugPrint('selected plant permission List $selectedPlantPermissionList');
     setState(() {});
   }
 
@@ -1277,7 +1277,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedFirmList.add(data);
       }
     }
-    // print(selectedFirmList);
+    // debugPrint(selectedFirmList);
     getPlantList(selectedFirmList);
   }
 
@@ -1361,7 +1361,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Firms'] = temp;
     }
 
@@ -1400,7 +1400,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Plants'] = temp;
     }
 
@@ -1439,7 +1439,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['WareHouses'] = temp;
     }
     if (selectedSectionPermissionList.isNotEmpty) {
@@ -1477,7 +1477,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Sections'] = temp;
     }
     if (selectedActivityPlanPermissionList.isNotEmpty) {
@@ -1517,7 +1517,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Activity_Plan'] = temp;
     }
     if (selectedVaccinationPlanPermissionList.isNotEmpty) {
@@ -1558,7 +1558,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Vaccination_Plan'] = temp;
     }
     if (selectedMedicationPlanPermissionList.isNotEmpty) {
@@ -1599,7 +1599,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Medication_Plan'] = temp;
     }
     if (selectedBreedPermissionList.isNotEmpty) {
@@ -1637,7 +1637,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Breed'] = temp;
     }
 
@@ -1678,7 +1678,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Breed_Version'] = temp;
     }
     if (selectedBirdAgeGroupingPermissionList.isNotEmpty) {
@@ -1719,7 +1719,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Bird_Age_Grouping'] = temp;
     }
 
@@ -1764,7 +1764,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Product_Management'] = temp;
     }
 
@@ -1806,7 +1806,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Batch_Planning'] = temp;
     }
 
@@ -1849,7 +1849,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         });
       }
 
-      // print(temp);
+      // debugPrint(temp);
       permissions['Users'] = temp;
     }
 
@@ -2023,7 +2023,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
       "Description": user['Role_Description'],
     };
 
-    // print(temp);
+    // debugPrint(temp);
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
       Provider.of<AdminApis>(context, listen: false)
@@ -2058,7 +2058,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
     if (prefs.containsKey('Role_Id')) {
       var extratedData =
           json.decode(prefs.getString('Role_Id')!) as Map<String, dynamic>;
-      // print(extratedData);
+      // debugPrint(extratedData);
       _roleId = extratedData['Role_Id'].toString();
     }
   }
@@ -2098,7 +2098,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
       });
     }
 
-    // print(temp);
+    // debugPrint(temp);
     permissions[name] = temp;
   }
 
@@ -2120,7 +2120,7 @@ class _EditUserRolesState extends State<EditUserRoles> {
         selectedFirmPermissionList.add(data);
       }
     }
-    // print('selected firm permission List $selectedFirmPermissionList');
+    // debugPrint('selected firm permission List $selectedFirmPermissionList');
     setState(() {});
   }
 

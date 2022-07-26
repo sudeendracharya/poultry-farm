@@ -84,6 +84,7 @@ class _EditWareHouseDetailsDialogState
   @override
   void initState() {
     super.initState();
+    clearWarehouseException(context);
     wareHouseDetails['WareHouse_Category_Id'] = widget.wareHouseCategoryId;
     wareHouseDetails['WareHouse_Sub_Category_Id'] =
         widget.wareHouseSubCategoryId;
@@ -563,7 +564,7 @@ class _EditWareHouseDetailsDialogState
                           itemBuilder: (BuildContext context, int index) {
                             return ModularWidgets.exceptionDesign(
                                 MediaQuery.of(context).size,
-                                value.wareHouseException[index][0]);
+                                value.wareHouseException[index]);
                           },
                         );
                       }),

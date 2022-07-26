@@ -5,14 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:poultry_login_signup/providers/apicalls.dart';
 import 'package:poultry_login_signup/items/providers/items_apis.dart';
 import 'package:provider/provider.dart';
-import 'package:universal_html/html.dart';
 
 import '../../colors.dart';
 import '../../main.dart';
 import '../../styles.dart';
 import '../../widgets/administration_search_widget.dart';
 import '../../widgets/modular_widgets.dart';
-import '../widgets/add_item_sub_category.dart';
 
 class ProductSubCategory extends StatefulWidget {
   ProductSubCategory({Key? key}) : super(key: key);
@@ -47,11 +45,11 @@ class _ProductSubCategoryState extends State<ProductSubCategory> {
   int defaultRowsPerPage = 3;
   void searchBook(String query) {
     final searchOutput = itemSubCategoryData.where((details) {
-      final breedName = details['Breed_Name'];
-      final breedVendor = details['Vendor'].toString().toLowerCase();
+      final breedVendor =
+          details['Product_Sub_Category_Name'].toString().toLowerCase();
       final searchName = query.toLowerCase();
 
-      return breedName.contains(searchName) || breedVendor.contains(searchName);
+      return breedVendor.contains(searchName);
     }).toList();
 
     setState(() {
@@ -65,12 +63,13 @@ class _ProductSubCategoryState extends State<ProductSubCategory> {
   }
 
   void update(int data) {
-    selectedProductSubType.clear();
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<ItemApis>(context, listen: false)
             .getItemSubCategoryAllData(token)
-            .then((value1) {});
+            .then((value1) {
+          selectedProductSubType.clear();
+        });
       }
     });
   }
@@ -97,7 +96,6 @@ class _ProductSubCategoryState extends State<ProductSubCategory> {
       }
       fetchCredientials().then((token) {
         if (token != '') {
-          print(temp);
           Provider.of<ItemApis>(context, listen: false)
               .deleteItemSubCategory(temp, token)
               .then((value) {
@@ -108,6 +106,8 @@ class _ProductSubCategoryState extends State<ProductSubCategory> {
               temp.clear();
             } else {
               failureSnackbar('Unable to delete the data Something went wrong');
+              selectedProductSubType.clear();
+              update(100);
             }
           });
         }
@@ -154,7 +154,6 @@ class _ProductSubCategoryState extends State<ProductSubCategory> {
     _productSubTypeFormKey.currentState!.save();
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       if (value == true) {
-        print(productSubType);
         var token = Provider.of<Apicalls>(context, listen: false).token;
         Provider.of<ItemApis>(context, listen: false)
             .editItemSubCategory(productSubType,
@@ -166,6 +165,9 @@ class _ProductSubCategoryState extends State<ProductSubCategory> {
             selectedProductSubType.clear();
             successSnackbar('Successfully Updated product Sub Type');
           } else {
+            Get.back();
+            update(100);
+            selectedProductSubType.clear();
             failureSnackbar(
                 'Something went wrong unable to update product sub type');
           }
@@ -217,7 +219,7 @@ class _ProductSubCategoryState extends State<ProductSubCategory> {
                   reFresh: (value) {},
                   text: query,
                   onChanged: searchBook,
-                  hintText: 'Search'),
+                  hintText: 'Product Sub Type'),
             ),
           ),
           Container(
@@ -334,28 +336,28 @@ class _ProductSubCategoryState extends State<ProductSubCategory> {
   bool productTypeValidation = true;
   String productTypeValidationMessage = '';
 
-  Dialog productSubTypeDialog(Size size) {
-    return Dialog(
-      child: StatefulBuilder(
-        builder: (BuildContext context, setState) {
-          if (productSubType['Product_Category_Id'] != '') {
-            if (itemCategoryData.isNotEmpty) {
-              for (var data in itemCategoryData) {
-                if (data['Product_Category_Id'] ==
-                    productSubType['Product_Category_Id']) {
-                  selectedProductTypeData = data['Product_Category_Name'];
-                }
+  StatefulBuilder productSubTypeDialog(Size size) {
+    return StatefulBuilder(
+      builder: (BuildContext context, setState) {
+        if (productSubType['Product_Category_Id'] != '') {
+          if (itemCategoryData.isNotEmpty) {
+            for (var data in itemCategoryData) {
+              if (data['Product_Category_Id'] ==
+                  productSubType['Product_Category_Id']) {
+                selectedProductTypeData = data['Product_Category_Name'];
               }
             }
           }
-          return Container(
-            width: size.width * 0.3,
-            height: size.height * 0.4,
-            color: Colors.white,
+        }
+        return Container(
+          width: size.width * 0.3,
+          height: size.height * 0.4,
+          color: Colors.white,
+          child: Drawer(
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 20,
-                vertical: 10,
+                vertical: 15,
               ),
               child: Form(
                 key: _productSubTypeFormKey,
@@ -540,9 +542,9 @@ class _ProductSubCategoryState extends State<ProductSubCategory> {
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

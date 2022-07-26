@@ -166,13 +166,13 @@ class _BirdGradingState extends State<BirdGrading> {
                           extratedPermissions['Create'] == true
                               ? IconButton(
                                   onPressed: () {
-                                    showGlobalDrawer(
-                                        context: context,
-                                        builder: (ctx) => AddBirdGrading(
-                                              reFresh: update,
-                                              editData: const {},
-                                            ),
-                                        direction: AxisDirection.right);
+                                    // showGlobalDrawer(
+                                    //     context: context,
+                                    //     builder: (ctx) => AddBirdGrading(
+                                    //           reFresh: update,
+                                    //           editData: const {},
+                                    //         ),
+                                    //     direction: AxisDirection.right);
                                   },
                                   icon: const Icon(Icons.add),
                                 )
@@ -185,14 +185,14 @@ class _BirdGradingState extends State<BirdGrading> {
                               : selectedBirdGradingIds.length == 1
                                   ? IconButton(
                                       onPressed: () {
-                                        showGlobalDrawer(
-                                            context: context,
-                                            builder: (ctx) => AddBirdGrading(
-                                                  reFresh: update,
-                                                  editData:
-                                                      selectedBirdGradingIds[0],
-                                                ),
-                                            direction: AxisDirection.right);
+                                        // showGlobalDrawer(
+                                        //     context: context,
+                                        //     builder: (ctx) => AddBirdGrading(
+                                        //           reFresh: update,
+                                        //           editData:
+                                        //               selectedBirdGradingIds[0],
+                                        //         ),
+                                        //     direction: AxisDirection.right);
                                       },
                                       icon: const Icon(Icons.edit),
                                     )

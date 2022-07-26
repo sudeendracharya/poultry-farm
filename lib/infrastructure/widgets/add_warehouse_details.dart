@@ -15,6 +15,7 @@ import 'package:poultry_login_signup/infrastructure/providers/infrastructure_api
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../main.dart';
 import '../../widgets/failure_dialog.dart';
 import '../../widgets/modular_widgets.dart';
 import '../../widgets/success_dialog.dart';
@@ -204,6 +205,7 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
   @override
   void initState() {
     super.initState();
+    clearWarehouseException(context);
     warehouseCodeController.text = getRandom(3, 'W-');
     lineIds.clear();
     individualLineDataList.clear();
@@ -361,7 +363,7 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
               title: 'Success',
             ));
             _formKey.currentState!.reset();
-            widget.update(100);
+            // widget.update(100);
             setState(() {
               _wareHouseId = value['WareHouse_Id'];
               _wareHouseName = value['WareHouse_Name'];
@@ -565,8 +567,6 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
   String boxLengthValidationMessage = '';
 
   bool validateAll() {
-    print('Validating');
-
     var boxHeight =
         RegExp(r'^\d{1,2}(\.\d{0,3})?$').hasMatch(boxHeightController.text);
 
@@ -576,9 +576,6 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
     var boxLength =
         RegExp(r'^\d{1,2}(\.\d{0,2})?$').hasMatch(boxLengthController.text);
 
-    print(boxHeight);
-    print(boxBreadth);
-    print(boxLength);
     if (sectionController.text == '') {
       sectionCodeValidation = false;
       sectionCodeValidationMessage = 'Section Code Cannot be empty';
@@ -1392,7 +1389,7 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
                 itemBuilder: (BuildContext context, int index) {
                   return ModularWidgets.exceptionDesign(
                       MediaQuery.of(context).size,
-                      value.wareHouseException[index][0]);
+                      value.wareHouseException[index]);
                 },
               );
             }),
@@ -1624,6 +1621,19 @@ class _AddWareHouseDetailsState extends State<AddWareHouseDetails> {
                       submittedSectionData: wareHouseSectionDetailsList,
                     ),
                   ),
+            count == 0
+                ? const SizedBox()
+                : ElevatedButton(
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                            ProjectColors.themecolor)),
+                    onPressed: () {
+                      Get.back();
+                    },
+                    child: const Text(
+                      'Close',
+                      style: TextStyle(color: Colors.white),
+                    ))
           ],
         ));
   }

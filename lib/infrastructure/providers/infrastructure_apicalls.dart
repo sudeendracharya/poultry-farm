@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../main.dart';
 
 class InfrastructureApis with ChangeNotifier {
   var token;
@@ -37,7 +40,7 @@ class InfrastructureApis with ChangeNotifier {
   List _displayWarehouseSubCategory = [];
 
   List _warehouseSubCategory = [];
-  var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
+  // var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
 
   List _singleFirmDetails = [];
   Map<String, dynamic> get individualWareHouseDetails {
@@ -140,8 +143,9 @@ class InfrastructureApis with ChangeNotifier {
               data['Firm_Alternate_Contact_Number'],
         }),
       );
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
+      forbidden(response);
       if (response.statusCode == 201) {
         var responseData = json.decode(response.body);
         return {
@@ -154,7 +158,7 @@ class InfrastructureApis with ChangeNotifier {
         var responseData = json.decode(response.body) as Map<String, dynamic>;
         _firmException.clear();
         responseData.forEach((key, value) {
-          _firmException.add(value);
+          _firmException.add({'Key': key, 'Value': value});
         });
         notifyListeners();
       }
@@ -163,6 +167,8 @@ class InfrastructureApis with ChangeNotifier {
         'FirmId': '',
       };
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -192,6 +198,7 @@ class InfrastructureApis with ChangeNotifier {
               data['Firm_Alternate_Contact_Number'],
         }),
       );
+      forbidden(response);
       if (response.statusCode == 202) {
         var responseData = json.decode(response.body);
         final prefs = await SharedPreferences.getInstance();
@@ -213,7 +220,7 @@ class InfrastructureApis with ChangeNotifier {
         var responseData = json.decode(response.body) as Map<String, dynamic>;
         _firmException.clear();
         responseData.forEach((key, value) {
-          _firmException.add(value);
+          _firmException.add({'Key': key, 'Value': value});
         });
 
         notifyListeners();
@@ -221,6 +228,8 @@ class InfrastructureApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -241,9 +250,9 @@ class InfrastructureApis with ChangeNotifier {
         },
       );
 
-      print(response.statusCode);
-      print(response.body);
-
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
+      forbidden(response);
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
@@ -282,6 +291,8 @@ class InfrastructureApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -290,7 +301,6 @@ class InfrastructureApis with ChangeNotifier {
     var id,
     var token,
   ) async {
-    log(token);
     //log(data.toString());
     final url = Uri.parse('${baseUrl}administration/firm-details/$id/');
     try {
@@ -301,7 +311,7 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
@@ -338,6 +348,8 @@ class InfrastructureApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -361,10 +373,12 @@ class InfrastructureApis with ChangeNotifier {
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
       // }
-
+      forbidden(response);
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -375,6 +389,7 @@ class InfrastructureApis with ChangeNotifier {
     // final url1 = Uri.parse(
     //     'https://mobilenallimenu.herokuapp.com/restrant/menu-details/1/');
     final url = Uri.parse('${baseUrl}plant-management/plant-list/$firmId/');
+
     try {
       final response = await http.get(
         url,
@@ -383,9 +398,9 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      print(response.statusCode);
-      print('plants ${response.body}');
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint('plants ${response.body}');
 
       var responseData = json.decode(response.body);
 
@@ -411,13 +426,14 @@ class InfrastructureApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
 
   Future<int> getPlantlist(var token, var data) async {
-    final url =
-        Uri.parse('https://poultryfarmapp.herokuapp.com/permisson/fetch-list/');
+    final url = Uri.parse('${baseUrl}permisson/fetch-list/');
     try {
       final response = await http.post(
         url,
@@ -427,7 +443,7 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print('plants List ${response.body}');
       if (response.statusCode == 201 || response.statusCode == 200) {
@@ -437,6 +453,8 @@ class InfrastructureApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -453,7 +471,7 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print('WareHouse List ${response.body}');
       if (response.statusCode == 201 || response.statusCode == 200) {
@@ -463,6 +481,8 @@ class InfrastructureApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -479,7 +499,7 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print('WareHouse Section List ${response.body}');
       if (response.statusCode == 201 || response.statusCode == 200) {
@@ -489,6 +509,8 @@ class InfrastructureApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -498,7 +520,6 @@ class InfrastructureApis with ChangeNotifier {
     var firmId,
     var token,
   ) async {
-    print(data);
     final url = Uri.parse('${baseUrl}plant-management/plant-list/$firmId/');
     try {
       final response = await http.post(
@@ -519,9 +540,9 @@ class InfrastructureApis with ChangeNotifier {
           'Plant_Pincode': int.parse(data['Plant_Pincode'])
         }),
       );
-
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -534,7 +555,7 @@ class InfrastructureApis with ChangeNotifier {
         var responseData = json.decode(response.body) as Map<String, dynamic>;
         _plantException.clear();
         responseData.forEach((key, value) {
-          _plantException.add(value);
+          _plantException.add({'Key': key, 'Value': value});
         });
 
         notifyListeners();
@@ -543,6 +564,8 @@ class InfrastructureApis with ChangeNotifier {
         'StatusCode': response.statusCode,
       };
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -552,7 +575,6 @@ class InfrastructureApis with ChangeNotifier {
     var id,
     var token,
   ) async {
-    print(data.toString());
     final url = Uri.parse('${baseUrl}plant-management/plant-details/$id/');
     try {
       final response = await http.put(
@@ -573,13 +595,13 @@ class InfrastructureApis with ChangeNotifier {
           'Plant_Pincode': int.parse(data['Plant_Pincode'])
         }),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         var responseData = json.decode(response.body) as Map<String, dynamic>;
         _plantException.clear();
 
         responseData.forEach((key, value) {
-          _plantException.add(value);
+          _plantException.add({'Key': key, 'Value': value});
         });
 
         notifyListeners();
@@ -587,6 +609,8 @@ class InfrastructureApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -595,7 +619,6 @@ class InfrastructureApis with ChangeNotifier {
     var id,
     var token,
   ) async {
-    log(token);
     //log(data.toString());
     final url = Uri.parse('${baseUrl}plant-management/plant-details/');
     try {
@@ -607,10 +630,12 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode({'Plant_Ids': id}),
       );
-
+      forbidden(response);
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -621,7 +646,7 @@ class InfrastructureApis with ChangeNotifier {
     responseData.forEach((key, value) {
       infrastructureException.add({
         'Key': key,
-        'Value': value[0],
+        'Value': value,
       });
     });
     notifyListeners();
@@ -647,7 +672,7 @@ class InfrastructureApis with ChangeNotifier {
           'Description': data['Description'],
         }),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -658,6 +683,8 @@ class InfrastructureApis with ChangeNotifier {
         'Response_Body': responseData,
       };
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -680,14 +707,17 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -709,10 +739,13 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -732,11 +765,12 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       // List categoryList = [];
       // List categoryListData = [];
 
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         List temp = [];
@@ -756,6 +790,8 @@ class InfrastructureApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -763,7 +799,6 @@ class InfrastructureApis with ChangeNotifier {
   Future<int> loadWarehouseCategoryAndSubCategory(
     var token,
   ) async {
-    log(token);
     //log(data.toString());
     final url =
         Uri.parse('${baseUrl}plant-management/warehouse-subcategory-alllist/');
@@ -775,11 +810,9 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      // List categoryList = [];
-      // List categoryListData = [];
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -798,6 +831,8 @@ class InfrastructureApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -823,13 +858,15 @@ class InfrastructureApis with ChangeNotifier {
           'Description': data['Description'],
         }),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -838,7 +875,6 @@ class InfrastructureApis with ChangeNotifier {
     var id,
     var token,
   ) async {
-    log(id.toString());
     //log(data.toString());
     final url =
         Uri.parse('${baseUrl}plant-management/warehouse-subcategory-list/$id/');
@@ -850,14 +886,15 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
 
       _warehouseSubCategory = responseData;
-      log(_warehouseSubCategory.toString());
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -877,10 +914,12 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -903,16 +942,18 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
 
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -924,7 +965,7 @@ class InfrastructureApis with ChangeNotifier {
     // log(id.toString());
     //log(data.toString());
     final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/infrastructure/load_warehouse_sub_categories/$id');
+        '${baseUrl}api/v1/infrastructure/load_warehouse_sub_categories/$id');
     try {
       final response = await http.get(
         url,
@@ -933,14 +974,15 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
 
       _warehouseSubCategory = responseData;
-      log(_warehouseSubCategory.toString());
       // notifyListeners();
       return responseData;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -968,7 +1010,7 @@ class InfrastructureApis with ChangeNotifier {
           'WareHouse_Code': data['WareHouse_Code'],
         }),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
@@ -985,13 +1027,15 @@ class InfrastructureApis with ChangeNotifier {
         var responseData = json.decode(response.body) as Map<String, dynamic>;
         _wareHouseException.clear();
         responseData.forEach((key, value) {
-          _wareHouseException.add(value);
+          _wareHouseException.add({'Key': key, 'Value': value});
         });
 
         notifyListeners();
       }
       return {'Status_Code': response.statusCode, 'WareHouse_Code': ''};
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1010,9 +1054,9 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
-      print(response.statusCode);
-      print('individual warehouse ${response.body}');
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -1022,6 +1066,8 @@ class InfrastructureApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1050,13 +1096,13 @@ class InfrastructureApis with ChangeNotifier {
           'Description': data['Description'],
         }),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         var responseData = json.decode(response.body) as Map<String, dynamic>;
         _wareHouseException.clear();
 
         responseData.forEach((key, value) {
-          _wareHouseException.add(value);
+          _wareHouseException.add({'Key': key, 'Value': value});
         });
 
         notifyListeners();
@@ -1067,6 +1113,8 @@ class InfrastructureApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1087,9 +1135,11 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1098,7 +1148,6 @@ class InfrastructureApis with ChangeNotifier {
     var plantId,
     var token,
   ) async {
-    log(plantId.toString());
     //log(data.toString());
     final url =
         Uri.parse('${baseUrl}plant-management/warehouse-list/$plantId/');
@@ -1110,8 +1159,9 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       var responseData = json.decode(response.body);
 
       List temp = [];
@@ -1149,6 +1199,8 @@ class InfrastructureApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1157,7 +1209,6 @@ class InfrastructureApis with ChangeNotifier {
     var wareHouseId,
     var token,
   ) async {
-    log(wareHouseId.toString());
     //log(data.toString());
     final url = Uri.parse('${baseUrl}batch-plan/get-batch-code/$wareHouseId/');
     try {
@@ -1168,8 +1219,9 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
@@ -1181,6 +1233,8 @@ class InfrastructureApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1200,7 +1254,9 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
       var responseData = json.decode(response.body);
 
       _warehouseDetails = responseData;
@@ -1208,6 +1264,8 @@ class InfrastructureApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1228,11 +1286,13 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1259,12 +1319,14 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(temp),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1285,9 +1347,11 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1308,9 +1372,11 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(ids),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1330,9 +1396,10 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       // print('section details ${response.statusCode}');
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       var responseData = json.decode(response.body);
 
@@ -1413,6 +1480,8 @@ class InfrastructureApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1423,7 +1492,7 @@ class InfrastructureApis with ChangeNotifier {
     //log(id.toString());
     //log(data.toString());
     final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/infrastructure/warehouse_section_line_details/');
+        '${baseUrl}api/v1/infrastructure/warehouse_section_line_details/');
     try {
       final response = await http.get(
         url,
@@ -1432,7 +1501,7 @@ class InfrastructureApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
 
       _warehouseSectionLine = responseData;
@@ -1440,6 +1509,8 @@ class InfrastructureApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1459,9 +1530,11 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(data['WareHouse_Section_Line_Details']),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1473,7 +1546,7 @@ class InfrastructureApis with ChangeNotifier {
   ) async {
     // log(token);
     final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/api/v1/infrastructure/warehouse_section_line_details-edit/$id/');
+        '${baseUrl}api/v1/infrastructure/warehouse_section_line_details-edit/$id/');
     try {
       final response = await http.put(
         url,
@@ -1494,9 +1567,11 @@ class InfrastructureApis with ChangeNotifier {
               data['WareHouse_Section_Line_Box_Height'],
         }),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -1517,9 +1592,12 @@ class InfrastructureApis with ChangeNotifier {
         },
         body: json.encode(id),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
+
       rethrow;
     }
   }

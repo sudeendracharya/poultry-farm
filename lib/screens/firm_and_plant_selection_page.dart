@@ -75,7 +75,6 @@ class _FirmPlantSelectionPageState extends State<FirmPlantSelectionPage> {
         Provider.of<Apicalls>(context, listen: false).getUser().then((value) {
           if (value['StatusCode'] == 200) {
             fcmDeviceModel['name'] = value['Id'];
-            print(fcmDeviceModel);
             Provider.of<Apicalls>(context, listen: false)
                 .sendFCMDeviceModel(fcmDeviceModel, token);
           } else {
@@ -117,7 +116,6 @@ class _FirmPlantSelectionPageState extends State<FirmPlantSelectionPage> {
   }
 
   Future<String?> _getId() async {
-    print('Getting Id');
     var deviceInfo = DeviceInfoPlugin();
     if (Platform.supportsSimd) {
       // import 'dart:io'

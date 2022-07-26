@@ -41,7 +41,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
       var token = Provider.of<Apicalls>(context, listen: false).token;
       Provider.of<InfrastructureApis>(context, listen: false)
           .getFirmDetails(token)
-          .then((value1) {});
+          .then((value1) {
+        selectedFirmId.clear();
+      });
     });
     // getFirmData().then((value) {
     //   Provider.of<Apicalls>(context, listen: false)
@@ -93,7 +95,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
       var token = Provider.of<Apicalls>(context, listen: false).token;
       Provider.of<InfrastructureApis>(context, listen: false)
           .getFirmDetails(token)
-          .then((value1) {});
+          .then((value1) {
+        selectedFirmId.clear();
+      });
     });
   }
 
@@ -173,7 +177,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         reFresh: (value) {},
                         text: query,
                         onChanged: searchBook,
-                        hintText: 'Search'),
+                        hintText: 'Firm Name'),
                   ),
                 ),
               ),
@@ -240,7 +244,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     scaleEnabled: false,
                     child: DataTable(
                         onSelectAll: (value) {
-                          print(value);
                           if (value == true) {
                             for (var data in list) {
                               if (data['Is_Selected'] == false) {
@@ -248,7 +251,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                 selectedFirmId.add(data['Firm_Id']);
                               }
                             }
-                            print(selectedFirmId);
+
                             setState(() {});
                           } else {
                             for (var data in list) {
@@ -293,11 +296,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                         data['Is_Selected'] = value!;
                                         if (value == true) {
                                           selectedFirmId.add(data['Firm_Id']);
-                                          print(selectedFirmId);
                                         } else {
                                           selectedFirmId
                                               .remove(data['Firm_Id']);
-                                          print(selectedFirmId);
                                         }
                                       });
                                     },

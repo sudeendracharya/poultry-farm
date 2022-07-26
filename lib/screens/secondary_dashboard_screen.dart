@@ -182,7 +182,7 @@ class _SecondaryDashBoardScreenState extends State<SecondaryDashBoardScreen> {
     return Scaffold(
       drawer: MainDrawer(controller: controller),
       appBar: AppBar(
-        title: const Text('DashBoard Screen'),
+        title: const Text('Firm DashBoard Screen'),
         backgroundColor: Theme.of(context).backgroundColor,
         actions: [
           IconButton(

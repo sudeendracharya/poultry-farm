@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 
 import 'package:flutter/cupertino.dart';
 
+import '../../main.dart';
+
 class CustomerSalesApis with ChangeNotifier {
   List _salesInfo = [];
   List _customerInfo = [];
@@ -19,9 +21,8 @@ class CustomerSalesApis with ChangeNotifier {
   Future<void> getSalesInfo(
     var token,
   ) async {
-    log(token);
     //log(data.toString());
-    final url = Uri.parse('https://poultryfarmerp.herokuapp.com/sale-record/');
+    final url = Uri.parse('${baseUrl}sale-record/');
     try {
       final response = await http.get(
         url,
@@ -36,7 +37,6 @@ class CustomerSalesApis with ChangeNotifier {
       //   _firmDetails.add(data['Firm_Name']);
       // }
       _salesInfo = responseData;
-      log(responseData.toString());
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -46,10 +46,8 @@ class CustomerSalesApis with ChangeNotifier {
   Future<int> getCustomerInfo(
     var token,
   ) async {
-    log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/sale-record/customer-info/');
+    final url = Uri.parse('${baseUrl}sale-record/customer-info/');
     try {
       final response = await http.get(
         url,
@@ -64,7 +62,6 @@ class CustomerSalesApis with ChangeNotifier {
       //   _firmDetails.add(data['Firm_Name']);
       // }
       _customerInfo = responseData;
-      log(responseData.toString());
       notifyListeners();
       return response.statusCode;
     } catch (e) {
@@ -76,10 +73,7 @@ class CustomerSalesApis with ChangeNotifier {
     var data,
     var token,
   ) async {
-    log(token);
-    log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/sale-record/customer-info/');
+    final url = Uri.parse('${baseUrl}sale-record/customer-info/');
     try {
       final response = await http.post(
         url,

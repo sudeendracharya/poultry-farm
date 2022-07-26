@@ -90,9 +90,12 @@ class _MortalitypageState extends State<Mortalitypage> {
               .deleteMortality(finalSelectedMortalityIds, token)
               .then((value) {
             if (value == 204) {
+              selectedMortality.clear();
               update(100);
               successSnackbar('Successfully deleted the data');
             } else {
+              selectedMortality.clear();
+              update(100);
               failureSnackbar('Unable to delete the data please try again');
             }
           });
@@ -152,7 +155,7 @@ class _MortalitypageState extends State<Mortalitypage> {
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'Record Code'),
                       ),
                     ),
                     Container(

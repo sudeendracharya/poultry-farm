@@ -31,7 +31,10 @@ class _BreedVersionState extends State<BreedVersion> {
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<BreedInfoApis>(context, listen: false)
-            .getBreedversionInfo(token);
+            .getBreedversionInfo(token)
+            .then((value) {
+          selectedBreedVersion.clear();
+        });
       }
     });
   }
@@ -91,9 +94,12 @@ class _BreedVersionState extends State<BreedVersion> {
               .deleteVersionDetails(temp, token)
               .then((value) {
             if (value == 204) {
+              selectedBreedVersion.clear();
               update(100);
               successSnackbar('Successfully deleted the data');
             } else {
+              selectedBreedVersion.clear();
+              update(100);
               failureSnackbar('Unable to delete the data something went wrong');
             }
           });
@@ -104,9 +110,9 @@ class _BreedVersionState extends State<BreedVersion> {
 
   void searchBook(String query) {
     final searchOutput = breedDetails.where((details) {
-      final breedName = details['Breed_Version'];
+      final breedName = details['Breed_Version'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
       return breedName.contains(searchName);
     }).toList();
@@ -153,7 +159,7 @@ class _BreedVersionState extends State<BreedVersion> {
                           reFresh: (value) {},
                           text: query,
                           onChanged: searchBook,
-                          hintText: 'Search',
+                          hintText: 'Breed Version',
                         ),
                       ),
                     ),

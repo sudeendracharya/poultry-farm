@@ -33,7 +33,10 @@ class _InventoryAdjustmentJournalState
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<JournalApi>(context, listen: false)
-            .getInventoryAdjustmentJournalInfo(token);
+            .getInventoryAdjustmentJournalInfo(token)
+            .then((value) {
+          selectedInventoryAdjustmentData.clear();
+        });
       }
     });
   }
@@ -93,9 +96,11 @@ class _InventoryAdjustmentJournalState
             if (value == 204) {
               successSnackbar('Successfully deleted the data');
               update(100);
+              selectedInventoryAdjustmentData.clear();
             } else {
               failureSnackbar('Something went wrong unable to delete the data');
               update(100);
+              selectedInventoryAdjustmentData.clear();
             }
           });
         }
@@ -107,9 +112,10 @@ class _InventoryAdjustmentJournalState
 
   void searchBook(String query) {
     final searchOutput = inventoryAdjustmentList.where((details) {
-      final activityCode = details['Activity_Code'];
+      final activityCode =
+          details['Inventory_Adjustment_Code'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
       return activityCode.contains(searchName);
     }).toList();
@@ -160,7 +166,7 @@ class _InventoryAdjustmentJournalState
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'Adjustment Code'),
                       ),
                     ),
                     Container(

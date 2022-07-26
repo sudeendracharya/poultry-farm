@@ -30,10 +30,13 @@ class _CustomersPageState extends State<CustomersPage> {
   List list = [];
 
   void update(int data) {
-    selectedCustomersInfo.clear();
     fetchCredientials().then((token) {
       if (token != '') {
-        Provider.of<JournalApi>(context, listen: false).getCustomersInfo(token);
+        Provider.of<JournalApi>(context, listen: false)
+            .getCustomersInfo(token, 'Individual')
+            .then((value) {
+          selectedCustomersInfo.clear();
+        });
       }
     });
   }
@@ -63,7 +66,10 @@ class _CustomersPageState extends State<CustomersPage> {
       fetchCredientials().then((token) {
         if (token != '') {
           Provider.of<JournalApi>(context, listen: false)
-              .getCustomersInfo(token);
+              .getCustomersInfo(token, 'Individual')
+              .then((value) {
+            selectedCustomersInfo.clear();
+          });
         }
       });
       setState(() {
@@ -81,20 +87,19 @@ class _CustomersPageState extends State<CustomersPage> {
     if (selectedCustomersInfo.isEmpty) {
       alertSnackBar('Select the checkbox first');
     } else {
-      List temp = [];
-      for (var data in selectedCustomersInfo) {
-        temp.add(data['Customer_Id']);
-      }
-      print(temp);
       fetchCredientials().then((token) {
         if (token != '') {
           Provider.of<JournalApi>(context, listen: false)
-              .deleteCustomerInfo(temp, token)
+              .deleteCustomerInfo(
+                  selectedCustomersInfo[0]['Customer_Id'], token)
               .then((value) {
             if (value == 204) {
+              selectedCustomersInfo.clear();
               update(100);
               successSnackbar('Successfully deleted the data');
             } else {
+              selectedCustomersInfo.clear();
+              update(100);
               failureSnackbar(
                   'Unable to delete the data something went wrong ');
             }
@@ -129,9 +134,10 @@ class _CustomersPageState extends State<CustomersPage> {
 
   void searchBook(String query) {
     final searchOutput = customersInfo.where((details) {
-      final customerName = details['Customer_Name'];
+      final customerName =
+          details['Individual_Customer_Name'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
       return customerName.contains(searchName);
     }).toList();
@@ -179,7 +185,7 @@ class _CustomersPageState extends State<CustomersPage> {
                   reFresh: (value) {},
                   text: query,
                   onChanged: searchBook,
-                  hintText: 'Search'),
+                  hintText: 'Customer Name'),
             ),
           ),
           Container(
@@ -227,10 +233,12 @@ class _CustomersPageState extends State<CustomersPage> {
                 ),
                 // extratedSalesPermissions['Delete'] == true
                 //     ?
-                IconButton(
-                  onPressed: delete,
-                  icon: const Icon(Icons.delete),
-                )
+                selectedCustomersInfo.length == 1
+                    ? IconButton(
+                        onPressed: delete,
+                        icon: const Icon(Icons.delete),
+                      )
+                    : const SizedBox(),
                 // : const SizedBox(),
               ],
             ),
@@ -338,12 +346,14 @@ class MySearchData extends DataTableSource {
                 if (pref.containsKey('Customer_Id')) {
                   pref.remove('Customer_Id');
                 }
-                var userData =
-                    json.encode({'Customer_Id': data[index]['Customer_Id']});
+                var userData = json.encode({
+                  'Customer_Id': data[index]['Individual_Customer_Id'],
+                  'Customer': data[index]['Customer_Id']
+                });
 
                 pref.setString('Customer_Id', userData);
                 Get.toNamed(CustomerDetailsPage.routeName,
-                    arguments: data[index]['Customer_Id']);
+                    arguments: data[index]['Individual_Customer_Id']);
               },
               child: Text(data[index]['Customer_Name']))),
           DataCell(Text(data[index]['Customer_Permanent_Account_Number'])),

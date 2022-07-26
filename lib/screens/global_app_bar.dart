@@ -1,23 +1,45 @@
 import 'package:aligned_dialog/aligned_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:poultry_login_signup/main.dart';
 import 'package:poultry_login_signup/screens/notifications_page.dart';
 
 import '../search_widget.dart';
 
-class GlobalAppBar extends StatelessWidget implements PreferredSizeWidget {
+class GlobalAppBar extends StatefulWidget implements PreferredSizeWidget {
   const GlobalAppBar({
     Key? key,
-    required this.query,
+    required this.firmName,
     required this.appbar,
   }) : super(key: key);
 
-  final String query;
+  final String firmName;
   final AppBar appbar;
+
+  @override
+  State<GlobalAppBar> createState() => _GlobalAppBarState();
+  @override
+  Size get preferredSize => Size.fromHeight(appbar.preferredSize.height);
+}
+
+class _GlobalAppBarState extends State<GlobalAppBar> {
+  String firmName = '';
+  @override
+  void initState() {
+    getFirm();
+    super.initState();
+  }
+
+  getFirm() async {
+    firmName = await getFirmName();
+    if (firmName != '') {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: const Text('Geetha Farms'),
+      title: Text(firmName),
       backgroundColor: Theme.of(context).backgroundColor,
       actions: [
         // Container(
@@ -41,7 +63,4 @@ class GlobalAppBar extends StatelessWidget implements PreferredSizeWidget {
       ],
     );
   }
-
-  @override
-  Size get preferredSize => Size.fromHeight(appbar.preferredSize.height);
 }

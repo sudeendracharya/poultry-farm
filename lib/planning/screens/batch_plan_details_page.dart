@@ -83,7 +83,7 @@ class _BatchPlanDetailsPageState extends State<BatchPlanDetailsPage> {
     if (prefs.containsKey('Batch_Plan_Id')) {
       var extratedData = json.decode(prefs.getString('Batch_Plan_Id')!)
           as Map<String, dynamic>;
-      print(extratedData);
+
       _batchPlanId = extratedData['Batch_Plan_Id'].toString();
     }
   }
@@ -162,7 +162,7 @@ class _BatchPlanDetailsPageState extends State<BatchPlanDetailsPage> {
 
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 43, vertical: 18),
         child: SingleChildScrollView(

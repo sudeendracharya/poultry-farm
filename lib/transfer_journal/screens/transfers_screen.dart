@@ -38,11 +38,11 @@ class _TransfersJournelScreenState extends State<TransfersJournelScreen>
   static List<Tab> myTabs = <Tab>[
     Tab(
       child: Container(
-        width: 166,
+        width: 150,
         height: 44,
         alignment: Alignment.center,
         child: Text(
-          'Transfer In',
+          'Transfer Out',
           style: GoogleFonts.roboto(
             textStyle: const TextStyle(
               fontWeight: FontWeight.w500,
@@ -56,11 +56,11 @@ class _TransfersJournelScreenState extends State<TransfersJournelScreen>
     ),
     Tab(
       child: Container(
-        width: 150,
+        width: 166,
         height: 44,
         alignment: Alignment.center,
         child: Text(
-          'Transfer Out',
+          'Transfer In',
           style: GoogleFonts.roboto(
             textStyle: const TextStyle(
               fontWeight: FontWeight.w500,
@@ -84,7 +84,7 @@ class _TransfersJournelScreenState extends State<TransfersJournelScreen>
         controller: controller,
         expansionHeaderTheme: expansionHeaderTheme,
       ),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: Container(
         width: width,
         child: Column(
@@ -152,8 +152,8 @@ class _TransfersJournelScreenState extends State<TransfersJournelScreen>
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.7,
                 child: TabBarView(controller: _tabController, children: [
-                  SingleChildScrollView(child: TransferInScreen()),
                   SingleChildScrollView(child: TransferOutScreen()),
+                  SingleChildScrollView(child: TransferInScreen()),
                 ]),
               ),
             ),

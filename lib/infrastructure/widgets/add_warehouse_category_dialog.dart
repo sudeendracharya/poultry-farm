@@ -83,6 +83,7 @@ class _AddWareHouseCategoryDialogState
 
   @override
   void initState() {
+    clearInfrastructureException(context);
     super.initState();
     categoryNameController.text = widget.categoryName;
     categoryDescriptionController.text = widget.categoryDescription;
@@ -128,7 +129,6 @@ class _AddWareHouseCategoryDialogState
         Provider.of<Apicalls>(context, listen: false)
             .tryAutoLogin()
             .then((value) {
-          print(wareHouseCategory);
           var token = Provider.of<Apicalls>(context, listen: false).token;
           Provider.of<InfrastructureApis>(context, listen: false)
               .editWareHouseCategory(
@@ -154,10 +154,15 @@ class _AddWareHouseCategoryDialogState
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    return Dialog(
-      child: Container(
-        width: 550,
-        height: 350,
+    return Container(
+      width: 550,
+      height: 350,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+        border: Border.all(color: Colors.black26),
+      ),
+      child: Drawer(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Form(
@@ -271,7 +276,7 @@ class _AddWareHouseCategoryDialogState
                                   height: 10,
                                 ),
                                 Text(value.infrastructureExceptionData[index]
-                                        ['Value'] ??
+                                        ['Value'][0] ??
                                     '')
                               ],
                             ),

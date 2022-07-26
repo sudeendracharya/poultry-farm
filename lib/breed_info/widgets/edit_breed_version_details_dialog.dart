@@ -81,6 +81,7 @@ class _EditBreedVersionDetailsDialogState
 
   @override
   void initState() {
+    clearBreedException(context);
     breedInfoData['Breed_Id'] = widget.breedId;
     breedVersionController.text = widget.breedVersion;
     if (widget.referenceData.length == 1) {

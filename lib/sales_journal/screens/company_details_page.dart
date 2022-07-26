@@ -38,6 +38,8 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
   int defaultRowsPerPage = 5;
   List journalDetails = [];
 
+  var company;
+
   Future<String> fetchCredientials() async {
     bool data =
         await Provider.of<Apicalls>(context, listen: false).tryAutoLogin();
@@ -60,7 +62,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
           Provider.of<JournalApi>(context, listen: false)
               .getIndividualCompanyInfo(companyId, token);
           Provider.of<JournalApi>(context, listen: false)
-              .getCompanySalesJournalInfo(companyId, token);
+              .getCompanySalesJournalInfo(company, token);
         }
       });
     });
@@ -74,7 +76,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<JournalApi>(context, listen: false)
-            .getCustomerSalesJournalInfo(companyId, token);
+            .getCustomerSalesJournalInfo(company, token);
       }
     });
   }
@@ -89,6 +91,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
       var extratedData = json.decode(pref.getString('Company_Id')!);
 
       companyId = extratedData['Company_Id'];
+      company = extratedData['Customer'];
     }
   }
 
@@ -166,7 +169,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
     journalDetails = Provider.of<JournalApi>(context).companySalesListData;
 
     return Scaffold(
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: Padding(
         padding: const EdgeInsets.only(top: 18.0, left: 43),
         child: SingleChildScrollView(
@@ -246,7 +249,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                 ),
                                 getDataContainer(
                                   individualCompanyInfo[
-                                      'Company_Permanent_Account_Number'],
+                                      'Customer__Permanent_Account_Number'],
                                 ),
                               ],
                             ),
@@ -260,7 +263,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCompanyInfo['Country'],
+                                  individualCompanyInfo['Customer__Country'],
                                 ),
                               ],
                             ),
@@ -274,7 +277,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCompanyInfo['State'],
+                                  individualCompanyInfo['Customer__State'],
                                 ),
                               ],
                             ),
@@ -288,7 +291,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCompanyInfo['City'],
+                                  individualCompanyInfo['Customer__City'],
                                 ),
                               ],
                             ),
@@ -302,7 +305,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCompanyInfo['Street'],
+                                  individualCompanyInfo['Customer__Street'],
                                 ),
                               ],
                             ),
@@ -316,7 +319,8 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCompanyInfo['Pincode'].toString(),
+                                  individualCompanyInfo['Customer__Pincode']
+                                      .toString(),
                                 ),
                               ],
                             ),
@@ -330,7 +334,8 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                   width: 49,
                                 ),
                                 getDataContainer(
-                                  individualCompanyInfo['Contact_Number']
+                                  individualCompanyInfo[
+                                          'Customer__Contact_Number']
                                       .toString(),
                                 ),
                               ],
@@ -396,7 +401,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                           //   ),
                           // ),
                           Container(
-                            width: MediaQuery.of(context).size.width * 0.6,
+                            width: MediaQuery.of(context).size.width * 0.4,
                             padding: const EdgeInsets.only(top: 10),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -410,7 +415,9 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                         builder: (ctx) => AddSalesJournal(
                                               name: individualCompanyInfo[
                                                   'Company_Name'],
-                                              id: companyId.toString(),
+                                              id: individualCompanyInfo[
+                                                      'Customer']
+                                                  .toString(),
                                               customerType: 'Company',
                                               editData: {},
                                               reFresh: update,
@@ -436,7 +443,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                           Padding(
                             padding: const EdgeInsets.only(top: 5.0),
                             child: Container(
-                              width: size.width * 0.6,
+                              width: size.width * 0.4,
                               child: PaginatedDataTable(
                                 source: MySearchData(
                                     query == '' ? journalDetails : list,
@@ -449,23 +456,7 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage> {
                                           style: ProjectStyles
                                               .paginatedHeaderStyle())),
                                   DataColumn(
-                                      label: Text('Company Name',
-                                          style: ProjectStyles
-                                              .paginatedHeaderStyle())),
-                                  DataColumn(
                                       label: Text('Date',
-                                          style: ProjectStyles
-                                              .paginatedHeaderStyle())),
-                                  DataColumn(
-                                      label: Text('Warehouse Name',
-                                          style: ProjectStyles
-                                              .paginatedHeaderStyle())),
-                                  DataColumn(
-                                      label: Text('Sold/Sale Item',
-                                          style: ProjectStyles
-                                              .paginatedHeaderStyle())),
-                                  DataColumn(
-                                      label: Text('Quantity',
                                           style: ProjectStyles
                                               .paginatedHeaderStyle())),
                                 ],
@@ -549,19 +540,15 @@ class MySearchData extends DataTableSource {
                 );
                 prefs.setString('Sale_Id', userData);
 
-                Get.toNamed(CompanySalesDetailsPage.routeName);
+                Get.toNamed(SalesDetailsPage.routeName);
               },
               child: Text(data[index]['Sale_Code']))),
-          DataCell(Text(data[index]['Customer_Name'])),
           DataCell(
             Text(
               DateFormat('dd-MM-yyyy')
-                  .format(DateTime.parse(data[index]['Shipped_Date'])),
+                  .format(DateTime.parse(data[index]['Despatch_Date'])),
             ),
           ),
-          DataCell(Text(data[index]['WareHouse_Code'].toString())),
-          DataCell(Text(data[index]['Item'].toString())),
-          DataCell(Text(data[index]['Quantity'].toString())),
         ]);
   }
 

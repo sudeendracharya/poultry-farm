@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:aligned_dialog/aligned_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:poultry_login_signup/planning/providers/activity_plan_apis.dart';
 import 'package:poultry_login_signup/planning/screens/medication_plan_details_page.dart';
 import 'package:poultry_login_signup/planning/widgets/add_medication_dialog.dart';
@@ -71,7 +70,10 @@ class _MedicationPlanningPageState extends State<MedicationPlanningPage> {
   void update(int data) {
     fetchCredientials().then((token) {
       Provider.of<ActivityApis>(context, listen: false)
-          .getMedicationPlanData(token);
+          .getMedicationPlanData(token)
+          .then((value) {
+        selectedMedicationCodes.clear();
+      });
     });
   }
 
@@ -87,9 +89,11 @@ class _MedicationPlanningPageState extends State<MedicationPlanningPage> {
             if (value == 204) {
               successSnackbar('Successfully deleted the data');
               update(100);
+              selectedMedicationCodes.clear();
             } else {
               failureSnackbar('Something went wrong unable to delete the data');
               update(100);
+              selectedMedicationCodes.clear();
             }
           });
         }
@@ -101,9 +105,10 @@ class _MedicationPlanningPageState extends State<MedicationPlanningPage> {
 
   void searchBook(String query) {
     final searchOutput = medicationPlanDetails.where((details) {
-      final vaccinationCode = details['Medication_Code'];
+      final vaccinationCode =
+          details['Medication_Code'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
       return vaccinationCode.contains(searchName);
     }).toList();
@@ -151,7 +156,7 @@ class _MedicationPlanningPageState extends State<MedicationPlanningPage> {
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'Medication Code'),
                       ),
                     ),
                     Container(

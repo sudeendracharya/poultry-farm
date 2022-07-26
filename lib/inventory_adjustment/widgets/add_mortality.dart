@@ -63,6 +63,8 @@ class _AddMortalityState extends State<AddMortality>
 
   String itemSubCategoryNameValidationMessage = '';
 
+  var plantId;
+
   EdgeInsetsGeometry getPadding() {
     return const EdgeInsets.only(left: 8.0);
   }
@@ -277,6 +279,8 @@ class _AddMortalityState extends State<AddMortality>
   @override
   void initState() {
     super.initState();
+    clearInventoryAdjustmentException(context);
+
     controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 450));
     //scaleAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
@@ -307,10 +311,11 @@ class _AddMortalityState extends State<AddMortality>
         .tryAutoLogin()
         .then((value) async {
       var token = Provider.of<Apicalls>(context, listen: false).token;
-      var plantId = await fetchPlant();
-      Provider.of<InfrastructureApis>(context, listen: false)
-          .getWarehouseDetails(plantId, token)
-          .then((value1) {});
+      var firmId = await getFirmData();
+      if (firmId != '') {
+        fechplantList(firmId, context);
+      }
+
       Provider.of<InventoryApi>(context, listen: false).getBatch(token);
       Provider.of<ItemApis>(context, listen: false)
           .getItemCategory(token)
@@ -390,7 +395,9 @@ class _AddMortalityState extends State<AddMortality>
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     double formWidth = size.width * 0.25;
-
+    plantDetails = Provider.of<InfrastructureApis>(
+      context,
+    ).plantDetails;
     wareHouseDetails = Provider.of<InfrastructureApis>(
       context,
     ).warehouseDetails;
@@ -519,7 +526,7 @@ class _AddMortalityState extends State<AddMortality>
                                     value: e['Batch_Plan_Code'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
-                                      mortalityDetails['Batch_Id'] =
+                                      mortalityDetails['Batch_Plan_Id'] =
                                           e['Batch_Plan_Id'];
                                       //print(warehouseCategory);
                                     },
@@ -607,6 +614,54 @@ class _AddMortalityState extends State<AddMortality>
                         Container(
                           width: formWidth,
                           padding: const EdgeInsets.only(bottom: 12),
+                          child: const Text('Plant'),
+                        ),
+                        Container(
+                          width: formWidth,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white,
+                            border: Border.all(color: Colors.black26),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                value: plantId,
+                                items: plantDetails
+                                    .map<DropdownMenuItem<String>>((e) {
+                                  return DropdownMenuItem(
+                                    value: e['Plant_Name'],
+                                    onTap: () {
+                                      fechWareHouseList(e['Plant_Id'], context);
+                                      wareHouseId = null;
+                                    },
+                                    child: Text(e['Plant_Name']),
+                                  );
+                                }).toList(),
+                                hint: const Text('Please Choose Plant Name'),
+                                onChanged: (value) {
+                                  setState(() {
+                                    plantId = value as String;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: formWidth,
+                          padding: const EdgeInsets.only(bottom: 12),
                           child: const Text('Ware house Id'),
                         ),
                         Container(
@@ -626,7 +681,6 @@ class _AddMortalityState extends State<AddMortality>
                                 items: wareHouseDetails
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['WareHouse_Code']),
                                     value: e['WareHouse_Code'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
@@ -634,6 +688,7 @@ class _AddMortalityState extends State<AddMortality>
                                           e['WareHouse_Id'];
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['WareHouse_Code']),
                                   );
                                 }).toList(),
                                 hint: const Text('Please Choose wareHouse Id'),
@@ -719,7 +774,6 @@ class _AddMortalityState extends State<AddMortality>
                                 items: itemCategoryDetails
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['Product_Category_Name']),
                                     value: e['Product_Category_Name'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
@@ -729,6 +783,7 @@ class _AddMortalityState extends State<AddMortality>
                                           e['Product_Category_Id']);
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['Product_Category_Name']),
                                   );
                                 }).toList(),
                                 hint: const Text('Please choose item category'),
@@ -775,7 +830,6 @@ class _AddMortalityState extends State<AddMortality>
                                 items: itemSubCategoryDetails
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['Product_Sub_Category_Name']),
                                     value: e['Product_Sub_Category_Name'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
@@ -783,6 +837,7 @@ class _AddMortalityState extends State<AddMortality>
                                           e['Product_Sub_Category_Id']);
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['Product_Sub_Category_Name']),
                                   );
                                 }).toList(),
                                 hint: const Text(
@@ -831,7 +886,6 @@ class _AddMortalityState extends State<AddMortality>
                                 items: productlist
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['Product_Name']),
                                     value: e['Product_Name'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
@@ -839,6 +893,7 @@ class _AddMortalityState extends State<AddMortality>
                                           e['Product_Id'];
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['Product_Name']),
                                   );
                                 }).toList(),
                                 hint: const Text('Please choose product'),
@@ -909,7 +964,7 @@ class _AddMortalityState extends State<AddMortality>
                         ),
                         Container(
                           width: formWidth,
-                          height: 36,
+                          height: 60,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
                             color: Colors.white,
@@ -917,8 +972,9 @@ class _AddMortalityState extends State<AddMortality>
                           ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
+                                horizontal: 12, vertical: 3),
                             child: TextFormField(
+                              maxLines: 4,
                               decoration: const InputDecoration(
                                   hintText: 'Enter description',
                                   border: InputBorder.none),
@@ -941,7 +997,7 @@ class _AddMortalityState extends State<AddMortality>
                       itemBuilder: (BuildContext context, int index) {
                         return ModularWidgets.exceptionDesign(
                             MediaQuery.of(context).size,
-                            value.inventoryAdjustemntExceptions[index][0]);
+                            value.inventoryAdjustemntExceptions[index]);
                       },
                     );
                   }),

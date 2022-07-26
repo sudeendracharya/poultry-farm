@@ -40,12 +40,13 @@ class _WarehouseSubCategoryScreenDetailsState
   }
 
   void update(int data) {
-    selectedSubCategory.clear();
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<InfrastructureApis>(context, listen: false)
             .loadWarehouseCategoryAndSubCategory(token)
-            .then((value1) {});
+            .then((value1) {
+          selectedSubCategory.clear();
+        });
       }
     });
   }
@@ -86,7 +87,10 @@ class _WarehouseSubCategoryScreenDetailsState
             if (value == 204) {
               successSnackbar('Successfully deleted the data');
               update(100);
+              selectedSubCategory.clear();
             } else {
+              update(100);
+              selectedSubCategory.clear();
               failureSnackbar('Unable to delete the data Something went wrong');
             }
           });
@@ -97,11 +101,11 @@ class _WarehouseSubCategoryScreenDetailsState
 
   void searchBook(String query) {
     final searchOutput = warehouseSubCategory.where((details) {
-      final breedName = details['Breed_Name'];
-      final breedVendor = details['Vendor'].toString().toLowerCase();
+      final breedVendor =
+          details['WareHouse_Sub_Category_Name'].toString().toLowerCase();
       final searchName = query.toLowerCase();
 
-      return breedName.contains(searchName) || breedVendor.contains(searchName);
+      return breedVendor.contains(searchName);
     }).toList();
 
     setState(() {
@@ -140,7 +144,7 @@ class _WarehouseSubCategoryScreenDetailsState
             height: 34,
           ),
           Text(
-            'WareHouse Category',
+            'WareHouse Sub Category',
             style: ProjectStyles.contentHeaderStyle(),
           ),
           Padding(
@@ -152,7 +156,7 @@ class _WarehouseSubCategoryScreenDetailsState
                   reFresh: (value) {},
                   text: query,
                   onChanged: searchBook,
-                  hintText: 'Search'),
+                  hintText: 'Sub Category Name'),
             ),
           ),
           Container(

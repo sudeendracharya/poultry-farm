@@ -264,7 +264,7 @@ class _WareHouseDetailsScreenState extends State<WareHouseDetailsScreen> {
         return true;
       },
       child: Scaffold(
-        appBar: GlobalAppBar(query: query, appbar: AppBar()),
+        appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
         body: _loading == true
             ? const Center(child: CircularProgressIndicator())
             : InteractiveViewer(

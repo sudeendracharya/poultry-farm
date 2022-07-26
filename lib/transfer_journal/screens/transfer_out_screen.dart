@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:aligned_dialog/aligned_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:poultry_login_signup/transfer_journal/providers/transfer_journal_apis.dart';
 import 'package:poultry_login_signup/transfer_journal/widgets/add_transfer_out_screen.dart';
@@ -30,7 +31,10 @@ class _TransferOutScreenState extends State<TransferOutScreen> {
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<TransferJournalApi>(context, listen: false)
-            .getTransferOutJournal(token);
+            .getTransferOutJournal(token)
+            .then((value) {
+          selectedTransferOutCodes.clear();
+        });
       }
     });
   }
@@ -56,6 +60,7 @@ class _TransferOutScreenState extends State<TransferOutScreen> {
 
   @override
   void initState() {
+    selectedTransferOutCodes.clear();
     getPermission().then((value) {
       setState(() {
         loading = false;
@@ -84,7 +89,18 @@ class _TransferOutScreenState extends State<TransferOutScreen> {
       fetchCredientials().then((token) {
         if (token != '') {
           Provider.of<TransferJournalApi>(context, listen: false)
-              .deleteTransferOutJournal(temp, token);
+              .deleteTransferOutJournal(temp, token)
+              .then((value) {
+            if (value == 204) {
+              update(100);
+              successSnackbar('successfully deleted the data');
+              selectedTransferOutCodes.clear();
+            } else {
+              selectedTransferOutCodes.clear();
+              update(100);
+              failureSnackbar('Something went wrong unable to delete the data');
+            }
+          });
         }
       });
     }
@@ -92,12 +108,11 @@ class _TransferOutScreenState extends State<TransferOutScreen> {
 
   void searchBook(String query) {
     final searchOutput = transferOutDetails.where((details) {
-      final batchCode = details['Batch_Code'];
-      final breedName = details['Breed_Id'];
+      final batchCode = details['Transfer_Out_Code'].toString().toLowerCase();
 
       final searchName = query;
 
-      return batchCode.contains(searchName) || breedName.contains(searchName);
+      return batchCode.contains(searchName);
     }).toList();
 
     setState(() {
@@ -125,7 +140,6 @@ class _TransferOutScreenState extends State<TransferOutScreen> {
         json.decode(prefs.getString('Transfer_Out')!) as Map<String, dynamic>;
 
     extratedTransferOutPermissions = extratedUserData['Transfer_Out'];
-    print(extratedTransferOutPermissions);
   }
 
   @override
@@ -164,7 +178,7 @@ class _TransferOutScreenState extends State<TransferOutScreen> {
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'Transfer Code'),
                       ),
                     ),
                     Container(
@@ -249,7 +263,11 @@ class _TransferOutScreenState extends State<TransferOutScreen> {
                                     style:
                                         ProjectStyles.paginatedHeaderStyle())),
                             DataColumn(
-                                label: Text('Warehouse Code',
+                                label: Text('From Warehouse',
+                                    style:
+                                        ProjectStyles.paginatedHeaderStyle())),
+                            DataColumn(
+                                label: Text('To Warehouse',
                                     style:
                                         ProjectStyles.paginatedHeaderStyle())),
                             DataColumn(
@@ -320,23 +338,23 @@ class MySearchData extends DataTableSource {
               selectedTransferOutCodes.remove(data[index]);
             }
           }
-          print(selectedTransferOutCodes);
         },
         selected: data[index]['Is_Selected'],
         cells: [
-          DataCell(Text(data[index]['Transfer_Code'])),
+          DataCell(Text(data[index]['Transfer_Out_Code'])),
           DataCell(
             Text(
-              data[index]['Despatch_Date'] == null
+              data[index]['Dispatch_Date'] == null
                   ? ''
                   : DateFormat('dd-MM-yyyy')
-                      .format(DateTime.parse(data[index]['Despatch_Date'])),
+                      .format(DateTime.parse(data[index]['Dispatch_Date'])),
             ),
           ),
-          DataCell(Text(data[index]['Product'].toString())),
+          DataCell(Text(data[index]['Product_Name'].toString())),
           DataCell(Text(data[index]['Transfer_Quantity'].toString())),
-          DataCell(Text(data[index]['WareHouse_Id'].toString())),
-          DataCell(Text(data[index]['Batch_Id'].toString())),
+          DataCell(Text(data[index]['From_WareHouse_Name'].toString())),
+          DataCell(Text(data[index]['To_WareHouse_Name'].toString())),
+          DataCell(Text(data[index]['Batch_Plan_Code'].toString())),
           DataCell(Text(data[index]['Transfer_Status'].toString())),
           DataCell(Text(data[index]['Remarks'].toString())),
         ]);

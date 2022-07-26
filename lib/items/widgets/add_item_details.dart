@@ -18,6 +18,7 @@ enum selectTransfer { yes, no }
 enum selectInventoryAdjustment { yes, no }
 
 enum selectMortality { yes, no }
+
 enum selectGrading { yes, no }
 
 class _AddItemDetailsState extends State<AddItemDetails> {
@@ -75,7 +76,6 @@ class _AddItemDetailsState extends State<AddItemDetails> {
       return;
     }
     _formKey.currentState!.save();
-    print(itemDetails);
 
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;

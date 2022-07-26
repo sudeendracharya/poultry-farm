@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:aligned_dialog/aligned_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:poultry_login_signup/inventory/providers/inventory_api.dart';
@@ -28,10 +29,32 @@ class _BatchScreenPageState extends State<BatchScreenPage> {
 
   List list = [];
 
+  void statusChange(int id) {
+    EasyLoading.show();
+    Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
+      var token = Provider.of<Apicalls>(context, listen: false).token;
+      Provider.of<InventoryApi>(context, listen: false)
+          .updateBatch({'Status': 'Complete'}, id, token).then((value) {
+        EasyLoading.dismiss();
+        if (value == 202 || value == 201) {
+          update(100);
+          Get.back();
+          successSnackbar('Successfully updated batch');
+        } else {
+          failureSnackbar('Unable to update data something went wrong');
+        }
+      });
+    });
+  }
+
   void update(int data) {
     fetchCredientials().then((token) {
       if (token != '') {
-        Provider.of<InventoryApi>(context, listen: false).getBatch(token);
+        Provider.of<InventoryApi>(context, listen: false)
+            .getBatch(token)
+            .then((value) {
+          selectedBatchCodes.clear();
+        });
       }
     });
   }
@@ -86,7 +109,10 @@ class _BatchScreenPageState extends State<BatchScreenPage> {
             if (value == 204) {
               successSnackbar('Succesfully deleted the data');
               update(100);
+              selectedBatchCodes.clear();
             } else {
+              update(100);
+              selectedBatchCodes.clear();
               failureSnackbar('Something went wrong unable to delete the data');
             }
           });
@@ -97,12 +123,11 @@ class _BatchScreenPageState extends State<BatchScreenPage> {
 
   void searchBook(String query) {
     final searchOutput = batchDetails.where((details) {
-      final batchCode = details['Batch_Code'];
-      final breedName = details['Breed_Id'];
+      final batchCode = details['Batch_Plan_Code'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
-      return batchCode.contains(searchName) || breedName.contains(searchName);
+      return batchCode.contains(searchName);
     }).toList();
 
     setState(() {
@@ -146,7 +171,7 @@ class _BatchScreenPageState extends State<BatchScreenPage> {
                             reFresh: (value) {},
                             text: query,
                             onChanged: searchBook,
-                            hintText: 'Search'),
+                            hintText: 'Batch Plan Code'),
                       ),
                     ),
                     Container(
@@ -188,7 +213,8 @@ class _BatchScreenPageState extends State<BatchScreenPage> {
                         child: PaginatedDataTable(
                           source: MySearchData(
                               query == '' ? batchDetails : list,
-                              updateCheckBox),
+                              updateCheckBox,
+                              statusChange),
                           arrowHeadColor: ProjectColors.themecolor,
 
                           columns: [
@@ -196,10 +222,10 @@ class _BatchScreenPageState extends State<BatchScreenPage> {
                                 label: Text('Batch Plan Code',
                                     style:
                                         ProjectStyles.paginatedHeaderStyle())),
-                            DataColumn(
-                                label: Text('Breed Name',
-                                    style:
-                                        ProjectStyles.paginatedHeaderStyle())),
+                            // DataColumn(
+                            //     label: Text('Breed Name',
+                            //         style:
+                            //             ProjectStyles.paginatedHeaderStyle())),
                             // DataColumn(
                             //     label: Text('Section Code',
                             //         style: ProjectStyles.paginatedHeaderStyle())),
@@ -271,8 +297,8 @@ List selectedBatchCodes = [];
 class MySearchData extends DataTableSource {
   final List<dynamic> data;
   final ValueChanged<int> reFresh;
-  MySearchData(this.data, this.reFresh);
-
+  MySearchData(this.data, this.reFresh, this.statusChange);
+  final ValueChanged<int> statusChange;
   @override
   int get selectedRowCount => 0;
 
@@ -310,23 +336,34 @@ class MySearchData extends DataTableSource {
                 Get.toNamed(InventoryBatchDetailScreen.routeName);
               },
               child: Text(data[index]['Batch_Plan_Code'].toString()))),
-          DataCell(Text(data[index]['Breed_Name'].toString())),
+          // DataCell(Text(data[index]['Breed_Name'].toString())),
           DataCell(Text(data[index]['Activity_Code'].toString())),
 
-          // DataCell(
-          //   Text(
-          //     DateFormat('dd-MM-yyyy')
-          //         .format(DateTime.parse(data[index]['Hatch_Date'])),
-          //   ),
-          // ),
-
-          // DataCell(Text(data[index]['Bird_Age_Id'].toString())),
-          // DataCell(Text(data[index]['Grade'].toString())),
-          // DataCell(Text(data[index]['Breed_Id'].toString())),
-          // DataCell(Text(data[index]['Breed_Version_Id'].toString())),
           DataCell(Text(data[index]['Vaccination_Code'].toString())),
           DataCell(Text(data[index]['Medication_Code'].toString())),
-          DataCell(Text(data[index]['Status'].toString())),
+          data[index]['Status'] == 'Pending'
+              ? DataCell(TextButton(
+                  onPressed: () {
+                    Get.defaultDialog(
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 10),
+                        titleStyle: const TextStyle(color: Colors.black),
+                        title: 'Alert',
+                        middleText:
+                            'Would you like to change the status to confirm? ',
+                        confirm: TextButton(
+                            onPressed: () {
+                              statusChange(data[index]['Batch_Plan_Id']);
+                            },
+                            child: const Text('Yes')),
+                        cancel: TextButton(
+                            onPressed: () {
+                              Get.back();
+                            },
+                            child: const Text('No')));
+                  },
+                  child: Text(data[index]['Status'].toString())))
+              : DataCell(Text(data[index]['Status']))
           // DataCell(
           //   Text(
           //     DateFormat('dd-MM-yyyy')

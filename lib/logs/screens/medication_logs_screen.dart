@@ -12,6 +12,7 @@ import '../../screens/global_app_bar.dart';
 import '../../screens/main_drawer_screen.dart';
 import '../../styles.dart';
 import '../../widgets/administration_search_widget.dart';
+import '../../widgets/modular_widgets.dart';
 import '../providers/logs_api.dart';
 import 'activity_logs_screen.dart';
 
@@ -52,6 +53,10 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
   var selectedWarehouseName;
 
   var selectedBatchCode;
+
+  var selectedUnitOfMeasurement;
+
+  List unitDetails = [];
   @override
   void initState() {
     getPermission('Medication_Log').then((value) {
@@ -97,6 +102,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
         Provider.of<LogsApi>(context, listen: false).logException.clear();
         Provider.of<LogsApi>(context, listen: false)
             .getMedicationLog(query, medicationNumber, token);
+        batchPlanCode = query;
       }
     });
   }
@@ -104,11 +110,91 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
   int defaultRowsPerPage = 5;
   Map<String, dynamic> medicationLog = {};
   GlobalKey<FormState> _formKey = GlobalKey();
+  TextEditingController modeOfAdministrationController =
+      TextEditingController();
+  TextEditingController siteOfAdministrationController =
+      TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  TextEditingController vaccinatorController = TextEditingController();
+  TextEditingController dosagePerBirdController = TextEditingController();
+
+  bool modeOfAdministrationValidate = true;
+  bool siteOfAdministrationValidate = true;
+  bool descriptionValidate = true;
+  bool vaccinatorValidate = true;
+  bool dosagePerBirdValidate = true;
+  bool unitValidate = true;
+
+  String modeOfAdministrationValidateMessage = '';
+  String siteOfAdministrationValidateMessage = '';
+  String descriptionValidateMessage = '';
+  String vaccinatorValidateMessage = '';
+  String dosagePerBirdValidateMessage = '';
+  String unitValidateMessage = '';
+  bool validateMedication() {
+    if (modeOfAdministrationController.text == '') {
+      modeOfAdministrationValidate = false;
+      modeOfAdministrationValidateMessage =
+          'Mode Of Administration cannot be null';
+    } else {
+      modeOfAdministrationValidate = true;
+    }
+
+    if (siteOfAdministrationController.text == '') {
+      siteOfAdministrationValidate = false;
+      siteOfAdministrationValidateMessage =
+          'Site Of Administration cannot be null';
+    } else {
+      siteOfAdministrationValidate = true;
+    }
+
+    if (descriptionController.text == '') {
+      descriptionValidate = false;
+      descriptionValidateMessage = 'Description cannot be null';
+    } else {
+      descriptionValidate = true;
+    }
+
+    if (vaccinatorController.text == '') {
+      vaccinatorValidate = false;
+      vaccinatorValidateMessage = 'Vaccinator cannot be null';
+    } else {
+      vaccinatorValidate = true;
+    }
+
+    if (dosagePerBirdController.text.isNum != true) {
+      dosagePerBirdValidate = false;
+      dosagePerBirdValidateMessage = 'Enter a valid Dosage Per Bird';
+    } else {
+      dosagePerBirdValidate = true;
+    }
+    if (selectedUnitOfMeasurement == null) {
+      unitValidate = false;
+      unitValidateMessage = 'Select Unit';
+    } else {
+      unitValidate = true;
+    }
+
+    if (modeOfAdministrationValidate == true &&
+        siteOfAdministrationValidate == true &&
+        descriptionValidate == true &&
+        dosagePerBirdValidate == true &&
+        unitValidate == true) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   void updateCheckBox(Map<String, dynamic> data) {
     var size = MediaQueryData.fromWindow(WidgetsBinding.instance.window).size;
-    print(size.width);
-    print(size.height);
+
+    Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
+      var token = Provider.of<Apicalls>(context, listen: false).token;
+
+      Provider.of<Apicalls>(context, listen: false)
+          .getStandardUnitValues(token);
+    });
     if (data['Status'] == 'not_started') {
       Get.dialog(
         Dialog(
@@ -121,6 +207,8 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
             ),
             child: StatefulBuilder(
               builder: (BuildContext context, setState) {
+                unitDetails = Provider.of<Apicalls>(context).standardUnitList;
+
                 return Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: size.width * 0.015,
@@ -158,7 +246,8 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                           hintText:
                                               'Enter Mode of Administration',
                                           border: InputBorder.none),
-                                      // controller: saleCodeController,
+                                      controller:
+                                          modeOfAdministrationController,
                                       onSaved: (value) {
                                         medicationLog[
                                             'Mode_Of_Administration'] = value!;
@@ -169,6 +258,10 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                               ],
                             ),
                           ),
+                          modeOfAdministrationValidate == true
+                              ? const SizedBox()
+                              : ModularWidgets.validationDesign(
+                                  size, modeOfAdministrationValidateMessage),
                           Padding(
                             padding: const EdgeInsets.only(top: 24.0),
                             child: Column(
@@ -195,7 +288,8 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                           hintText:
                                               'Enter Site of Administration',
                                           border: InputBorder.none),
-                                      // controller: saleCodeController,
+                                      controller:
+                                          siteOfAdministrationController,
                                       onSaved: (value) {
                                         medicationLog[
                                             'Site_Of_Administration'] = value!;
@@ -206,6 +300,10 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                               ],
                             ),
                           ),
+                          siteOfAdministrationValidate == true
+                              ? const SizedBox()
+                              : ModularWidgets.validationDesign(
+                                  size, siteOfAdministrationValidateMessage),
                           Padding(
                             padding: const EdgeInsets.only(top: 24.0),
                             child: Column(
@@ -231,7 +329,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                       decoration: const InputDecoration(
                                           hintText: 'Enter Dosage Per Bird',
                                           border: InputBorder.none),
-                                      // controller: saleCodeController,
+                                      controller: dosagePerBirdController,
                                       onSaved: (value) {
                                         medicationLog['Dosage_Per_Bird'] =
                                             value!;
@@ -242,6 +340,10 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                               ],
                             ),
                           ),
+                          dosagePerBirdValidate == true
+                              ? const SizedBox()
+                              : ModularWidgets.validationDesign(
+                                  size, dosagePerBirdValidateMessage),
                           Padding(
                             padding: const EdgeInsets.only(top: 24.0),
                             child: Column(
@@ -262,21 +364,40 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 6),
-                                    child: TextFormField(
-                                      decoration: const InputDecoration(
-                                          hintText: 'Enter Dosage Unit',
-                                          border: InputBorder.none),
-                                      // controller: saleCodeController,
-                                      onSaved: (value) {
-                                        medicationLog['Dosage_Unit'] = value!;
-                                      },
+                                        horizontal: 5.0),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton(
+                                        value: selectedUnitOfMeasurement,
+                                        items: unitDetails
+                                            .map<DropdownMenuItem<String>>((e) {
+                                          return DropdownMenuItem(
+                                            value: e['Unit_Name'],
+                                            onTap: () {
+                                              medicationLog['Dosage_Unit'] =
+                                                  e['Unit_Id'];
+                                            },
+                                            child: Text(e['Unit_Name']),
+                                          );
+                                        }).toList(),
+                                        hint: const SizedBox(
+                                            width: 404, child: Text('Select')),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedUnitOfMeasurement =
+                                                value as String?;
+                                          });
+                                        },
+                                      ),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                          unitValidate == true
+                              ? const SizedBox()
+                              : ModularWidgets.validationDesign(
+                                  size, unitValidateMessage),
                           // Padding(
                           //   padding: const EdgeInsets.only(top: 24.0),
                           //   child: Column(
@@ -337,7 +458,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                       decoration: const InputDecoration(
                                           hintText: 'Enter Description',
                                           border: InputBorder.none),
-                                      // controller: saleCodeController,
+                                      controller: descriptionController,
                                       onSaved: (value) {
                                         medicationLog['Description'] = value!;
                                       },
@@ -347,6 +468,10 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                               ],
                             ),
                           ),
+                          descriptionValidate == true
+                              ? const SizedBox()
+                              : ModularWidgets.validationDesign(
+                                  size, descriptionValidateMessage),
                           const SizedBox(
                             height: 24,
                           ),
@@ -358,6 +483,11 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                     backgroundColor: MaterialStateProperty.all(
                                         ProjectColors.themecolor)),
                                 onPressed: () {
+                                  bool validateData = validateMedication();
+                                  if (validateData != true) {
+                                    setState(() {});
+                                    return;
+                                  }
                                   _formKey.currentState!.save();
 
                                   String dateTime =
@@ -367,7 +497,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                       data['Medication_LogId'];
                                   medicationLog['Status'] = 'Started';
                                   medicationLog['Start_Date'] = dateTime;
-                                  print(medicationLog);
+
                                   fetchCredientials().then((token) {
                                     if (token != '') {
                                       Provider.of<LogsApi>(context,
@@ -378,7 +508,10 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                         if (value == 202 || value == 204) {
                                           Get.back();
                                           searchBook(
-                                              batchPlanCode, searchQuery);
+                                              batchPlanCode,
+                                              searchQuery == ''
+                                                  ? 'None'
+                                                  : searchQuery);
                                         } else {
                                           failureSnackbar(
                                               'Something went wrong unable to update the data');
@@ -442,7 +575,8 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                     }, token).then((value) {
                       if (value == 202 || value == 204) {
                         Get.back();
-                        searchBook(batchPlanCode, searchQuery);
+                        searchBook(batchPlanCode,
+                            searchQuery == '' ? 'None' : searchQuery);
                       } else {
                         Get.back();
                         failureSnackbar(
@@ -471,7 +605,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
 
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: loading == true
           ? const SizedBox()
           : extratedPermissions['View'] == false
@@ -545,6 +679,18 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                             MaterialStateProperty.all(
                                                 ProjectColors.themecolor)),
                                     onPressed: () {
+                                      Provider.of<InfrastructureApis>(context,
+                                              listen: false)
+                                          .plantDetails
+                                          .clear();
+                                      Provider.of<InfrastructureApis>(context,
+                                              listen: false)
+                                          .warehouseDetails
+                                          .clear();
+                                      Provider.of<InfrastructureApis>(context,
+                                              listen: false)
+                                          .batchCodeDetails
+                                          .clear();
                                       filterBasedOnPlant(
                                           firmList,
                                           plantList,
@@ -559,7 +705,7 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
                                           selectedBatchCode,
                                           searchBook);
                                     },
-                                    child: const Text('Filter Based on Plant'))
+                                    child: const Text('Search By Firm'))
                                 // Padding(
                                 //   padding: const EdgeInsets.symmetric(
                                 //       horizontal: 12, vertical: 6),
@@ -849,7 +995,6 @@ class _MedicationLogsScreenState extends State<MedicationLogsScreen> {
   }
 
   void searchWareHouse(e) {
-    print('id $e');
     fetchCredientials().then((token) {
       Provider.of<InfrastructureApis>(context, listen: false)
           .getWarehouseDetailsForAll(e, token)

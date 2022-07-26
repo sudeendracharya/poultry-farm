@@ -161,7 +161,7 @@ class _CompanySalesDetailsPageState extends State<CompanySalesDetailsPage> {
         return true;
       },
       child: Scaffold(
-        appBar: GlobalAppBar(query: query, appbar: AppBar()),
+        appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
         body: Padding(
           padding: const EdgeInsets.only(top: 18.0, left: 43),
           child: SingleChildScrollView(

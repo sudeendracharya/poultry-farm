@@ -45,22 +45,22 @@ class _OperationsScreenState extends State<OperationsScreen>
   }
 
   static List<Tab> myTabs = <Tab>[
-    Tab(
-      child: Container(
-        width: 166,
-        height: 44,
-        alignment: Alignment.center,
-        child: Text(
-          'Planning',
-          style: GoogleFonts.roboto(
-              textStyle: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                  color: Colors.black)),
-        ),
-      ),
-      // text: 'Administration',
-    ),
+    // Tab(
+    //   child: Container(
+    //     width: 166,
+    //     height: 44,
+    //     alignment: Alignment.center,
+    //     child: Text(
+    //       'Planning',
+    //       style: GoogleFonts.roboto(
+    //           textStyle: const TextStyle(
+    //               fontWeight: FontWeight.w700,
+    //               fontSize: 18,
+    //               color: Colors.black)),
+    //     ),
+    //   ),
+    //   // text: 'Administration',
+    // ),
     // Tab(
     //   child: Container(
     //     width: 100,
@@ -117,7 +117,7 @@ class _OperationsScreenState extends State<OperationsScreen>
     final breadCrumpsStyle = Theme.of(context).textTheme.headline4;
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: Padding(
         padding: const EdgeInsets.only(top: 18),
         child: SingleChildScrollView(
@@ -187,7 +187,7 @@ class _OperationsScreenState extends State<OperationsScreen>
                 height: MediaQuery.of(context).size.height * 0.9,
                 child: TabBarView(controller: _tabController, children: [
                   // PlanningScreen(),
-                  SingleChildScrollView(child: BatchPlanningPage()),
+                  // SingleChildScrollView(child: BatchPlanningPage()),
                   // TransfersJournelScreen(),
                   // CustomerSalesPage(),
                   InventoryAdjustmentScreen(),

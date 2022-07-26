@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 
 import '../../admin/widgets/add_permissions_dialog.dart';
 import '../../admin/widgets/add_user_roles.dart';
+import '../../main.dart';
 
 class AddFirmDetailsDialog extends StatefulWidget {
   AddFirmDetailsDialog({
@@ -264,6 +265,8 @@ class _AddFirmDetailsDialogState extends State<AddFirmDetailsDialog> {
 
   @override
   void initState() {
+    clearFirmException(context);
+    clearPlantException(context);
     firmCodeController.text = getRandom(4, 'Firm-');
     plantCodeController.text = getRandom(4, 'Plant-');
 
@@ -911,7 +914,7 @@ class _AddFirmDetailsDialogState extends State<AddFirmDetailsDialog> {
                       ),
                       Container(
                         width: 440,
-                        height: 36,
+                        height: 55,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           color: Colors.white,
@@ -925,6 +928,7 @@ class _AddFirmDetailsDialogState extends State<AddFirmDetailsDialog> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           child: TextFormField(
+                            maxLength: 10,
                             keyboardType: TextInputType.number,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly
@@ -964,7 +968,7 @@ class _AddFirmDetailsDialogState extends State<AddFirmDetailsDialog> {
                       ),
                       Container(
                         width: 440,
-                        height: 36,
+                        height: 55,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           color: Colors.white,
@@ -978,6 +982,7 @@ class _AddFirmDetailsDialogState extends State<AddFirmDetailsDialog> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           child: TextFormField(
+                            maxLength: 10,
                             keyboardType: TextInputType.number,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly
@@ -1077,7 +1082,7 @@ class _AddFirmDetailsDialogState extends State<AddFirmDetailsDialog> {
                   itemBuilder: (BuildContext context, int index) {
                     return ModularWidgets.exceptionDesign(
                         MediaQuery.of(context).size,
-                        value.firmException[index][0]);
+                        value.firmException[index]);
                   },
                 );
               }),
@@ -1466,6 +1471,7 @@ class _AddFirmDetailsDialogState extends State<AddFirmDetailsDialog> {
                         countrySearchPlaceholder: "Country",
                         stateSearchPlaceholder: "State",
                         citySearchPlaceholder: "City",
+                        flagState: CountryFlag.DISABLE,
 
                         ///labels for dropdown
                         countryDropdownLabel: "*Country",
@@ -1607,8 +1613,7 @@ class _AddFirmDetailsDialogState extends State<AddFirmDetailsDialog> {
                 itemCount: value.plantException.length,
                 itemBuilder: (BuildContext context, int index) {
                   return ModularWidgets.exceptionDesign(
-                      MediaQuery.of(context).size,
-                      value.plantException[index][0]);
+                      MediaQuery.of(context).size, value.plantException[index]);
                 },
               );
             }),

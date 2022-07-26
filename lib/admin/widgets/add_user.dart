@@ -247,7 +247,9 @@ class _AddUserState extends State<AddUser> with SingleTickerProviderStateMixin {
         roleIdValidation == true &&
         userNameValidation == true &&
         shippingDateValidation == true &&
-        emailValidation == true) {
+        emailValidation == true &&
+        ConfirmPasswordValidation == true &&
+        passwordValidation == true) {
       return true;
     } else {
       return false;
@@ -310,6 +312,7 @@ class _AddUserState extends State<AddUser> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    clearTransferException(context);
     controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 450));
     //scaleAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
@@ -357,55 +360,55 @@ class _AddUserState extends State<AddUser> with SingleTickerProviderStateMixin {
     });
   }
 
-  var isValid = true;
-
   void save() {
-    isValid = validate();
+    bool isValid = validate();
     if (!isValid) {
+      debugPrint(isValid.toString());
       setState(() {});
-      return;
-    }
-    _formKey.currentState!.save();
-    // user['had_Access'] = true;
-
-    if (widget.editData.isNotEmpty) {
-      Provider.of<Apicalls>(context, listen: false)
-          .tryAutoLogin()
-          .then((value) {
-        var token = Provider.of<Apicalls>(context, listen: false).token;
-        Provider.of<AdminApis>(context, listen: false)
-            .updateUser(
-          user,
-          token,
-          widget.editData['id'],
-        )
-            .then((value) {
-          if (value['Status_Code'] == 202 || value['Status_Code'] == 201) {
-            widget.reFresh(100);
-            Get.back();
-            successSnackbar('Successfully updated user data');
-          } else {
-            failureSnackbar('Unable to update data something went wrong');
-          }
-        });
-      });
+      // return;
     } else {
-      Provider.of<Apicalls>(context, listen: false)
-          .tryAutoLogin()
-          .then((value) {
-        var token = Provider.of<Apicalls>(context, listen: false).token;
-        Provider.of<AdminApis>(context, listen: false)
-            .addUser(user, token)
+      _formKey.currentState!.save();
+      // user['had_Access'] = true;
+
+      if (widget.editData.isNotEmpty) {
+        Provider.of<Apicalls>(context, listen: false)
+            .tryAutoLogin()
             .then((value) {
-          if (value == 200 || value == 201) {
-            widget.reFresh(100);
-            Get.back();
-            successSnackbar('Successfully added User');
-          } else {
-            failureSnackbar('Unable to add User something went wrong');
-          }
+          var token = Provider.of<Apicalls>(context, listen: false).token;
+          Provider.of<AdminApis>(context, listen: false)
+              .updateUser(
+            user,
+            token,
+            widget.editData['id'],
+          )
+              .then((value) {
+            if (value['Status_Code'] == 202 || value['Status_Code'] == 201) {
+              widget.reFresh(100);
+              Get.back();
+              successSnackbar('Successfully updated user data');
+            } else {
+              failureSnackbar('Unable to update data something went wrong');
+            }
+          });
         });
-      });
+      } else {
+        Provider.of<Apicalls>(context, listen: false)
+            .tryAutoLogin()
+            .then((value) {
+          var token = Provider.of<Apicalls>(context, listen: false).token;
+          Provider.of<AdminApis>(context, listen: false)
+              .addUser(user, token)
+              .then((value) {
+            if (value == 200 || value == 201) {
+              widget.reFresh(100);
+              Get.back();
+              successSnackbar('Successfully added User');
+            } else {
+              failureSnackbar('Unable to add User something went wrong');
+            }
+          });
+        });
+      }
     }
   }
 
@@ -600,7 +603,7 @@ class _AddUserState extends State<AddUser> with SingleTickerProviderStateMixin {
                         ),
                         Container(
                           width: formWidth,
-                          height: 36,
+                          height: 54,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
                             color: Colors.white,
@@ -610,6 +613,8 @@ class _AddUserState extends State<AddUser> with SingleTickerProviderStateMixin {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
                             child: TextFormField(
+                              maxLength: 10,
+                              enableSuggestions: false,
                               decoration: const InputDecoration(
                                   hintText: 'Enter mobile number',
                                   border: InputBorder.none),
@@ -779,13 +784,13 @@ class _AddUserState extends State<AddUser> with SingleTickerProviderStateMixin {
                                 items: roleDetails
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['Role_Name']),
                                     value: e['Role_Name'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
                                       user['Role_Id'] = e['Role_Id'];
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['Role_Name']),
                                   );
                                 }).toList(),
                                 hint: const Text('Select'),
@@ -871,7 +876,7 @@ class _AddUserState extends State<AddUser> with SingleTickerProviderStateMixin {
                       itemBuilder: (BuildContext context, int index) {
                         return ModularWidgets.exceptionDesign(
                             MediaQuery.of(context).size,
-                            value.transferException[index][0]);
+                            value.transferException[index]);
                       },
                     );
                   }),

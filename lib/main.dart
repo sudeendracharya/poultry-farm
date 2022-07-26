@@ -92,12 +92,10 @@ import 'infrastructure/screens/user_detail_page.dart';
 import 'infrastructure/screens/warehouse_category_screen.dart';
 import 'infrastructure/screens/warehouse_details_screen.dart';
 import 'infrastructure/screens/warehouse_section_line.dart';
-import 'infrastructure/screens/warehouse_section_screen.dart';
 import 'infrastructure/screens/warehouse_sub_category_screen.dart';
 import 'infrastructure/widgets/add_firm_details.dart';
 import 'infrastructure/widgets/add_warehouse_category.dart';
 import 'infrastructure/widgets/add_warehouse_details.dart';
-import 'infrastructure/widgets/add_warehouse_section.dart';
 import 'infrastructure/widgets/add_warehouse_section_line.dart';
 import 'infrastructure/widgets/add_warehouse_subcategory.dart';
 import 'inventory/screens/inventory_batch_details_page.dart';
@@ -121,12 +119,11 @@ import 'providers/dashboard_apicalls.dart';
 import 'sales_journal/providers/journal_api.dart';
 import 'sales_journal/screens/company_sales_details_page.dart';
 import 'widgets/modular_widgets.dart';
+
 // import 'widgets/batch_plan/addbatchplandetails.dart';
-
-void relogin() {
-  Get.defaultDialog();
-}
-
+// var baseUrl = 'http://127.0.0.1:8000/';
+var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
+// var baseUrl = 'https://poultryfarmtest.herokuapp.com/';
 String getRandom(int length, String name) {
   const ch = '1234567890abcdefghijklmnopqrstuvwxyz';
   Random r = Random();
@@ -226,22 +223,259 @@ Future<String> fetchPlant() async {
   }
 }
 
+void fechWareHouseList(int id, BuildContext context) {
+  Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
+    var token = Provider.of<Apicalls>(context, listen: false).token;
+    Provider.of<InfrastructureApis>(context, listen: false)
+        .getWarehouseDetailsForAll(
+          id,
+          token,
+        )
+        .then((value1) {});
+    // Provider.of<InfrastructureApis>(context, listen: false)
+    //     .getPlantDetails(token)
+    //     .then((value1) {});
+  });
+}
+
+void fechplantList(var id, BuildContext context) {
+  Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
+    var token = Provider.of<Apicalls>(context, listen: false).token;
+    Provider.of<InfrastructureApis>(context, listen: false)
+        .getPlantDetails(
+          token,
+          id,
+        )
+        .then((value1) {});
+  });
+}
+
+void clearDatas(BuildContext context) {
+  Provider.of<BatchApis>(context, listen: false).batchPlan.clear();
+  Provider.of<BatchApis>(context, listen: false).batchPlanMapping.clear();
+  Provider.of<BreedInfoApis>(context, listen: false).breedVersion.clear();
+  Provider.of<BreedInfoApis>(context, listen: false).breedInfo.clear();
+  Provider.of<EggCollectionApis>(context, listen: false).eggCollection.clear();
+  Provider.of<EggCollectionApis>(context, listen: false).mortality.clear();
+  Provider.of<InfrastructureApis>(context, listen: false)
+      .batchCodeDetails
+      .clear();
+  Provider.of<InfrastructureApis>(context, listen: false)
+      .singleFirmDetails
+      .clear();
+  Provider.of<InfrastructureApis>(context, listen: false)
+      .wareHouseSectionLists
+      .clear();
+  Provider.of<InfrastructureApis>(context, listen: false)
+      .wareHouseLists
+      .clear();
+  Provider.of<InfrastructureApis>(context, listen: false).plantLists.clear();
+  Provider.of<InfrastructureApis>(context, listen: false).firmDetails.clear();
+  Provider.of<InfrastructureApis>(context, listen: false).plantDetails.clear();
+  Provider.of<InfrastructureApis>(context, listen: false)
+      .warehouseDetails
+      .clear();
+  Provider.of<InfrastructureApis>(context, listen: false)
+      .warehouseSection
+      .clear();
+  Provider.of<InfrastructureApis>(context, listen: false)
+      .warehouseSectionLine
+      .clear();
+  Provider.of<InventoryApi>(context, listen: false).logDailyBatchList.clear();
+  Provider.of<InventoryApi>(context, listen: false).batchDetails.clear();
+  Provider.of<InventoryAdjustemntApis>(context, listen: false)
+      .mortalityListData
+      .clear();
+  Provider.of<InventoryAdjustemntApis>(context, listen: false)
+      .eggCollectionDetails
+      .clear();
+  Provider.of<InventoryAdjustemntApis>(context, listen: false)
+      .eggGradingList
+      .clear();
+  Provider.of<ItemApis>(context, listen: false).productList.clear();
+  Provider.of<ItemApis>(context, listen: false)
+      .itemSubCategoryAllDataList
+      .clear();
+  Provider.of<ItemApis>(context, listen: false).productDetails.clear();
+  Provider.of<ItemApis>(context, listen: false).itemcategory.clear();
+  Provider.of<ItemApis>(context, listen: false).itemSubCategory.clear();
+  Provider.of<ItemApis>(context, listen: false).itemDetails.clear();
+  Provider.of<ItemApis>(context, listen: false).itemMapping.clear();
+  Provider.of<ItemApis>(context, listen: false).inventoryItems.clear();
+  Provider.of<ItemApis>(context, listen: false).inventoryAdjustment.clear();
+  Provider.of<ItemApis>(context, listen: false).mortality.clear();
+  Provider.of<LogsApi>(context, listen: false).vaccinationNumbersList.clear();
+  Provider.of<LogsApi>(context, listen: false).activityNumbersList.clear();
+  Provider.of<LogsApi>(context, listen: false).batchPlanCodeList.clear();
+  Provider.of<ActivityApis>(context, listen: false).activityHeader.clear();
+  Provider.of<ActivityApis>(context, listen: false).breedReferenceList.clear();
+  Provider.of<ActivityApis>(context, listen: false).vaccinationHeader.clear();
+  Provider.of<ActivityApis>(context, listen: false).medicationHeader.clear();
+  Provider.of<ActivityApis>(context, listen: false).medicationPlan.clear();
+  Provider.of<ActivityApis>(context, listen: false).vaccinationPlan.clear();
+}
+
+Future<String> getFirmData() async {
+  final prefs = await SharedPreferences.getInstance();
+  if (!prefs.containsKey('FirmAndPlantDetails')) {
+    return '';
+  }
+  final extratedUserData = json.decode(prefs.getString('FirmAndPlantDetails')!)
+      as Map<String, dynamic>;
+  debugPrint(extratedUserData.toString());
+  if (extratedUserData['FirmId'] == null) {
+    Get.defaultDialog(
+      titlePadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      title: 'Alert',
+      middleText:
+          'unable to fetch the firm id please select firm from dashboard and then proceed',
+      confirm: TextButton(
+        onPressed: () {
+          Get.offAllNamed(SecondaryDashBoardScreen.routeName);
+        },
+        child: const Text('Ok'),
+      ),
+      cancel: TextButton(
+        onPressed: () {
+          Get.back();
+        },
+        child: const Text('Cancel'),
+      ),
+    );
+  }
+  return extratedUserData['FirmId'] == null
+      ? ''
+      : extratedUserData['FirmId'].toString();
+  // _storedPlantId = extratedUserData['PlantId'];
+}
+
+Future<String> getFirmName() async {
+  final prefs = await SharedPreferences.getInstance();
+  if (prefs.containsKey('FirmAndPlantDetails')) {
+    var extratedData = json.decode(prefs.getString('FirmAndPlantDetails')!)
+        as Map<String, dynamic>;
+
+    return extratedData['firmName'];
+
+    // print(extratedData);
+  } else {
+    return '';
+  }
+
+  // print(firmName);
+  // print(plantName);
+}
+
 Center viewPermissionDenied() {
   return const Center(
     child: Text('You don\'t have permission to view this page'),
   );
 }
 
+void exceptionDialog(String e) {
+  Get.defaultDialog(
+      titleStyle: const TextStyle(color: Colors.black),
+      title: 'Alert',
+      middleText: e,
+      confirm: TextButton(
+          onPressed: () {
+            Get.back();
+          },
+          child: Text(
+            'Ok',
+            style: TextStyle(color: ProjectColors.themecolor),
+          )));
+}
+
+void forbidden(var response) {
+  if (response.statusCode == 403) {
+    var responseData = json.decode(response.body) as Map<String, dynamic>;
+
+    Get.dialog(Dialog(
+      child: StatefulBuilder(
+        builder: (BuildContext context, setState) {
+          var size = MediaQuery.of(context).size;
+          return WillPopScope(
+            onWillPop: () async {
+              var token = Provider.of<Apicalls>(context, listen: false).token;
+              Provider.of<Apicalls>(
+                context,
+                listen: false,
+              ).logOut(token);
+              Provider.of<Apicalls>(
+                context,
+                listen: false,
+              ).logoutLocally();
+
+              Get.offAllNamed(MyHomePage.routeName);
+              return true;
+            },
+            child: Container(
+              width: size.width * 0.2,
+              height: 120,
+              decoration: BoxDecoration(
+                  color: Colors.white, borderRadius: BorderRadius.circular(10)),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Forbidden',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Text(responseData.values.toString()),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          var token =
+                              Provider.of<Apicalls>(context, listen: false)
+                                  .token;
+                          Provider.of<Apicalls>(
+                            context,
+                            listen: false,
+                          ).logOut(token);
+                          Provider.of<Apicalls>(
+                            context,
+                            listen: false,
+                          ).logoutLocally();
+
+                          Get.offAllNamed(MyHomePage.routeName);
+                        },
+                        child: Text(
+                          'Ok',
+                          style: TextStyle(
+                              fontSize: 14, color: ProjectColors.themecolor),
+                        ))
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    )).then((value) {
+      debugPrint(value.toString());
+    });
+  }
+}
+
 Future<Map<String, dynamic>> getPermission(String key) async {
   final prefs = await SharedPreferences.getInstance();
   if (!prefs.containsKey(key)) {
     var extratedinventoryAdjustmentPermissions = {
-      'Role_Name': 'Worker',
-      'Id': 'Inventory Adjustment Journal',
+      'Role_Name': key,
+      'Id': 'Users',
       'Edit': false,
       'View': false,
       'Create': false,
-      'Delete': false
+      'Delete': false,
     };
     return extratedinventoryAdjustmentPermissions;
   }
@@ -250,12 +484,13 @@ Future<Map<String, dynamic>> getPermission(String key) async {
       json.decode(prefs.getString(key)!) as Map<String, dynamic>;
 
   var extratedinventoryAdjustmentPermissions = extratedUserData[key];
-  // print(extratedinventoryAdjustmentPermissions);
+  debugPrint(extratedinventoryAdjustmentPermissions.toString());
 
   return extratedinventoryAdjustmentPermissions;
 }
 
 Future<void> main() async {
+  debugPrint = (String? message, {int? wrapWidth}) {};
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: const FirebaseOptions(
@@ -272,7 +507,7 @@ Future<void> main() async {
     // ModularApp(module: AppModule(), child: MyApp())
   );
 
-  // print('Messaging');
+  // debugPrint('Messaging');
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   NotificationSettings settings = await messaging.requestPermission(
@@ -285,13 +520,13 @@ Future<void> main() async {
     sound: true,
   );
 
-  // print('User granted permission: ${settings.authorizationStatus}');
+  // debugPrint('User granted permission: ${settings.authorizationStatus}');
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // print('Handling a background message ${message.notification!.title}');
+  // debugPrint('Handling a background message ${message.notification!.title}');
 }
 
 class MyApp extends StatefulWidget {
@@ -304,7 +539,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   void initState() {
-    // print('inside');
+    // debugPrint('inside');
     FirebaseMessaging.instance
         .getToken(
             vapidKey:
@@ -317,7 +552,7 @@ class _MyAppState extends State<MyApp> {
         },
       );
       prefs.setString('FCM', userData);
-      // print('Token: ${value.toString()}');
+      // debugPrint('Token: ${value.toString()}');
     });
 
     firebaseOnMessage();
@@ -337,7 +572,7 @@ class _MyAppState extends State<MyApp> {
       if (event != null) {
         final title = event.notification!.title;
         final body = event.notification!.body;
-        // print('Received New Notification');
+        // debugPrint('Received New Notification');
 
         // ScaffoldMessenger.of(context).showSnackBar(
         //   SnackBar(
@@ -494,11 +729,11 @@ class _MyAppState extends State<MyApp> {
           getPages: [
             GetPage(
               name: '/',
-              page: () => MyApp(),
+              page: () => const MyApp(),
             ),
             GetPage(
               name: MyHomePage.routeName,
-              page: () => MyHomePage(),
+              page: () => const MyHomePage(),
             ),
             GetPage(
               name: SignUp.routeName,
@@ -507,23 +742,23 @@ class _MyAppState extends State<MyApp> {
 
             GetPage(
               name: Admin.routeName,
-              page: () => Admin(),
+              page: () => const Admin(),
             ),
             GetPage(
               name: ModuleData.routeName,
-              page: () => ModuleData(),
+              page: () => const ModuleData(),
             ),
             GetPage(
               name: Permission.routeName,
-              page: () => Permission(),
+              page: () => const Permission(),
             ),
             GetPage(
               name: UserCredentials.routeName,
-              page: () => UserCredentials(),
+              page: () => const UserCredentials(),
             ),
             GetPage(
               name: User.routeName,
-              page: () => User(),
+              page: () => const User(),
             ),
             GetPage(
               name: BatchPlanDetails.routeName,
@@ -591,13 +826,13 @@ class _MyAppState extends State<MyApp> {
               name: WarehouseSectionLine.routeName,
               page: () => WarehouseSectionLine(),
             ),
-            GetPage(
-              name: WareHouseSectionScreen.routeName,
-              page: () => WareHouseSectionScreen(),
-            ),
+            // GetPage(
+            //   name: WareHouseSectionScreen.routeName,
+            //   page: () => WareHouseSectionScreen(),
+            // ),
             GetPage(
               name: WarehouseSubCategoryScreen.routeName,
-              page: () => WarehouseSubCategoryScreen(),
+              page: () => const WarehouseSubCategoryScreen(),
             ),
             GetPage(
               name: InventoryAdjustment.routeName,
@@ -653,11 +888,11 @@ class _MyAppState extends State<MyApp> {
             ),
             GetPage(
               name: AddModule.routeName,
-              page: () => AddModule(),
+              page: () => const AddModule(),
             ),
             GetPage(
               name: AddPermission.routeName,
-              page: () => AddPermission(),
+              page: () => const AddPermission(),
             ),
             GetPage(
               name: AddUserCredentials.routeName,
@@ -721,10 +956,10 @@ class _MyAppState extends State<MyApp> {
               name: AddWareHouseSectionLine.routeName,
               page: () => AddWareHouseSectionLine(),
             ),
-            GetPage(
-              name: AddWareHouseSection.routeName,
-              page: () => AddWareHouseSection(),
-            ),
+            // GetPage(
+            //   name: AddWareHouseSection.routeName,
+            //   page: () => AddWareHouseSection(),
+            // ),
             GetPage(
               name: AddWareHouseSubCategory.routeName,
               page: () => AddWareHouseSubCategory(),
@@ -768,7 +1003,7 @@ class _MyAppState extends State<MyApp> {
             ),
             GetPage(
               name: UserRoles.routeName,
-              page: () => UserRoles(),
+              page: () => const UserRoles(),
             ),
 
             GetPage(
@@ -897,7 +1132,8 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           title: 'Poultry Farm',
           theme: ThemeData(
-            primarySwatch: Colors.blue,
+            colorScheme: ColorScheme.fromSwatch()
+                .copyWith(primary: ProjectColors.themecolor),
             backgroundColor: const Color.fromRGBO(44, 96, 154, 1),
             fontFamily: GoogleFonts.roboto().fontFamily,
             accentColor: ProjectColors.themecolor,
@@ -966,6 +1202,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     _formKey.currentState!.save();
     try {
+      EasyLoading.show();
       Provider.of<Apicalls>(context, listen: false)
           .authenticate(_authData['Mobile_Number']!, _authData['Password']!)
           .then((value) {
@@ -975,10 +1212,14 @@ class _MyHomePageState extends State<MyHomePage> {
               .then((value) {
             var token = Provider.of<Apicalls>(context, listen: false).token;
             Provider.of<Apicalls>(context, listen: false)
-                .getUserPermissions(token);
+                .getUserPermissions(token)
+                .then((value) {
+              EasyLoading.dismiss();
+            });
           });
           Get.toNamed(MainDashBoardScreen.routeName);
         } else if (value == 400) {
+          EasyLoading.dismiss();
           // var errorMessage =
           //     Provider.of<Apicalls>(context, listen: false).errorMessage;
 
@@ -1004,6 +1245,7 @@ class _MyHomePageState extends State<MyHomePage> {
           //   ),
           // );
         } else {
+          EasyLoading.dismiss();
           showDialog(
             context: context,
             builder: (ctx) => AlertDialog(
@@ -1024,6 +1266,12 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       rethrow;
     }
+  }
+
+  @override
+  void initState() {
+    clearSignupException(context);
+    super.initState();
   }
 
   @override
@@ -1076,14 +1324,17 @@ class _MyHomePageState extends State<MyHomePage> {
                         SizedBox(
                           width: 427,
                           child: TextFormField(
+                            autofocus: true,
                             cursorHeight: 20,
                             decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.person),
+                              focusColor: ProjectColors.themecolor,
+                              prefixIcon: Icon(Icons.person,
+                                  color: ProjectColors.themecolor),
                               hintText: 'User Name',
                               hintStyle: GoogleFonts.roboto(
                                   textStyle: const TextStyle(
                                       fontWeight: FontWeight.w400,
-                                      fontSize: 20)),
+                                      fontSize: 18)),
                             ),
                             onSaved: (value) {
                               _authData['Mobile_Number'] = value!;
@@ -1096,67 +1347,72 @@ class _MyHomePageState extends State<MyHomePage> {
                         Container(
                           width: 427,
                           decoration: const BoxDecoration(
-                              border: Border(
-                                  bottom: BorderSide(color: Colors.grey))),
+                              // border: Border(
+                              //   bottom: BorderSide(color: Colors.grey),
+                              // ),
+                              ),
                           child: Row(
                             children: [
                               SizedBox(
-                                width: 400,
+                                width: 427,
                                 child: TextFormField(
                                   cursorHeight: 20,
                                   obscureText:
                                       _showPassword == true ? false : true,
                                   decoration: InputDecoration(
-                                    border: InputBorder.none,
+                                    // border: InputBorder.none,
                                     prefixIcon: const Icon(Icons.lock),
+                                    suffix: SizedBox(
+                                      width: 25,
+                                      height: 25,
+                                      child: _showPassword == true
+                                          ? GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  _showPassword = false;
+                                                });
+                                              },
+                                              child: SizedBox(
+                                                width: 25,
+                                                height: 25,
+                                                child: Image.asset(
+                                                  'assets/images/view.png',
+                                                  // fit: BoxFit.contain,
+                                                  color:
+                                                      ProjectColors.themecolor,
+                                                ),
+                                              ),
+                                            )
+                                          : GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  _showPassword = true;
+                                                });
+                                              },
+                                              child: SizedBox(
+                                                width: 25,
+                                                height: 25,
+                                                child: Image.asset(
+                                                  'assets/images/hidden.png',
+                                                  // fit: BoxFit.contain,
+                                                  color:
+                                                      ProjectColors.themecolor,
+                                                ),
+                                              ),
+                                            ),
+                                    ),
+
                                     hintText: 'Password',
                                     hintStyle: GoogleFonts.roboto(
                                         textStyle: const TextStyle(
                                             fontWeight: FontWeight.w400,
-                                            fontSize: 20)),
+                                            fontSize: 18)),
                                   ),
                                   onSaved: (value) {
                                     _authData['Password'] = value!;
                                   },
                                 ),
                               ),
-                              SizedBox(
-                                width: 25,
-                                height: 25,
-                                child: _showPassword == true
-                                    ? GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            _showPassword = false;
-                                          });
-                                        },
-                                        child: SizedBox(
-                                          width: 25,
-                                          height: 25,
-                                          child: Image.asset(
-                                            'assets/images/view.png',
-                                            // fit: BoxFit.contain,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      )
-                                    : GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            _showPassword = true;
-                                          });
-                                        },
-                                        child: SizedBox(
-                                          width: 25,
-                                          height: 25,
-                                          child: Image.asset(
-                                            'assets/images/hidden.png',
-                                            // fit: BoxFit.contain,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ),
-                              )
                             ],
                           ),
                         ),
@@ -1174,7 +1430,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               itemBuilder: (BuildContext context, int index) {
                                 return ModularWidgets.exceptionDesign(
                                     MediaQuery.of(context).size,
-                                    value.signupException[index][0]);
+                                    value.signupException[index]);
                               },
                             );
                           }),
@@ -1271,4 +1527,74 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+
+void clearSignupException(BuildContext context) {
+  Provider.of<Apicalls>(context, listen: false).signupException.clear();
+}
+
+void clearBatchPlanException(BuildContext context) {
+  Provider.of<BatchApis>(context, listen: false).batchPlanException.clear();
+}
+
+void clearBreedException(BuildContext context) {
+  Provider.of<BreedInfoApis>(context, listen: false).breedException.clear();
+}
+
+void clearInfrastructureException(BuildContext context) {
+  Provider.of<InfrastructureApis>(context, listen: false)
+      .infrastructureExceptionData
+      .clear();
+}
+
+void clearWarehouseException(BuildContext context) {
+  Provider.of<InfrastructureApis>(context, listen: false)
+      .wareHouseException
+      .clear();
+}
+
+void clearFirmException(BuildContext context) {
+  Provider.of<InfrastructureApis>(context, listen: false).firmException.clear();
+}
+
+void clearPlantException(BuildContext context) {
+  Provider.of<InfrastructureApis>(context, listen: false)
+      .plantException
+      .clear();
+}
+
+void clearInventoryBatchException(BuildContext context) {
+  Provider.of<InventoryApi>(context, listen: false)
+      .inventoryBatchExceptions
+      .clear();
+}
+
+void clearInventoryAdjustmentException(BuildContext context) {
+  Provider.of<InventoryAdjustemntApis>(context, listen: false)
+      .inventoryAdjustemntExceptions
+      .clear();
+}
+
+void clearProductException(BuildContext context) {
+  Provider.of<ItemApis>(context, listen: false).productException.clear();
+}
+
+void clearLogException(BuildContext context) {
+  Provider.of<LogsApi>(context, listen: false).logExceptionData.clear();
+}
+
+void clearActivityPlanException(BuildContext context) {
+  Provider.of<ActivityApis>(context, listen: false)
+      .activityPlanException
+      .clear();
+}
+
+void clearSalesException(BuildContext context) {
+  Provider.of<JournalApi>(context, listen: false).salesException.clear();
+}
+
+void clearTransferException(BuildContext context) {
+  Provider.of<TransferJournalApi>(context, listen: false)
+      .transferException
+      .clear();
 }

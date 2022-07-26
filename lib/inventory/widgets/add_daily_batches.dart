@@ -102,6 +102,14 @@ class _AddDailyBatchState extends State<AddDailyBatch>
 
   String feedConsumptionUnitValidationMessage = '';
 
+  var plantId;
+
+  var standardUnitId;
+
+  List standardUnitlist = [];
+
+  var feedConsumptionUnitId;
+
   EdgeInsetsGeometry getPadding() {
     return const EdgeInsets.only(left: 8.0);
   }
@@ -112,6 +120,7 @@ class _AddDailyBatchState extends State<AddDailyBatch>
   var batchId;
   var wareHouseId;
   List wareHouseDetails = [];
+  List plantDetails = [];
 
   List itemCategoryDetails = [];
 
@@ -357,6 +366,7 @@ class _AddDailyBatchState extends State<AddDailyBatch>
   @override
   void initState() {
     super.initState();
+    clearInventoryBatchException(context);
     controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 450));
     //scaleAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
@@ -393,19 +403,45 @@ class _AddDailyBatchState extends State<AddDailyBatch>
         .tryAutoLogin()
         .then((value) async {
       var token = Provider.of<Apicalls>(context, listen: false).token;
-      var platId = await fetchPlant();
-      Provider.of<InfrastructureApis>(context, listen: false)
-          .getWarehouseDetails(platId, token)
-          .then((value1) {});
-      Provider.of<InventoryApi>(context, listen: false).getBatch(token);
+      var firmId = await getFirmData();
+      if (firmId != '') {
+        Provider.of<InfrastructureApis>(context, listen: false)
+            .getPlantDetails(
+              token,
+              firmId,
+            )
+            .then((value1) {});
+      }
 
-      Provider.of<ItemApis>(context, listen: false)
-          .getItemCategory(token)
-          .then((value1) {});
+      // var platId = await fetchPlant();
+      // Provider.of<InfrastructureApis>(context, listen: false)
+      //     .getWarehouseDetails(platId, token)
+      //     .then((value1) {});
+      Provider.of<InventoryApi>(context, listen: false).getBatch(token);
+      Provider.of<Apicalls>(context, listen: false)
+          .getStandardUnitValues(token);
+      // Provider.of<ItemApis>(context, listen: false)
+      //     .getItemCategory(token)
+      //     .then((value1) {});
     });
 
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
+    });
+  }
+
+  void fechWareHouseList(int id) {
+    Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
+      var token = Provider.of<Apicalls>(context, listen: false).token;
+      Provider.of<InfrastructureApis>(context, listen: false)
+          .getWarehouseDetailsForAll(
+            id,
+            token,
+          )
+          .then((value1) {});
+      // Provider.of<InfrastructureApis>(context, listen: false)
+      //     .getPlantDetails(token)
+      //     .then((value1) {});
     });
   }
 
@@ -460,7 +496,6 @@ class _AddDailyBatchState extends State<AddDailyBatch>
   }
 
   void getProductSubCategory(var id) {
-    print(id);
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
       Provider.of<ItemApis>(context, listen: false)
@@ -482,15 +517,16 @@ class _AddDailyBatchState extends State<AddDailyBatch>
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     double formWidth = size.width * 0.25;
-
+    plantDetails = Provider.of<InfrastructureApis>(
+      context,
+    ).plantDetails;
     wareHouseDetails = Provider.of<InfrastructureApis>(
       context,
     ).warehouseDetails;
 
     batchPlanDetails = Provider.of<InventoryApi>(context).batchDetails;
-    itemCategoryDetails = Provider.of<ItemApis>(context).itemcategory;
-    itemSubCategoryDetails = Provider.of<ItemApis>(context).itemSubCategory;
-    productlist = Provider.of<ItemApis>(context).productList;
+    standardUnitlist = Provider.of<Apicalls>(context).standardUnitList;
+
     return Container(
       width: size.width * 0.3,
       height: MediaQuery.of(context).size.height,
@@ -534,7 +570,57 @@ class _AddDailyBatchState extends State<AddDailyBatch>
                       ],
                     ),
                   ),
-
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: formWidth,
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: const Text('Plant'),
+                        ),
+                        Container(
+                          width: formWidth,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white,
+                            border: Border.all(color: Colors.black26),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                value: plantId,
+                                items: plantDetails
+                                    .map<DropdownMenuItem<String>>((e) {
+                                  return DropdownMenuItem(
+                                    value: e['Plant_Name'],
+                                    onTap: () {
+                                      // firmId = e['Firm_Code'];
+                                      dailyBatch['Plant_Id'] = e['Plant_Id'];
+                                      fechWareHouseList(e['Plant_Id']);
+                                      wareHouseId = null;
+                                      //print(warehouseCategory);
+                                    },
+                                    child: Text(e['Plant_Name']),
+                                  );
+                                }).toList(),
+                                hint: const Text('Please Choose Plant'),
+                                onChanged: (value) {
+                                  setState(() {
+                                    plantId = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Column(
@@ -562,7 +648,6 @@ class _AddDailyBatchState extends State<AddDailyBatch>
                                 items: wareHouseDetails
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['WareHouse_Code']),
                                     value: e['WareHouse_Code'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
@@ -570,12 +655,13 @@ class _AddDailyBatchState extends State<AddDailyBatch>
                                           e['WareHouse_Id'];
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['WareHouse_Code']),
                                   );
                                 }).toList(),
                                 hint: const Text('Please Choose wareHouse'),
                                 onChanged: (value) {
                                   setState(() {
-                                    wareHouseId = value as String;
+                                    wareHouseId = value;
                                   });
                                 },
                               ),
@@ -616,13 +702,14 @@ class _AddDailyBatchState extends State<AddDailyBatch>
                                 items: batchPlanDetails
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    child: Text(e['Batch_Code']),
-                                    value: e['Batch_Code'],
+                                    value: e['Batch_Plan_Code'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
-                                      dailyBatch['Batch_Id'] = e['Batch_Id'];
+                                      dailyBatch['Batch_Plan_Id'] =
+                                          e['Batch_Plan_Id'];
                                       //print(warehouseCategory);
                                     },
+                                    child: Text(e['Batch_Plan_Code']),
                                   );
                                 }).toList(),
                                 hint: const Text('Please choose batch code'),
@@ -642,338 +729,6 @@ class _AddDailyBatchState extends State<AddDailyBatch>
                       ? const SizedBox()
                       : ModularWidgets.validationDesign(
                           size, batchPlanValidationMessage),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 24.0),
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: [
-                  //       Container(
-                  //         width: formWidth,
-                  //         padding: const EdgeInsets.only(bottom: 12),
-                  //         child: const Text('To Warehouse'),
-                  //       ),
-                  //       Container(
-                  //         width: formWidth,
-                  //         height: 36,
-                  //         decoration: BoxDecoration(
-                  //           borderRadius: BorderRadius.circular(8),
-                  //           color: Colors.white,
-                  //           border: Border.all(color: Colors.black26),
-                  //         ),
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.symmetric(
-                  //               horizontal: 12, vertical: 6),
-                  //           child: DropdownButtonHideUnderline(
-                  //             child: DropdownButton(
-                  //               value: warehouseToCategoryId,
-                  //               items: wareHouseDetails
-                  //                   .map<DropdownMenuItem<String>>((e) {
-                  //                 return DropdownMenuItem(
-                  //                   child: Text(e['WareHouse_Code']),
-                  //                   value: e['WareHouse_Code'],
-                  //                   onTap: () {
-                  //                     // firmId = e['Firm_Code'];
-                  //                     transferOut['To_Warehouse_Id'] =
-                  //                         e['WareHouse_Id'];
-                  //                     //print(warehouseCategory);
-                  //                   },
-                  //                 );
-                  //               }).toList(),
-                  //               hint: const Text('Please Choose to  wareHouse'),
-                  //               onChanged: (value) {
-                  //                 setState(() {
-                  //                   warehouseToCategoryId = value as String;
-                  //                 });
-                  //               },
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // warehouseToValidation == true
-                  //     ? const SizedBox()
-                  //     : ModularWidgets.validationDesign(
-                  //         size, warehouseToValidationMessage),
-
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 24.0),
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: [
-                  //       Row(
-                  //         children: [
-                  //           Container(
-                  //             width: formWidth,
-                  //             padding: const EdgeInsets.only(bottom: 12),
-                  //             child: const Text('Shipped Date'),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //       Row(
-                  //         mainAxisAlignment: MainAxisAlignment.start,
-                  //         children: [
-                  //           Container(
-                  //             width: size.width * 0.23,
-                  //             height: 36,
-                  //             decoration: BoxDecoration(
-                  //               borderRadius: BorderRadius.circular(8),
-                  //               color: Colors.white,
-                  //               border: Border.all(color: Colors.black26),
-                  //             ),
-                  //             child: Padding(
-                  //               padding: const EdgeInsets.symmetric(
-                  //                   horizontal: 12, vertical: 6),
-                  //               child: TextFormField(
-                  //                 controller: shippingDateController,
-                  //                 decoration: const InputDecoration(
-                  //                     hintText: 'Choose Shipped date',
-                  //                     border: InputBorder.none),
-                  //                 enabled: false,
-                  //                 // onSaved: (value) {
-                  //                 //   batchPlanDetails[
-                  //                 //       'Required_Date_Of_Delivery'] = value!;
-                  //                 // },
-                  //               ),
-                  //             ),
-                  //           ),
-                  //           IconButton(
-                  //               onPressed: () =>
-                  //                   _datePicker(shippingDateController, 2),
-                  //               icon: Icon(
-                  //                 Icons.date_range_outlined,
-                  //                 color: ProjectColors.themecolor,
-                  //               ))
-                  //         ],
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // shippingDateValidation == true
-                  //     ? const SizedBox()
-                  //     : ModularWidgets.validationDesign(
-                  //         size, shippingDateValidationMessage),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 24.0),
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: [
-                  //       Row(
-                  //         children: [
-                  //           Container(
-                  //             width: formWidth,
-                  //             padding: const EdgeInsets.only(bottom: 12),
-                  //             child: const Text('Received Date'),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //       Row(
-                  //         mainAxisAlignment: MainAxisAlignment.start,
-                  //         children: [
-                  //           Container(
-                  //             width: size.width * 0.23,
-                  //             height: 36,
-                  //             decoration: BoxDecoration(
-                  //               borderRadius: BorderRadius.circular(8),
-                  //               color: Colors.white,
-                  //               border: Border.all(color: Colors.black26),
-                  //             ),
-                  //             child: Padding(
-                  //               padding: const EdgeInsets.symmetric(
-                  //                   horizontal: 12, vertical: 6),
-                  //               child: TextFormField(
-                  //                 controller: receivedDateController,
-                  //                 decoration: const InputDecoration(
-                  //                     hintText: 'Choose Received date',
-                  //                     border: InputBorder.none),
-                  //                 enabled: false,
-                  //                 // onSaved: (value) {
-                  //                 //   batchPlanDetails[
-                  //                 //       'Required_Date_Of_Delivery'] = value!;
-                  //                 // },
-                  //               ),
-                  //             ),
-                  //           ),
-                  //           IconButton(
-                  //               onPressed: () =>
-                  //                   _datePicker(receivedDateController, 1),
-                  //               icon: Icon(
-                  //                 Icons.date_range_outlined,
-                  //                 color: ProjectColors.themecolor,
-                  //               ))
-                  //         ],
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // receivedDateValidation == true
-                  //     ? const SizedBox()
-                  //     : ModularWidgets.validationDesign(
-                  //         size, receivedDateValidationMessage),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 24.0),
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: [
-                  //       Container(
-                  //         width: formWidth,
-                  //         padding: const EdgeInsets.only(bottom: 12),
-                  //         child: const Text('Item Category'),
-                  //       ),
-                  //       Container(
-                  //         width: formWidth,
-                  //         height: 36,
-                  //         decoration: BoxDecoration(
-                  //           borderRadius: BorderRadius.circular(8),
-                  //           color: Colors.white,
-                  //           border: Border.all(color: Colors.black26),
-                  //         ),
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.symmetric(
-                  //               horizontal: 12, vertical: 6),
-                  //           child: DropdownButtonHideUnderline(
-                  //             child: DropdownButton(
-                  //               value: itemCategoryId,
-                  //               items: itemCategoryDetails
-                  //                   .map<DropdownMenuItem<String>>((e) {
-                  //                 return DropdownMenuItem(
-                  //                   child: Text(e['Product_Category_Name']),
-                  //                   value: e['Product_Category_Name'],
-                  //                   onTap: () {
-                  //                     // firmId = e['Firm_Code'];
-                  //                     getProductSubCategory(
-                  //                         e['Product_Category_Id']);
-                  //                     //print(warehouseCategory);
-                  //                   },
-                  //                 );
-                  //               }).toList(),
-                  //               hint: const Text(
-                  //                   'Please choose product category'),
-                  //               onChanged: (value) {
-                  //                 setState(() {
-                  //                   itemCategoryId = value as String;
-                  //                 });
-                  //               },
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // itemCategoryNameValidation == true
-                  //     ? const SizedBox()
-                  //     : ModularWidgets.validationDesign(
-                  //         size, itemCategoryNameValidationMessage),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 24.0),
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: [
-                  //       Container(
-                  //         width: formWidth,
-                  //         padding: const EdgeInsets.only(bottom: 12),
-                  //         child: const Text('Item sub Category'),
-                  //       ),
-                  //       Container(
-                  //         width: formWidth,
-                  //         height: 36,
-                  //         decoration: BoxDecoration(
-                  //           borderRadius: BorderRadius.circular(8),
-                  //           color: Colors.white,
-                  //           border: Border.all(color: Colors.black26),
-                  //         ),
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.symmetric(
-                  //               horizontal: 12, vertical: 6),
-                  //           child: DropdownButtonHideUnderline(
-                  //             child: DropdownButton(
-                  //               value: itemSubCategoryId,
-                  //               items: itemSubCategoryDetails
-                  //                   .map<DropdownMenuItem<String>>((e) {
-                  //                 return DropdownMenuItem(
-                  //                   child: Text(e['Product_Sub_Category_Name']),
-                  //                   value: e['Product_Sub_Category_Name'],
-                  //                   onTap: () {
-                  //                     // firmId = e['Firm_Code'];
-                  //                     getProductList(
-                  //                         e['Product_Sub_Category_Id']);
-                  //                     //print(warehouseCategory);
-                  //                   },
-                  //                 );
-                  //               }).toList(),
-                  //               hint: const Text(
-                  //                   'Please choose product sub category'),
-                  //               onChanged: (value) {
-                  //                 setState(() {
-                  //                   itemSubCategoryId = value as String;
-                  //                 });
-                  //               },
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // itemCategoryNameValidation == true
-                  //     ? const SizedBox()
-                  //     : ModularWidgets.validationDesign(
-                  //         size, itemCategoryNameValidationMessage),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 24.0),
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: [
-                  //       Container(
-                  //         width: formWidth,
-                  //         padding: const EdgeInsets.only(bottom: 12),
-                  //         child: const Text('Product'),
-                  //       ),
-                  //       Container(
-                  //         width: formWidth,
-                  //         height: 36,
-                  //         decoration: BoxDecoration(
-                  //           borderRadius: BorderRadius.circular(8),
-                  //           color: Colors.white,
-                  //           border: Border.all(color: Colors.black26),
-                  //         ),
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.symmetric(
-                  //               horizontal: 12, vertical: 6),
-                  //           child: DropdownButtonHideUnderline(
-                  //             child: DropdownButton(
-                  //               value: productId,
-                  //               items: productlist
-                  //                   .map<DropdownMenuItem<String>>((e) {
-                  //                 return DropdownMenuItem(
-                  //                   child: Text(e['Product_Name']),
-                  //                   value: e['Product_Name'],
-                  //                   onTap: () {
-                  //                     // firmId = e['Firm_Code'];
-                  //                     transferOut['Product'] = e['Product_Id'];
-                  //                     //print(warehouseCategory);
-                  //                   },
-                  //                 );
-                  //               }).toList(),
-                  //               hint: const Text('Please choose product'),
-                  //               onChanged: (value) {
-                  //                 setState(() {
-                  //                   productId = value as String;
-                  //                 });
-                  //               },
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // itemValidation == true
-                  //     ? const SizedBox()
-                  //     : ModularWidgets.validationDesign(
-                  //         size, itemValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Column(
@@ -1013,138 +768,6 @@ class _AddDailyBatchState extends State<AddDailyBatch>
                       ? const SizedBox()
                       : ModularWidgets.validationDesign(
                           size, ABWValidationMessage),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 24.0),
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: [
-                  //       Container(
-                  //         width: formWidth,
-                  //         padding: const EdgeInsets.only(bottom: 12),
-                  //         child: const Text('CW Quantity'),
-                  //       ),
-                  //       Container(
-                  //         width: formWidth,
-                  //         height: 36,
-                  //         decoration: BoxDecoration(
-                  //           borderRadius: BorderRadius.circular(8),
-                  //           color: Colors.white,
-                  //           border: Border.all(color: Colors.black26),
-                  //         ),
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.symmetric(
-                  //               horizontal: 12, vertical: 6),
-                  //           child: TextFormField(
-                  //             decoration: const InputDecoration(
-                  //                 hintText: 'Enter cw quantity',
-                  //                 border: InputBorder.none),
-                  //             controller: cwQuantityController,
-                  //             onSaved: (value) {
-                  //               transferOut['CW_Quantity'] = value!;
-                  //             },
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // cwQuantityValidation == true
-                  //     ? const SizedBox()
-                  //     : ModularWidgets.validationDesign(
-                  //         size, cwQuantityValidationMessage),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 24.0),
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: [
-                  //       Container(
-                  //         width: formWidth,
-                  //         padding: const EdgeInsets.only(bottom: 12),
-                  //         child: const Text('CW Unit'),
-                  //       ),
-                  //       Container(
-                  //         width: formWidth,
-                  //         height: 36,
-                  //         decoration: BoxDecoration(
-                  //           borderRadius: BorderRadius.circular(8),
-                  //           color: Colors.white,
-                  //           border: Border.all(color: Colors.black26),
-                  //         ),
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.symmetric(
-                  //               horizontal: 12, vertical: 6),
-                  //           child: TextFormField(
-                  //             decoration: const InputDecoration(
-                  //                 hintText: 'Enter cw unit',
-                  //                 border: InputBorder.none),
-                  //             controller: cwUnitController,
-                  //             onSaved: (value) {
-                  //               transferOut['CW_Unit'] = value!;
-                  //             },
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // cwUnitValidation == true
-                  //     ? const SizedBox()
-                  //     : ModularWidgets.validationDesign(
-                  //         size, cwUnitValidationMessage),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 24.0),
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: [
-                  //       Container(
-                  //         width: formWidth,
-                  //         padding: const EdgeInsets.only(bottom: 12),
-                  //         child: const Text('Status'),
-                  //       ),
-                  //       Container(
-                  //         width: formWidth,
-                  //         height: 36,
-                  //         decoration: BoxDecoration(
-                  //           borderRadius: BorderRadius.circular(8),
-                  //           color: Colors.white,
-                  //           border: Border.all(color: Colors.black26),
-                  //         ),
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.symmetric(
-                  //               horizontal: 12, vertical: 6),
-                  //           child: DropdownButtonHideUnderline(
-                  //             child: DropdownButton(
-                  //               value: collectionStatusId,
-                  //               items: ['Pending', 'Complete']
-                  //                   .map<DropdownMenuItem<String>>((e) {
-                  //                 return DropdownMenuItem(
-                  //                   child: Text(e),
-                  //                   value: e,
-                  //                   onTap: () {
-                  //                     // firmId = e['Firm_Code'];
-                  //                     transferOut['Status'] = e;
-                  //                     //print(warehouseCategory);
-                  //                   },
-                  //                 );
-                  //               }).toList(),
-                  //               hint:
-                  //                   const Text('Please Choose Transfer Status'),
-                  //               onChanged: (value) {
-                  //                 setState(() {
-                  //                   collectionStatusId = value as String;
-                  //                 });
-                  //               },
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // statusValidation == true
-                  //     ? const SizedBox()
-                  //     : ModularWidgets.validationDesign(
-                  //         size, statusValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Column(
@@ -1166,14 +789,29 @@ class _AddDailyBatchState extends State<AddDailyBatch>
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
-                            child: TextFormField(
-                              decoration: const InputDecoration(
-                                  hintText: 'Enter weight unit',
-                                  border: InputBorder.none),
-                              controller: weightUnitController,
-                              onSaved: (value) {
-                                dailyBatch['Weight_Unit'] = value!;
-                              },
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                value: standardUnitId,
+                                items: standardUnitlist
+                                    .map<DropdownMenuItem<String>>((e) {
+                                  return DropdownMenuItem(
+                                    value: e['Unit_Name'],
+                                    onTap: () {
+                                      // firmId = e['Firm_Code'];
+                                      dailyBatch['Weight_Unit'] = e['Unit_Id'];
+
+                                      //print(warehouseCategory);
+                                    },
+                                    child: Text(e['Unit_Name']),
+                                  );
+                                }).toList(),
+                                hint: const Text('Please Choose Unit'),
+                                onChanged: (value) {
+                                  setState(() {
+                                    standardUnitId = value as String;
+                                  });
+                                },
+                              ),
                             ),
                           ),
                         ),
@@ -1244,14 +882,30 @@ class _AddDailyBatchState extends State<AddDailyBatch>
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
-                            child: TextFormField(
-                              decoration: const InputDecoration(
-                                  hintText: 'Enter feed consumption unit',
-                                  border: InputBorder.none),
-                              controller: FeedConsumptionUnitController,
-                              onSaved: (value) {
-                                dailyBatch['Feed_Consumption_Unit'] = value!;
-                              },
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                value: feedConsumptionUnitId,
+                                items: standardUnitlist
+                                    .map<DropdownMenuItem<String>>((e) {
+                                  return DropdownMenuItem(
+                                    value: e['Unit_Name'],
+                                    onTap: () {
+                                      // firmId = e['Firm_Code'];
+                                      dailyBatch['Feed_Consumption_Unit'] =
+                                          e['Unit_Id'];
+
+                                      //print(warehouseCategory);
+                                    },
+                                    child: Text(e['Unit_Name']),
+                                  );
+                                }).toList(),
+                                hint: const Text('Please Choose Unit'),
+                                onChanged: (value) {
+                                  setState(() {
+                                    feedConsumptionUnitId = value as String;
+                                  });
+                                },
+                              ),
                             ),
                           ),
                         ),
@@ -1262,7 +916,6 @@ class _AddDailyBatchState extends State<AddDailyBatch>
                       ? const SizedBox()
                       : ModularWidgets.validationDesign(
                           size, feedConsumptionUnitValidationMessage),
-
                   Consumer<InventoryApi>(builder: (context, value, child) {
                     return ListView.builder(
                       shrinkWrap: true,
@@ -1271,7 +924,7 @@ class _AddDailyBatchState extends State<AddDailyBatch>
                       itemBuilder: (BuildContext context, int index) {
                         return ModularWidgets.exceptionDesign(
                             MediaQuery.of(context).size,
-                            value.inventoryBatchExceptions[index][0]);
+                            value.inventoryBatchExceptions[index]);
                       },
                     );
                   }),

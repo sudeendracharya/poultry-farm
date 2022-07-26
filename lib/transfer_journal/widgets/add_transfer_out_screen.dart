@@ -388,6 +388,7 @@ class _AddTransferOutScreenState extends State<AddTransferOutScreen>
   @override
   void initState() {
     super.initState();
+    clearTransferException(context);
     controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 450));
     //scaleAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
@@ -400,24 +401,36 @@ class _AddTransferOutScreenState extends State<AddTransferOutScreen>
 
     controller.forward();
     if (widget.editData.isNotEmpty) {
-      shippingDateController.text = widget.editData['Shipped_Date'];
-      transferOut['Shipped_Date'] = widget.editData['Shipped_Date'];
+      shippingDateController.text = widget.editData['Dispatch_Date'];
+      transferOut['Shipped_Date'] = widget.editData['Dispatch_Date'];
       quantityController.text = widget.editData['Transfer_Quantity'].toString();
       transferOut['Transfer_Quantity'] = widget.editData['Transfer_Quantity'];
-      // cwQuantityController.text = widget.editData['CW_Quantity'].toString();
-      // transferOut['CW_Quantity'] = widget.editData['CW_Quantity'];
-      // cwUnitController.text = widget.editData['CW_Unit'];
-      // transferOut['CW_Unit'] = widget.editData['CW_Unit'];
+      firmId = widget.editData['From_Firm_Name'];
+      getPlantList(widget.editData['From_Firm_Id']);
+      plantId = widget.editData['From_Plant_Name'];
+      getWarehouseDetails(widget.editData['From_Plant_Id']);
+      wareHouseId = widget.editData['From_WareHouse_Name'];
+      transferOut['WareHouse_Id_From'] = widget.editData['WareHouse_Id'];
+      batchId = widget.editData['Batch_Plan_Code'];
+      transferOut['Batch_Plan_Id'] = widget.editData['Batch_Plan_Id'];
       remarksController.text = widget.editData['Remarks'].toString();
       transferOut['Remarks'] = widget.editData['Remarks'];
-      // itemController.text = widget.editData['Item'];
-      // transferOut['Item'] = widget.editData['Item'];
-      // itemCategoryController.text = widget.editData['Customer_Name'];
-      // transferOut['Customer_Name'] = widget.editData['Customer_Name'];
-      transferCodeController.text = widget.editData['Transfer_Code'];
-      transferOut['Transfer_Code'] = widget.editData['Transfer_Code'];
-      // statusController.text = widget.editData['Rate'].toString();
-      // transferOut['Rate'] = widget.editData['Rate'];
+      itemCategoryId = widget.editData['Product_Category_Name'];
+      getProductSubCategory(widget.editData['Product_Category_Id']);
+      itemSubCategoryId = widget.editData['Product_Sub_Category_Name'];
+      getProductList(widget.editData['Product_Sub_Category_Id']);
+      productId = widget.editData['Product_Name'];
+      transferOut['Product'] = widget.editData['Product_Id'];
+      transferCodeController.text = widget.editData['Transfer_Out_Code'];
+      transferOut['Transfer_Out_Code'] = widget.editData['Transfer_Out_Code'];
+      unitId = widget.editData['Unit_Name'];
+      transferOut['Unit_Id'] = widget.editData['Unit_Id'];
+      toFirmId = widget.editData['To_Firm_Name'];
+      getPlantList(widget.editData['To_Firm_Id']);
+      toPlantId = widget.editData['To_Plant_Name'];
+      getWarehouseDetails(widget.editData['To_Plant_Id']);
+      toWareHouseId = widget.editData['To_WareHouse_Name'];
+      transferOut['WareHouse_Id_To'] = widget.editData['WareHouse_Id_To'];
     } else {
       transferCodeController.text = getRandom(4, 'T-');
     }
@@ -454,8 +467,6 @@ class _AddTransferOutScreenState extends State<AddTransferOutScreen>
       return;
     }
     _formKey.currentState!.save();
-
-    print(transferOut.toString());
 
     if (widget.editData.isNotEmpty) {
       Provider.of<Apicalls>(context, listen: false)
@@ -496,7 +507,6 @@ class _AddTransferOutScreenState extends State<AddTransferOutScreen>
   }
 
   void getProductSubCategory(var id) {
-    print(id);
     Provider.of<Apicalls>(context, listen: false).tryAutoLogin().then((value) {
       var token = Provider.of<Apicalls>(context, listen: false).token;
       Provider.of<ItemApis>(context, listen: false)
@@ -1612,17 +1622,17 @@ class _AddTransferOutScreenState extends State<AddTransferOutScreen>
                                 items: wareHouseDetails
                                     .map<DropdownMenuItem<String>>((e) {
                                   return DropdownMenuItem(
-                                    value: e['WareHouse_Code'],
+                                    value: e['WareHouse_Name'],
                                     onTap: () {
                                       // firmId = e['Firm_Code'];
                                       transferOut['WareHouse_Id_To'] =
                                           e['WareHouse_Id'];
                                       //print(warehouseCategory);
                                     },
-                                    child: Text(e['WareHouse_Code']),
+                                    child: Text(e['WareHouse_Name']),
                                   );
                                 }).toList(),
-                                hint: const Text('Please Choose wareHouse'),
+                                hint: const Text('Please Choose Warehouse'),
                                 onChanged: (value) {
                                   setState(() {
                                     toWareHouseId = value as String;
@@ -1648,7 +1658,7 @@ class _AddTransferOutScreenState extends State<AddTransferOutScreen>
                       itemBuilder: (BuildContext context, int index) {
                         return ModularWidgets.exceptionDesign(
                             MediaQuery.of(context).size,
-                            value.transferException[index][0]);
+                            value.transferException[index]);
                       },
                     );
                   }),

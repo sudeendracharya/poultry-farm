@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/cupertino.dart';
+
+import '../../main.dart';
 
 class BatchApis with ChangeNotifier {
   var _token;
@@ -32,7 +35,7 @@ class BatchApis with ChangeNotifier {
     return _batchPlanMapping;
   }
 
-  var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
+  // var baseUrl = 'https://poultryfarmapp.herokuapp.com/';
 
   void clear() {
     batchPlanExceptionData.clear();
@@ -53,7 +56,7 @@ class BatchApis with ChangeNotifier {
 
       // print(response.statusCode);
       // print('batch plan ${response.body}');
-
+      forbidden(response);
       if (response.statusCode == 200 || response.statusCode == 201) {
         var responseData = json.decode(response.body);
         List temp = [];
@@ -77,6 +80,8 @@ class BatchApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -96,7 +101,7 @@ class BatchApis with ChangeNotifier {
         },
         // body: json.encode({'Batch_Plan_Id': id}),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
@@ -104,12 +109,14 @@ class BatchApis with ChangeNotifier {
         var responseData = json.decode(response.body);
 
         _individualBatchPlan = responseData;
-        print(responseData.toString());
+        debugPrint(responseData.toString());
       }
 
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -128,12 +135,14 @@ class BatchApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -143,7 +152,7 @@ class BatchApis with ChangeNotifier {
 
     responseData.forEach((key, value) {
       batchPlanExceptionData.clear();
-      batchPlanExceptionData.add(value);
+      batchPlanExceptionData.add({'Key': key, 'Value': value});
     });
 
     notifyListeners();
@@ -164,7 +173,7 @@ class BatchApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
@@ -174,6 +183,8 @@ class BatchApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -193,9 +204,9 @@ class BatchApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
-      print(response.statusCode);
-      print(response.body);
+      forbidden(response);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       if (response.statusCode == 400) {
         handleException(response);
@@ -203,6 +214,8 @@ class BatchApis with ChangeNotifier {
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -221,12 +234,14 @@ class BatchApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       // print(response.statusCode);
       // print(response.body);
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -248,16 +263,18 @@ class BatchApis with ChangeNotifier {
         },
         body: json.encode(data),
       );
-
+      forbidden(response);
       if (response.statusCode == 400) {
         handleException(response);
       }
 
-      print(response.statusCode);
-      print(response.body);
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
 
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -267,8 +284,7 @@ class BatchApis with ChangeNotifier {
   ) async {
     // log(token);
     //log(data.toString());
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/activity-plan/batch-plan-mapping/');
+    final url = Uri.parse('${baseUrl}activity-plan/batch-plan-mapping/');
     try {
       final response = await http.get(
         url,
@@ -277,7 +293,7 @@ class BatchApis with ChangeNotifier {
           "Authorization": 'Token $token'
         },
       );
-
+      forbidden(response);
       var responseData = json.decode(response.body);
       // for (var data in responseData) {
       //   _firmDetails.add(data['Firm_Name']);
@@ -287,6 +303,8 @@ class BatchApis with ChangeNotifier {
       notifyListeners();
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }
@@ -296,8 +314,7 @@ class BatchApis with ChangeNotifier {
     var token,
   ) async {
     clear();
-    final url = Uri.parse(
-        'https://poultryfarmerp.herokuapp.com/activity-plan/batch-plan-mapping/');
+    final url = Uri.parse('${baseUrl}activity-plan/batch-plan-mapping/');
     try {
       final response = await http.post(
         url,
@@ -317,9 +334,11 @@ class BatchApis with ChangeNotifier {
           'Bird_Age_Name': data['Bird_Age_Name'],
         }),
       );
-
+      forbidden(response);
       return response.statusCode;
     } catch (e) {
+      EasyLoading.dismiss();
+      exceptionDialog(e.toString());
       rethrow;
     }
   }

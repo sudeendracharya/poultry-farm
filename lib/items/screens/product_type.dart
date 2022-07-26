@@ -50,12 +50,13 @@ class _ProductTypePageState extends State<ProductTypePage> {
   }
 
   void update(int data) {
-    selectedProductType.clear();
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<ItemApis>(context, listen: false)
             .getItemCategory(token)
-            .then((value1) {});
+            .then((value1) {
+          selectedProductType.clear();
+        });
       }
     });
   }
@@ -98,6 +99,8 @@ class _ProductTypePageState extends State<ProductTypePage> {
               selectedProductType.clear();
               temp.clear();
             } else {
+              update(100);
+              selectedProductType.clear();
               failureSnackbar('Unable to delete the data Something went wrong');
             }
           });
@@ -108,11 +111,11 @@ class _ProductTypePageState extends State<ProductTypePage> {
 
   void searchBook(String query) {
     final searchOutput = ProductTypeList.where((details) {
-      final breedName = details['Breed_Name'];
-      final breedVendor = details['Vendor'].toString().toLowerCase();
+      final breedVendor =
+          details['Product_Category_Name'].toString().toLowerCase();
       final searchName = query.toLowerCase();
 
-      return breedName.contains(searchName) || breedVendor.contains(searchName);
+      return breedVendor.contains(searchName);
     }).toList();
 
     setState(() {
@@ -177,19 +180,19 @@ class _ProductTypePageState extends State<ProductTypePage> {
   bool productTypeValidation = true;
   String productTypeValidationMessage = '';
 
-  Dialog productTypeDialog(Size size) {
-    return Dialog(
-      child: StatefulBuilder(
-        builder: (BuildContext context, setState) {
-          return Container(
-            width: size.width * 0.25,
-            height: size.height * 0.25,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10), color: Colors.white),
+  StatefulBuilder productTypeDialog(Size size) {
+    return StatefulBuilder(
+      builder: (BuildContext context, setState) {
+        return Container(
+          width: size.width * 0.25,
+          height: size.height * 0.25,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10), color: Colors.white),
+          child: Drawer(
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 20,
-                vertical: 10,
+                vertical: 20,
               ),
               child: Form(
                 key: _productTypeFormKey,
@@ -298,9 +301,9 @@ class _ProductTypePageState extends State<ProductTypePage> {
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -345,7 +348,7 @@ class _ProductTypePageState extends State<ProductTypePage> {
                   reFresh: (value) {},
                   text: query,
                   onChanged: searchBook,
-                  hintText: 'Search'),
+                  hintText: 'Product Type'),
             ),
           ),
           Container(

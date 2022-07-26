@@ -10,6 +10,7 @@ import 'package:poultry_login_signup/screens/main_drawer_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../main.dart';
 import '../../providers/apicalls.dart';
 import '../../screens/global_app_bar.dart';
 import '../../screens/secondary_dashboard_screen.dart';
@@ -45,6 +46,7 @@ class _RolesDetailsPageState extends State<RolesDetailsPage> {
 
   @override
   void initState() {
+    clearSignupException(context);
     getRoleId().then((value) {
       if (_roleId != null) {
         fetchCredientials().then((token) {
@@ -73,7 +75,7 @@ class _RolesDetailsPageState extends State<RolesDetailsPage> {
 
     return Scaffold(
       drawer: MainDrawer(controller: controller),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: WillPopScope(
         onWillPop: () async {
           return true;

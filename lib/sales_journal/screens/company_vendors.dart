@@ -80,7 +80,6 @@ class _CompanyVendorsState extends State<CompanyVendors> {
     } else {
       fetchCredientials().then((token) {
         if (token != '') {
-          print(selectedCompanyVendors[0]['Vendor']);
           Provider.of<JournalApi>(context, listen: false)
               .deleteCompanyVendorsInfo(
                   selectedCompanyVendors[0]['Vendor'], token)
@@ -123,9 +122,10 @@ class _CompanyVendorsState extends State<CompanyVendors> {
 
   void searchBook(String query) {
     final searchOutput = customersInfo.where((details) {
-      final customerName = details['Customer_Name'];
+      final customerName =
+          details['Vendor__Vendor_Name'].toString().toLowerCase();
 
-      final searchName = query;
+      final searchName = query.toLowerCase();
 
       return customerName.contains(searchName);
     }).toList();
@@ -173,7 +173,7 @@ class _CompanyVendorsState extends State<CompanyVendors> {
                   reFresh: (value) {},
                   text: query,
                   onChanged: searchBook,
-                  hintText: 'Search'),
+                  hintText: 'Vendor Name'),
             ),
           ),
           Container(

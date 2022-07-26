@@ -70,6 +70,16 @@ class _AddEggCollectionState extends State<AddEggCollection>
 
   List batchPlanDetails = [];
 
+  var plantId;
+
+  bool wareHouseCategoryValidation = true;
+
+  String wareHouseCategoryValidationMessage = '';
+
+  var wareHouseCategoryId;
+
+  List itemCategoryDetails = [];
+
   EdgeInsetsGeometry getPadding() {
     return const EdgeInsets.only(left: 8.0);
   }
@@ -226,15 +236,15 @@ class _AddEggCollectionState extends State<AddEggCollection>
     }
 
     if (eggCollectionCodeValidation == true &&
-        itemSubCategoryValidation == true &&
-        itemValidation == true &&
+        // itemSubCategoryValidation == true &&
+        // itemValidation == true &&
         collectionCodeValidation == true &&
-        gradeValidation == true &&
+        // gradeValidation == true &&
         quantityValidation == true &&
         wareHouseIdValidation == true &&
         averageWeightValidation == true &&
         collectionStatusValidation == true &&
-        IsClearedValidation == true &&
+        // IsClearedValidation == true &&
         collectionDateValidation == true) {
       return true;
     } else {
@@ -329,6 +339,7 @@ class _AddEggCollectionState extends State<AddEggCollection>
   @override
   void initState() {
     super.initState();
+    clearInventoryAdjustmentException(context);
     controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 450));
     //scaleAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
@@ -345,10 +356,13 @@ class _AddEggCollectionState extends State<AddEggCollection>
         .tryAutoLogin()
         .then((value) async {
       var token = Provider.of<Apicalls>(context, listen: false).token;
-      var plantId = await fetchPlant();
-      Provider.of<InfrastructureApis>(context, listen: false)
-          .getWarehouseDetails(plantId, token)
-          .then((value1) {});
+      var firmId = await getFirmData();
+      if (firmId != '') {
+        fechplantList(firmId, context);
+      }
+
+      Provider.of<ItemApis>(context, listen: false).getItemCategory(token);
+
       Provider.of<Apicalls>(context, listen: false)
           .getStandardEggGradeList(token);
       Provider.of<InventoryApi>(context, listen: false).getBatch(token);
@@ -399,7 +413,7 @@ class _AddEggCollectionState extends State<AddEggCollection>
       return;
     }
     _formKey.currentState!.save();
-    // print(eggGradingDetails);
+    debugPrint(eggCollectionDetails.toString());
 
     if (widget.editData.isNotEmpty) {
       Provider.of<Apicalls>(context, listen: false)
@@ -463,7 +477,9 @@ class _AddEggCollectionState extends State<AddEggCollection>
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     double formWidth = size.width * 0.25;
-
+    plantDetails = Provider.of<InfrastructureApis>(
+      context,
+    ).plantDetails;
     wareHouseDetails = Provider.of<InfrastructureApis>(
       context,
     ).warehouseDetails;
@@ -471,7 +487,7 @@ class _AddEggCollectionState extends State<AddEggCollection>
     itemSubCategory = Provider.of<ItemApis>(context).itemSubCategory;
     productList = Provider.of<ItemApis>(context).productList;
     batchPlanDetails = Provider.of<InventoryApi>(context).batchDetails;
-
+    itemCategoryDetails = Provider.of<ItemApis>(context).itemcategory;
     return Container(
       width: size.width * 0.3,
       height: MediaQuery.of(context).size.height,
@@ -602,6 +618,58 @@ class _AddEggCollectionState extends State<AddEggCollection>
                         Container(
                           width: formWidth,
                           padding: const EdgeInsets.only(bottom: 12),
+                          child: const Text('Plant'),
+                        ),
+                        Container(
+                          width: formWidth,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white,
+                            border: Border.all(color: Colors.black26),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                value: plantId,
+                                items: plantDetails
+                                    .map<DropdownMenuItem<String>>((e) {
+                                  return DropdownMenuItem(
+                                    value: e['Plant_Name'],
+                                    onTap: () {
+                                      // firmId = e['Firm_Code'];
+                                      eggCollectionDetails['Plant_Id'] =
+                                          e['Plant_Id'];
+                                      fechWareHouseList(e['Plant_Id'], context);
+                                      wareHouseId = null;
+                                      //print(warehouseCategory);
+                                    },
+                                    child: Text(e['Plant_Name']),
+                                  );
+                                }).toList(),
+                                hint: const Text('Please Choose wareHouse Id'),
+                                onChanged: (value) {
+                                  setState(() {
+                                    plantId = value as String;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: formWidth,
+                          padding: const EdgeInsets.only(bottom: 12),
                           child: const Text('Ware house Id'),
                         ),
                         Container(
@@ -648,121 +716,177 @@ class _AddEggCollectionState extends State<AddEggCollection>
                       ? const SizedBox()
                       : ModularWidgets.validationDesign(
                           size, wareHouseIdValidationMessage),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(top: 24.0),
+                  //   child: Column(
+                  //     mainAxisAlignment: MainAxisAlignment.start,
+                  //     children: [
+                  //       Container(
+                  //         width: formWidth,
+                  //         padding: const EdgeInsets.only(bottom: 12),
+                  //         child: const Text('Product Category'),
+                  //       ),
+                  //       Container(
+                  //         width: formWidth,
+                  //         height: 36,
+                  //         decoration: BoxDecoration(
+                  //           borderRadius: BorderRadius.circular(8),
+                  //           color: Colors.white,
+                  //           border: Border.all(color: Colors.black26),
+                  //         ),
+                  //         child: Padding(
+                  //           padding: const EdgeInsets.symmetric(
+                  //               horizontal: 12, vertical: 6),
+                  //           child: DropdownButtonHideUnderline(
+                  //             child: DropdownButton(
+                  //               value: wareHouseCategoryId,
+                  //               items: itemCategoryDetails
+                  //                   .map<DropdownMenuItem<String>>((e) {
+                  //                 return DropdownMenuItem(
+                  //                   value: e['Product_Category_Name'],
+                  //                   onTap: () {
+                  //                     // firmId = e['Firm_Code'];
 
-                  Padding(
-                    padding: const EdgeInsets.only(top: 24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: formWidth,
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: const Text('Item Sub Category'),
-                        ),
-                        Container(
-                          width: formWidth,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.white,
-                            border: Border.all(color: Colors.black26),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                value: itemSubCategoryId,
-                                items: itemSubCategory
-                                    .map<DropdownMenuItem<String>>((e) {
-                                  return DropdownMenuItem(
-                                    value: e['Product_Sub_Category_Name'],
-                                    onTap: () {
-                                      // firmId = e['Firm_Code'];
-                                      // salesJournal['Item_Sub_Category'] =
-                                      //     e['Product_Sub_Category_Id'];
+                  //                     getItemSubCategory(
+                  //                         e['Product_Category_Id']);
+                  //                     itemSubCategoryId = null;
+                  //                     //print(warehouseCategory);
+                  //                   },
+                  //                   child: Text(e['Product_Category_Name']),
+                  //                 );
+                  //               }).toList(),
+                  //               hint: const Text('Please choose item category'),
+                  //               onChanged: (value) {
+                  //                 setState(() {
+                  //                   wareHouseCategoryId = value as String;
+                  //                 });
+                  //               },
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  // wareHouseCategoryValidation == true
+                  //     ? const SizedBox()
+                  //     : ModularWidgets.validationDesign(
+                  //         size, wareHouseCategoryValidationMessage),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(top: 24.0),
+                  //   child: Column(
+                  //     mainAxisAlignment: MainAxisAlignment.start,
+                  //     children: [
+                  //       Container(
+                  //         width: formWidth,
+                  //         padding: const EdgeInsets.only(bottom: 12),
+                  //         child: const Text('Product Sub Category'),
+                  //       ),
+                  //       Container(
+                  //         width: formWidth,
+                  //         height: 36,
+                  //         decoration: BoxDecoration(
+                  //           borderRadius: BorderRadius.circular(8),
+                  //           color: Colors.white,
+                  //           border: Border.all(color: Colors.black26),
+                  //         ),
+                  //         child: Padding(
+                  //           padding: const EdgeInsets.symmetric(
+                  //               horizontal: 12, vertical: 6),
+                  //           child: DropdownButtonHideUnderline(
+                  //             child: DropdownButton(
+                  //               value: itemSubCategoryId,
+                  //               items: itemSubCategory
+                  //                   .map<DropdownMenuItem<String>>((e) {
+                  //                 return DropdownMenuItem(
+                  //                   value: e['Product_Sub_Category_Name'],
+                  //                   onTap: () {
+                  //                     // firmId = e['Firm_Code'];
+                  //                     // salesJournal['Item_Sub_Category'] =
+                  //                     //     e['Product_Sub_Category_Id'];
 
-                                      getProducts(e['Product_Sub_Category_Id']);
-                                      //print(warehouseCategory);
-                                    },
-                                    child: Text(e['Product_Sub_Category_Name']),
-                                  );
-                                }).toList(),
-                                hint: const Text('Select'),
-                                onChanged: (value) {
-                                  setState(() {
-                                    itemSubCategoryId = value as String;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  itemSubCategoryValidation == true
-                      ? const SizedBox()
-                      : ModularWidgets.validationDesign(
-                          size, itemSubCategoryValidationMessage),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: formWidth,
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: const Text('Product'),
-                        ),
-                        Container(
-                          width: formWidth,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.white,
-                            border: Border.all(color: Colors.black26),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                value: productId,
-                                items: productList
-                                    .map<DropdownMenuItem<String>>((e) {
-                                  return DropdownMenuItem(
-                                    value: e['Product_Name'],
-                                    onTap: () {
-                                      // firmId = e['Firm_Code'];
-                                      eggCollectionDetails['Product_Id'] =
-                                          e['Product_Id'];
-                                      // unitId =
-                                      //     e['Unit_Of_Measure__Unit_Name'];
-                                      // salesJournal['Quantity_Unit'] =
-                                      //     e['Unit_Of_Measure__Unit_Id'];
-                                      //print(warehouseCategory);
-                                    },
-                                    child: Text(e['Product_Name']),
-                                  );
-                                }).toList(),
-                                hint: const Text('Select'),
-                                onChanged: (value) {
-                                  setState(() {
-                                    productId = value as String;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  itemValidation == true
-                      ? const SizedBox()
-                      : ModularWidgets.validationDesign(
-                          size, itemValidationMessage),
+                  //                     getProducts(e['Product_Sub_Category_Id']);
+                  //                     productId = null;
+                  //                     //print(warehouseCategory);
+                  //                   },
+                  //                   child: Text(e['Product_Sub_Category_Name']),
+                  //                 );
+                  //               }).toList(),
+                  //               hint: const Text('Select'),
+                  //               onChanged: (value) {
+                  //                 setState(() {
+                  //                   itemSubCategoryId = value as String;
+                  //                 });
+                  //               },
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  // itemSubCategoryValidation == true
+                  //     ? const SizedBox()
+                  //     : ModularWidgets.validationDesign(
+                  //         size, itemSubCategoryValidationMessage),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(top: 24.0),
+                  //   child: Column(
+                  //     mainAxisAlignment: MainAxisAlignment.start,
+                  //     children: [
+                  //       Container(
+                  //         width: formWidth,
+                  //         padding: const EdgeInsets.only(bottom: 12),
+                  //         child: const Text('Product'),
+                  //       ),
+                  //       Container(
+                  //         width: formWidth,
+                  //         height: 36,
+                  //         decoration: BoxDecoration(
+                  //           borderRadius: BorderRadius.circular(8),
+                  //           color: Colors.white,
+                  //           border: Border.all(color: Colors.black26),
+                  //         ),
+                  //         child: Padding(
+                  //           padding: const EdgeInsets.symmetric(
+                  //               horizontal: 12, vertical: 6),
+                  //           child: DropdownButtonHideUnderline(
+                  //             child: DropdownButton(
+                  //               value: productId,
+                  //               items: productList
+                  //                   .map<DropdownMenuItem<String>>((e) {
+                  //                 return DropdownMenuItem(
+                  //                   value: e['Product_Name'],
+                  //                   onTap: () {
+                  //                     // firmId = e['Firm_Code'];
+                  //                     eggCollectionDetails['Product_Id'] =
+                  //                         e['Product_Id'];
+                  //                     // unitId =
+                  //                     //     e['Unit_Of_Measure__Unit_Name'];
+                  //                     // salesJournal['Quantity_Unit'] =
+                  //                     //     e['Unit_Of_Measure__Unit_Id'];
+                  //                     //print(warehouseCategory);
+                  //                   },
+                  //                   child: Text(e['Product_Name']),
+                  //                 );
+                  //               }).toList(),
+                  //               hint: const Text('Select'),
+                  //               onChanged: (value) {
+                  //                 setState(() {
+                  //                   productId = value as String;
+                  //                 });
+                  //               },
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  // itemValidation == true
+                  //     ? const SizedBox()
+                  //     : ModularWidgets.validationDesign(
+                  //         size, itemValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Column(
@@ -817,60 +941,60 @@ class _AddEggCollectionState extends State<AddEggCollection>
                       ? const SizedBox()
                       : ModularWidgets.validationDesign(
                           size, batchPlanValidationMessage),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: formWidth,
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: const Text('Grade'),
-                        ),
-                        Container(
-                          width: formWidth,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.white,
-                            border: Border.all(color: Colors.black26),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                value: eggGradingId,
-                                items: eggGradingList
-                                    .map<DropdownMenuItem<String>>((e) {
-                                  return DropdownMenuItem(
-                                    value: e['Egg_Grade'],
-                                    onTap: () {
-                                      // firmId = e['Firm_Code'];
-                                      eggCollectionDetails['Egg_Grade_Id'] =
-                                          e['Egg_Grade_Id'];
-                                      //print(warehouseCategory);
-                                    },
-                                    child: Text(e['Egg_Grade']),
-                                  );
-                                }).toList(),
-                                hint: const Text('Please Choose Grade'),
-                                onChanged: (value) {
-                                  setState(() {
-                                    eggGradingId = value as String;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  gradeValidation == true
-                      ? const SizedBox()
-                      : ModularWidgets.validationDesign(
-                          size, gradeValidationMessage),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(top: 24.0),
+                  //   child: Column(
+                  //     mainAxisAlignment: MainAxisAlignment.start,
+                  //     children: [
+                  //       Container(
+                  //         width: formWidth,
+                  //         padding: const EdgeInsets.only(bottom: 12),
+                  //         child: const Text('Grade'),
+                  //       ),
+                  //       Container(
+                  //         width: formWidth,
+                  //         height: 36,
+                  //         decoration: BoxDecoration(
+                  //           borderRadius: BorderRadius.circular(8),
+                  //           color: Colors.white,
+                  //           border: Border.all(color: Colors.black26),
+                  //         ),
+                  //         child: Padding(
+                  //           padding: const EdgeInsets.symmetric(
+                  //               horizontal: 12, vertical: 6),
+                  //           child: DropdownButtonHideUnderline(
+                  //             child: DropdownButton(
+                  //               value: eggGradingId,
+                  //               items: eggGradingList
+                  //                   .map<DropdownMenuItem<String>>((e) {
+                  //                 return DropdownMenuItem(
+                  //                   value: e['Egg_Grade'],
+                  //                   onTap: () {
+                  //                     // firmId = e['Firm_Code'];
+                  //                     eggCollectionDetails['Egg_Grade_Id'] =
+                  //                         e['Egg_Grade_Id'];
+                  //                     //print(warehouseCategory);
+                  //                   },
+                  //                   child: Text(e['Egg_Grade']),
+                  //                 );
+                  //               }).toList(),
+                  //               hint: const Text('Please Choose Grade'),
+                  //               onChanged: (value) {
+                  //                 setState(() {
+                  //                   eggGradingId = value as String;
+                  //                 });
+                  //               },
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  // gradeValidation == true
+                  //     ? const SizedBox()
+                  //     : ModularWidgets.validationDesign(
+                  //         size, gradeValidationMessage),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
                     child: Column(
@@ -1060,60 +1184,60 @@ class _AddEggCollectionState extends State<AddEggCollection>
                       ? const SizedBox()
                       : ModularWidgets.validationDesign(
                           size, collectionStatusValidationMessage),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: formWidth,
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: const Text('Is Cleared'),
-                        ),
-                        Container(
-                          width: formWidth,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.white,
-                            border: Border.all(color: Colors.black26),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                value: IsClearedSelected,
-                                items: ['Yes', 'No']
-                                    .map<DropdownMenuItem<String>>((e) {
-                                  return DropdownMenuItem(
-                                    child: Text(e),
-                                    value: e,
-                                    onTap: () {
-                                      // firmId = e['Firm_Code'];
-                                      eggCollectionDetails['Is_Cleared'] = e;
-                                      //print(warehouseCategory);
-                                    },
-                                  );
-                                }).toList(),
-                                hint:
-                                    const Text('Please Choose Cleared Status'),
-                                onChanged: (value) {
-                                  setState(() {
-                                    IsClearedSelected = value as String;
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IsClearedValidation == true
-                      ? const SizedBox()
-                      : ModularWidgets.validationDesign(
-                          size, IsClearedValidationMessage),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(top: 24.0),
+                  //   child: Column(
+                  //     mainAxisAlignment: MainAxisAlignment.start,
+                  //     children: [
+                  //       Container(
+                  //         width: formWidth,
+                  //         padding: const EdgeInsets.only(bottom: 12),
+                  //         child: const Text('Is Cleared'),
+                  //       ),
+                  //       Container(
+                  //         width: formWidth,
+                  //         height: 36,
+                  //         decoration: BoxDecoration(
+                  //           borderRadius: BorderRadius.circular(8),
+                  //           color: Colors.white,
+                  //           border: Border.all(color: Colors.black26),
+                  //         ),
+                  //         child: Padding(
+                  //           padding: const EdgeInsets.symmetric(
+                  //               horizontal: 12, vertical: 6),
+                  //           child: DropdownButtonHideUnderline(
+                  //             child: DropdownButton(
+                  //               value: IsClearedSelected,
+                  //               items: ['Yes', 'No']
+                  //                   .map<DropdownMenuItem<String>>((e) {
+                  //                 return DropdownMenuItem(
+                  //                   child: Text(e),
+                  //                   value: e,
+                  //                   onTap: () {
+                  //                     // firmId = e['Firm_Code'];
+                  //                     eggCollectionDetails['Is_Cleared'] = e;
+                  //                     //print(warehouseCategory);
+                  //                   },
+                  //                 );
+                  //               }).toList(),
+                  //               hint:
+                  //                   const Text('Please Choose Cleared Status'),
+                  //               onChanged: (value) {
+                  //                 setState(() {
+                  //                   IsClearedSelected = value as String;
+                  //                 });
+                  //               },
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+                  // IsClearedValidation == true
+                  //     ? const SizedBox()
+                  //     : ModularWidgets.validationDesign(
+                  //         size, IsClearedValidationMessage),
 
                   Consumer<InventoryAdjustemntApis>(
                       builder: (context, value, child) {
@@ -1124,7 +1248,7 @@ class _AddEggCollectionState extends State<AddEggCollection>
                       itemBuilder: (BuildContext context, int index) {
                         return ModularWidgets.exceptionDesign(
                             MediaQuery.of(context).size,
-                            value.inventoryAdjustemntExceptions[index][0]);
+                            value.inventoryAdjustemntExceptions[index]);
                       },
                     );
                   }),

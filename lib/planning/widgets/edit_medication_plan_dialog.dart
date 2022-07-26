@@ -19,7 +19,6 @@ class EditMedicationPlanDialog extends StatefulWidget {
       required this.recommendedBy,
       required this.medicationPlan,
       required this.breedVersionId,
-      required this.description,
       required this.medicationId,
       required this.medicationCode})
       : super(key: key);
@@ -28,7 +27,7 @@ class EditMedicationPlanDialog extends StatefulWidget {
   final String recommendedBy;
   final List medicationPlan;
   final String breedVersionId;
-  final String description;
+
   final String medicationId;
   final String medicationCode;
 
@@ -94,7 +93,8 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
 
   @override
   void initState() {
-    print(widget.medicationPlan);
+    clearActivityPlanException(context);
+
     medicationCodeController.text = widget.medicationCode;
     recommendedByController.text = widget.recommendedBy;
     breedVersionId = widget.breedVersionId;
@@ -113,7 +113,6 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
           widget.medicationPlan[0]['Notification_Prior_Days'].toString();
     }
     medicationPlanData['Breed_Version_Id'] = breedVersionId;
-    medicationPlanData['Description'] = widget.description;
     medicationPlanData['Recommended_By'] = widget.recommendedBy;
     fetchCredientials().then((token) {
       if (token != '') {
@@ -322,7 +321,6 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
             // print(excel.tables[table]!.rows[i].length.toString());
 
             for (int j = 0; j < excel.tables[table]!.rows[i].length; j++) {
-              print(excel.tables[table]!.rows[i][j]!.value.toString());
               temp[names[j]] = excel.tables[table]!.rows[i][j] == null
                   ? ''
                   : excel.tables[table]!.rows[i][j]!.value;
@@ -619,58 +617,6 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                       ? const SizedBox()
                       : ModularWidgets.validationDesign(
                           size, breedVersionValidationMessage),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 24.0),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: size.width * 0.25,
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: const Text('Description'),
-                          ),
-                          Container(
-                            width: size.width * 0.25,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.white,
-                              border: Border.all(
-                                  color: activityPlanIdError == false
-                                      ? Colors.black26
-                                      : const Color.fromRGBO(243, 60, 60, 1)),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: TextFormField(
-                                decoration: InputDecoration(
-                                    hintText: activityPlanIdError == false
-                                        ? 'Enter description'
-                                        : '',
-                                    border: InputBorder.none),
-                                initialValue: widget.description,
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    // showError('FirmCode');
-                                    return '';
-                                  }
-                                },
-                                onSaved: (value) {
-                                  medicationPlanData['Description'] = value!;
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 36,
-                  ),
                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(
@@ -1173,7 +1119,7 @@ class _EditMedicationPlanDialogState extends State<EditMedicationPlanDialog> {
                             itemBuilder: (BuildContext context, int index) {
                               return ModularWidgets.exceptionDesign(
                                   MediaQuery.of(context).size,
-                                  value.activityPlanException[index][0]);
+                                  value.activityPlanException[index]);
                             },
                           );
                         }),

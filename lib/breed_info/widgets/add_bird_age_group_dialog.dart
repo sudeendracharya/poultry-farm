@@ -94,6 +94,7 @@ class _AddBirdAgeGroupState extends State<AddBirdAgeGroup> {
 
   @override
   void initState() {
+    clearBreedException(context);
     fetchCredientials().then((token) {
       if (token != '') {
         Provider.of<BreedInfoApis>(context, listen: false).getBreed(token);

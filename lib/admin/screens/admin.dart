@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:poultry_login_signup/admin/screens/user.dart';
 import 'package:poultry_login_signup/admin/screens/user_roles.dart';
+import 'package:poultry_login_signup/main.dart';
 
 import '../../screens/global_app_bar.dart';
 import '../../screens/main_dash_board.dart';
@@ -34,10 +35,14 @@ class _AdminState extends State<Admin> with SingleTickerProviderStateMixin {
             fontWeight: FontWeight.w700, fontSize: 18, color: Colors.black));
   }
 
+  Future<void> getfirm() async {
+    query = await getFirmName();
+  }
+
   @override
   void initState() {
     var index = Get.arguments;
-
+    getfirm();
     _tabController = TabController(
         vsync: this, length: myTabs.length, initialIndex: index ?? 0);
 
@@ -89,7 +94,7 @@ class _AdminState extends State<Admin> with SingleTickerProviderStateMixin {
         controller: controller,
         expansionHeaderTheme: expansionHeaderTheme,
       ),
-      appBar: GlobalAppBar(query: query, appbar: AppBar()),
+      appBar: GlobalAppBar(firmName: query, appbar: AppBar()),
       body: Padding(
         padding: const EdgeInsets.only(top: 18),
         child: SingleChildScrollView(

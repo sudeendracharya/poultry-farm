@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:poultry_login_signup/infrastructure/screens/administration.dart';
+import 'package:poultry_login_signup/screens/global_app_bar.dart';
 
 import 'package:poultry_login_signup/screens/main_dash_board.dart';
 
@@ -30,25 +31,7 @@ class _FirmsPageState extends State<FirmsPage> {
     return Scaffold(
       drawer: PrimarySideBar(
           controller: controller, expansionHeaderTheme: expansionHeaderTheme),
-      appBar: AppBar(
-        title: const Text('DashBoard Screen'),
-        backgroundColor: Theme.of(context).backgroundColor,
-        actions: [
-          IconButton(
-              onPressed: () {
-                showGlobalDrawer(
-                  context: context,
-                  builder: (ctx) => NotificationPage(),
-                  direction: AxisDirection.right,
-                );
-              },
-              icon: const Icon(Icons.notifications)),
-          const SizedBox(
-            width: 6,
-          ),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.person)),
-        ],
-      ),
+      appBar: GlobalAppBar(firmName: '', appbar: AppBar()),
       body: Padding(
         padding: const EdgeInsets.only(left: 45.0, top: 18),
         child: Column(
